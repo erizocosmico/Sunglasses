@@ -1,0 +1,11 @@
+{
+    "debug": true,
+    "url": "localhost:3000",
+    "port": ":3000",
+    "database_name": "lamp_test",
+    "database_url": "localhost:28015",
+    "database_auth_key": "",
+    "redis_address": ":6379",
+    "static_content_path": "/path/to/static/content",
+    "secret_key": "my fancy secret key"
+}
