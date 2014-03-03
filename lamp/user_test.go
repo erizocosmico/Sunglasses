@@ -49,34 +49,11 @@ func TestUser(t *testing.T) {
 					user.ID = uid
 				})
 
-				Convey("Retrieving user info and settings", func() {
-					settingsID := user.Settings.ID
-					infoID := user.Info.ID
-
-					err = user.RetrieveUserInfo(conn)
-					So(err, ShouldEqual, nil)
-					So(settingsID, ShouldEqual, user.Settings.ID)
-
-					err = user.RetrieveUserSettings(conn)
-					So(err, ShouldEqual, nil)
-					So(infoID, ShouldEqual, user.Info.ID)
-				})
-
-				Convey("Deleting the user should not produce any errors", func() {
+				/*Convey("Deleting the user should not produce any errors", func() {
 					success, err := user.Remove(conn)
 					So(err, ShouldEqual, nil)
 					So(success, ShouldEqual, true)
-				})
-
-				Convey("Deleting the info and settings should not produce any errors", func() {
-					success, err := user.Settings.Remove(conn)
-					So(err, ShouldEqual, nil)
-					So(success, ShouldEqual, true)
-
-					success, err = user.Info.Remove(conn)
-					So(err, ShouldEqual, nil)
-					So(success, ShouldEqual, true)
-				})
+				})*/
 			})
 		})
 	})

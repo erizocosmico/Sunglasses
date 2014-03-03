@@ -99,17 +99,9 @@ func (c *Connection) Remove(table, ID string) (bool, error) {
 func createDatabase(conn *Connection, config *Config) error {
 	tables := []string{
 		"user",
-		"user_info",
-		"user_settings",
 		"post",
-		"status",
-		"video",
-		"link",
-		"picture",
 		"album",
-		"object_privacy",
 		"notification",
-		"object_privacy_user",
 		"request",
 		"block",
 		"follow",
@@ -117,22 +109,14 @@ func createDatabase(conn *Connection, config *Config) error {
 		"token",
 	}
 	indexes := map[string][]string{
-		"user_info":           []string{"user_id"},
-		"user_settings":       []string{"user_id"},
-		"post":                []string{"user_id"},
-		"status":              []string{"post_id"},
-		"picture":             []string{"post_id", "album_id"},
-		"video":               []string{"post_id"},
-		"link":                []string{"post_id"},
-		"album":               []string{"user_id"},
-		"notification":        []string{"user_id"},
-		"token":               []string{"user_id", "token"},
-		"request":             []string{"user_to", "user_from"},
-		"follow":              []string{"user_to", "user_from"},
-		"report":              []string{"user_id", "post_id"},
-		"block":               []string{"user_to", "user_from"},
-		"object_privacy":      []string{"object_id", "user_id"},
-		"object_privacy_user": []string{"object_id", "user_id"},
+		"post":         []string{"user_id"},
+		"album":        []string{"user_id"},
+		"notification": []string{"user_id"},
+		"token":        []string{"user_id", "token"},
+		"request":      []string{"user_to", "user_from"},
+		"follow":       []string{"user_to", "user_from"},
+		"report":       []string{"user_id", "post_id"},
+		"block":        []string{"user_to", "user_from"},
 	}
 
 	_, err := r.DbCreate(config.DatabaseName).RunRow(conn.Session)
