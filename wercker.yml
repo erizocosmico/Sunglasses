@@ -1,10 +1,12 @@
 box: wercker/golang
+
 services:
   - mies/rethinkdb
+
 build:
-  - add-ssh-key:
-    keyname: LAMP_KEY
   steps:
+    - add-ssh-key:
+        keyname: LAMP_KEY
     - setup-go-workspace
     - script:
         name: go get
