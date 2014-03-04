@@ -2,6 +2,7 @@ package lamp
 
 import (
 	"github.com/codegangsta/martini"
+	"github.com/martini-contrib/render"
 )
 
 // NewApp instantiates the application
@@ -24,6 +25,7 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 	// Map services
 	m.Map(config)
 	m.Map(conn)
+	m.Use(render.Renderer())
 
 	// Add routes
 

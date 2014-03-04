@@ -3,6 +3,7 @@ package lamp
 import (
 	"code.google.com/p/go.crypto/bcrypt"
 	r "github.com/dancannon/gorethink"
+	"strings"
 )
 
 // UserRole represents an user role
@@ -44,6 +45,7 @@ const (
 type User struct {
 	ID                string       `json:"id,omitempty" gorethink:"id,omitempty"`
 	Username          string       `json:"username" gorethink:"username"`
+	UsernameLower     string       `json:"username_lower" gorethink:"username_lower"`
 	Password          string       `json:"password" gorethink:"password"`
 	EMail             string       `json:"email,omitempty" gorethink:"email,omitempty"`
 	PublicName        string       `json:"public_name,omitempty" gorethink:"public_name,omitempty"`
@@ -92,6 +94,8 @@ func (u *User) Save(conn *Connection) (bool, error) {
 	var count int64
 	var err error
 	var res *r.ResultRow
+
+	u.UsernameLower = strings.ToLower(u.Username)
 
 	// Check if username is already in use
 	if u.ID != "" {
