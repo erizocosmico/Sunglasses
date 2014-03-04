@@ -153,14 +153,31 @@ func (u *User) Remove(conn *Connection) (bool, error) {
 	return conn.Remove("user", u.ID)
 }
 
-// SetPassword sets a new encrypted password for the user
-func (u *User) SetPassword(password string) error {
-	pwBytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+// SetEmail sets the email of the user
+func (u *User) SetEmail(email string) error {
+	emailHash, err := crypt(email)
 	if err != nil {
 		return err
 	}
 
-	u.Password = string(pwBytes[:])
+	u.EMail = emailHash
+	return nil
+}
+
+// CheckEmail checks if the given email matches the current user email
+func (u *User) CheckEmail(email string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(u.EMail), []byte(email))
+	return err == nil
+}
+
+// SetPassword sets a new encrypted password for the user
+func (u *User) SetPassword(password string) error {
+	pwHash, err := crypt(password)
+	if err != nil {
+		return err
+	}
+
+	u.Password = pwHash
 	return nil
 }
 

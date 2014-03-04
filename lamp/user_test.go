@@ -24,6 +24,10 @@ func TestUser(t *testing.T) {
 				if err != nil {
 					panic(err)
 				}
+				err = user.SetEmail("test@test.com")
+				if err != nil {
+					panic(err)
+				}
 				user.Role = RoleUser
 				user.Active = true
 
@@ -34,6 +38,11 @@ func TestUser(t *testing.T) {
 
 					Convey("And the password must match 'testing'", func() {
 						valid := user.CheckPassword("testing")
+						So(valid, ShouldEqual, true)
+					})
+
+					Convey("The email hash must match 'test@test.com'", func() {
+						valid := user.CheckEmail("test@test.com")
 						So(valid, ShouldEqual, true)
 					})
 				})
