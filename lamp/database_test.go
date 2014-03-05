@@ -8,7 +8,7 @@ import (
 func TestNewDatabaseConn(t *testing.T) {
 	Convey("Subject: Establishing a database connection", t, func() {
 		Convey("Given a valid config", func() {
-			config, err := NewConfig("../config.json")
+			config, err := NewConfig("../config.sample.json")
 			if err != nil {
 				panic(err)
 			}

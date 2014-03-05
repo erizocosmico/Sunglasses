@@ -8,7 +8,7 @@ import (
 func TestUser(t *testing.T) {
 	Convey("Subject: Creating an user and removing it", t, func() {
 		Convey("Given a database connection", func() {
-			config, err := NewConfig("../config.json")
+			config, err := NewConfig("../config.sample.json")
 			if err != nil {
 				panic(err)
 			}

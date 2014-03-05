@@ -14,7 +14,7 @@ import (
 
 func TestAccessTokenValidation(t *testing.T) {
 	Convey("Subject: Testing access token validation", t, func() {
-		config, err := NewConfig("../config.json")
+		config, err := NewConfig("../config.sample.json")
 		if err != nil {
 			panic(err)
 		}
@@ -87,7 +87,7 @@ func TestAccessTokenValidation(t *testing.T) {
 
 func TestUserTokenValidation(t *testing.T) {
 	Convey("Subject: Testing user token validation", t, func() {
-		config, err := NewConfig("../config.json")
+		config, err := NewConfig("../config.sample.json")
 		if err != nil {
 			panic(err)
 		}
@@ -160,7 +160,7 @@ func TestUserTokenValidation(t *testing.T) {
 
 func TestGetAccessToken(t *testing.T) {
 	Convey("Subject: Getting access token", t, func() {
-		config, err := NewConfig("../config.json")
+		config, err := NewConfig("../config.sample.json")
 		if err != nil {
 			panic(err)
 		}
@@ -195,7 +195,7 @@ func TestGetAccessToken(t *testing.T) {
 
 func TestGetUserToken(t *testing.T) {
 	Convey("Subject: Getting user token", t, func() {
-		config, err := NewConfig("../config.json")
+		config, err := NewConfig("../config.sample.json")
 		if err != nil {
 			panic(err)
 		}
@@ -269,7 +269,7 @@ func TestGetUserToken(t *testing.T) {
 
 func TestDestroyUserToken(t *testing.T) {
 	Convey("Subject: Testing user token destruction", t, func() {
-		config, err := NewConfig("../config.json")
+		config, err := NewConfig("../config.sample.json")
 		if err != nil {
 			panic(err)
 		}
