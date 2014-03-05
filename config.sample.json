@@ -7,5 +7,8 @@
     "database_auth_key": "",
     "redis_address": ":6379",
     "static_content_path": "/path/to/static/content",
-    "secret_key": "my fancy secret key"
+    "secret_key": "my fancy secret key",
+    "database_max_idle_connections": 20,
+    "database_max_active_connections": 100,
+    "database_idle_timeout": 40
 }
