@@ -13,12 +13,8 @@ build:
         code: |
           cd $WERCKER_SOURCE_DIR
           go version
-          go get -t ./...
-    - script:
-        name: go build
-        code: |
-          go build ./...
+          go get -t ./lamp
     - script:
         name: go test
         code: |
-          go test ./...
+          go test ./lamp
