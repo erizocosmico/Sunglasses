@@ -18,13 +18,6 @@ func TestNewDatabaseConn(t *testing.T) {
 				So(conn, ShouldNotEqual, nil)
 				So(err, ShouldEqual, nil)
 			})
-
-			Convey("And an invalid mongodb address", func() {
-				config.DatabaseUrl = "localhost:3456"
-				conn, err := NewDatabaseConn(config)
-				So(conn, ShouldEqual, nil)
-				So(err, ShouldNotEqual, nil)
-			})
 		})
 	})
 }
