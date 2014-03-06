@@ -8,18 +8,14 @@ import (
 
 // Config gathers all the necessary data to run the app
 type Config struct {
-	URL                          string `json:"url"`
-	Port                         string `json:"port"`
-	StaticContentPath            string `json:"static_content_path"`
-	RedisAddress                 string `json:"redis_address"`
-	SecretKey                    string `json:"secret_key"`
-	DatabaseUrl                  string `json:"database_url"`
-	DatabaseAuthKey              string `json:"database_auth_key"`
-	DatabaseName                 string `json:"database_name"`
-	DatabaseMaxIdleConnections   int    `json:"database_max_idle_connections"`
-	DatabaseMaxActiveConnections int    `json:"database_max_active_connections"`
-	DatabaseIdleTimeout          int    `json:"database_idle_timeout"`
-	Debug                        bool   `json:"debug"`
+	URL               string `json:"url"`
+	Port              string `json:"port"`
+	StaticContentPath string `json:"static_content_path"`
+	RedisAddress      string `json:"redis_address"`
+	SecretKey         string `json:"secret_key"`
+	DatabaseUrl       string `json:"database_url"`
+	DatabaseName      string `json:"database_name"`
+	Debug             bool   `json:"debug"`
 }
 
 // NewConfig creates a new config struct

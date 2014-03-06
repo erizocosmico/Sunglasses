@@ -32,36 +32,33 @@ func TestUser(t *testing.T) {
 				user.Active = true
 
 				Convey("User should be saved correctly", func() {
-					success, err := user.Save(conn)
-					So(success, ShouldEqual, true)
+					err := user.Save(conn)
 					So(err, ShouldEqual, nil)
+				})
 
-					Convey("And the password must match 'testing'", func() {
-						valid := user.CheckPassword("testing")
-						So(valid, ShouldEqual, true)
-					})
+				Convey("And the password must match 'testing'", func() {
+					valid := user.CheckPassword("testing")
+					So(valid, ShouldEqual, true)
+				})
 
-					Convey("The email hash must match 'test@test.com'", func() {
-						valid := user.CheckEmail("test@test.com")
-						So(valid, ShouldEqual, true)
-					})
+				Convey("The email hash must match 'test@test.com'", func() {
+					valid := user.CheckEmail("test@test.com")
+					So(valid, ShouldEqual, true)
 				})
 
 				Convey("But with the same username the user should not be inserted", func() {
 					uid := user.ID
 					user.ID = ""
 
-					success, err := user.Save(conn)
-					So(success, ShouldEqual, false)
-					So(err, ShouldEqual, nil)
+					err := user.Save(conn)
+					So(err, ShouldNotEqual, nil)
 
 					user.ID = uid
 				})
 
 				Convey("Deleting the user should not produce any errors", func() {
-					success, err := user.Remove(conn)
+					err := user.Remove(conn)
 					So(err, ShouldEqual, nil)
-					So(success, ShouldEqual, true)
 				})
 			})
 		})
