@@ -13,17 +13,10 @@ func TestNewDatabaseConn(t *testing.T) {
 				panic(err)
 			}
 
-			Convey("And a valid rethinkdb address", func() {
+			Convey("And a valid mongodb address", func() {
 				conn, err := NewDatabaseConn(config)
 				So(conn, ShouldNotEqual, nil)
 				So(err, ShouldEqual, nil)
-			})
-
-			Convey("And an invalid rethinkdb address", func() {
-				config.DatabaseUrl = "localhost:3456"
-				conn, err := NewDatabaseConn(config)
-				So(conn, ShouldEqual, nil)
-				So(err, ShouldNotEqual, nil)
 			})
 		})
 	})

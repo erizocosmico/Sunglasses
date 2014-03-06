@@ -1,12 +1,13 @@
 box: wercker/golang
 
 services:
-  - mies/rethinkdb
+  - wercker/mongodb
 
 build:
   steps:
     - add-ssh-key:
         keyname: LAMP_KEY
+    - bundle-install
     - setup-go-workspace
     - script:
         name: go get
@@ -17,4 +18,5 @@ build:
     - script:
         name: go test
         code: |
-          go test ./lamp
+          cd lamp
+          go test -v

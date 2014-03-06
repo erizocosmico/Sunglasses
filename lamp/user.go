@@ -2,7 +2,8 @@ package lamp
 
 import (
 	"code.google.com/p/go.crypto/bcrypt"
-	r "github.com/dancannon/gorethink"
+	"errors"
+	"labix.org/v2/mgo/bson"
 	"strings"
 )
 
@@ -43,83 +44,76 @@ const (
 
 // User represents an application user
 type User struct {
-	ID                string       `json:"id,omitempty" gorethink:"id,omitempty"`
-	Username          string       `json:"username" gorethink:"username"`
-	UsernameLower     string       `json:"username_lower" gorethink:"username_lower"`
-	Password          string       `json:"password" gorethink:"password"`
-	EMail             string       `json:"email,omitempty" gorethink:"email,omitempty"`
-	PublicName        string       `json:"public_name,omitempty" gorethink:"public_name,omitempty"`
-	PrivateName       string       `json:"private_name,omitempty" gorethink:"private_name,omitempty"`
-	Role              UserRole     `json:"role" gorethink:"role"`
-	PreferredLanguage string       `json:"preferred_lang,omitempty" gorethink:"preferred_lang,omitempty"`
-	Timezone          int          `json:"timezone,omitempty" gorethink:"timezone,omitempty"`
-	Avatar            string       `json:"avatar,omitempty" gorethink:"avatar,omitempty"`
-	PublicAvatar      string       `json:"public_avatar,omitempty" gorethink:"public_avatar,omitempty"`
-	Active            bool         `json:"active" gorethink:"active"`
-	Info              UserInfo     `json:"info" gorethink:"info"`
-	Settings          UserSettings `json:"settings" gorethink:"settings"`
+	ID                bson.ObjectId `json:"id,omitempty" bson:"_id"`
+	Username          string        `json:"username" bson:"username"`
+	UsernameLower     string        `json:"username_lower" bson:"username_lower"`
+	Password          string        `json:"password" bson:"password"`
+	EMail             string        `json:"email,omitempty" bson:"email,omitempty"`
+	PublicName        string        `json:"public_name,omitempty" bson:"public_name,omitempty"`
+	PrivateName       string        `json:"private_name,omitempty" bson:"private_name,omitempty"`
+	Role              UserRole      `json:"role" bson:"role"`
+	PreferredLanguage string        `json:"preferred_lang,omitempty" bson:"preferred_lang,omitempty"`
+	Timezone          int           `json:"timezone,omitempty" bson:"timezone,omitempty"`
+	Avatar            string        `json:"avatar,omitempty" bson:"avatar,omitempty"`
+	PublicAvatar      string        `json:"public_avatar,omitempty" bson:"public_avatar,omitempty"`
+	Active            bool          `json:"active" bson:"active"`
+	Info              UserInfo      `json:"info" bson:"info"`
+	Settings          UserSettings  `json:"settings" bson:"settings"`
 }
 
 // UserInfo stores all personal information about the user
 type UserInfo struct {
-	Work      string     `json:"work,omitempty" gorethink:"work,omitempty"`
-	Education string     `json:"education,omitempty" gorethink:"education,omitempty"`
-	Hobbies   string     `json:"hobbies,omitempty" gorethink:"hobbies,omitempty"`
-	Books     string     `json:"books,omitempty" gorethink:"books,omitempty"`
-	Movies    string     `json:"movies,omitempty" gorethink:"movies,omitempty"`
-	TV        string     `json:"tv,omitempty" gorethink:"tv,omitempty"`
-	Gender    Gender     `json:"gender,omitempty" gorethink:"gender,omitempty"`
-	Websites  []string   `json:"websites,omitempty" gorethink:"websites,omitempty"`
-	Status    UserStatus `json:"status,omitempty" gorethink:"status,omitempty"`
-	About     string     `json:"about,omitempty" gorethink:"about,omitempty"`
+	Work      string     `json:"work,omitempty" bson:"work,omitempty"`
+	Education string     `json:"education,omitempty" bson:"education,omitempty"`
+	Hobbies   string     `json:"hobbies,omitempty" bson:"hobbies,omitempty"`
+	Books     string     `json:"books,omitempty" bson:"books,omitempty"`
+	Movies    string     `json:"movies,omitempty" bson:"movies,omitempty"`
+	TV        string     `json:"tv,omitempty" bson:"tv,omitempty"`
+	Gender    Gender     `json:"gender,omitempty" bson:"gender,omitempty"`
+	Websites  []string   `json:"websites,omitempty" bson:"websites,omitempty"`
+	Status    UserStatus `json:"status,omitempty" bson:"status,omitempty"`
+	About     string     `json:"about,omitempty" bson:"about,omitempty"`
 }
 
 // UserSettings stores the user preferences
 type UserSettings struct {
-	Invisible                   bool           `json:"invisible" gorethink:"invisible"`
-	CanReceiveRequests          bool           `json:"can_receive_requests" gorethink:"can_receive_requests"`
-	DisplayAvatarBeforeApproval bool           `json:"display_avatar_before_approval" gorethink:"display_avatar_before_approval"`
-	NotifyNewComment            bool           `json:"notify_new_comment" gorethink:"notify_new_comment"`
-	NotifyNewCommentOthers      bool           `json:"notify_new_comment_others" gorethink:"notify_new_comment_others"`
-	AllowPostsInMyProfile       bool           `json:"allow_posts_in_my_profile" gorethink:"allow_posts_in_my_profile"`
-	AllowCommentsInPosts        bool           `json:"allow_comments_in_posts" gorethink:"allow_comments_in_posts"`
-	DisplayEmail                bool           `json:"display_email" gorethink:"display_email"`
-	PasswordRecoveryMethod      RecoveryMethod `json:"recovery_method" gorethink:"recovery_method"`
-	RecoveryQuestion            string         `json:"recovery_question,omitempty" gorethink:"recovery_question,omitempty"`
-	RecoveryAnswer              string         `json:"recovery_answer,omitempty" gorethink:"recovery_answer,omitempty"`
+	Invisible                   bool           `json:"invisible" bson:"invisible"`
+	CanReceiveRequests          bool           `json:"can_receive_requests" bson:"can_receive_requests"`
+	DisplayAvatarBeforeApproval bool           `json:"display_avatar_before_approval" bson:"display_avatar_before_approval"`
+	NotifyNewComment            bool           `json:"notify_new_comment" bson:"notify_new_comment"`
+	NotifyNewCommentOthers      bool           `json:"notify_new_comment_others" bson:"notify_new_comment_others"`
+	AllowPostsInMyProfile       bool           `json:"allow_posts_in_my_profile" bson:"allow_posts_in_my_profile"`
+	AllowCommentsInPosts        bool           `json:"allow_comments_in_posts" bson:"allow_comments_in_posts"`
+	DisplayEmail                bool           `json:"display_email" bson:"display_email"`
+	PasswordRecoveryMethod      RecoveryMethod `json:"recovery_method" bson:"recovery_method"`
+	RecoveryQuestion            string         `json:"recovery_question,omitempty" bson:"recovery_question,omitempty"`
+	RecoveryAnswer              string         `json:"recovery_answer,omitempty" bson:"recovery_answer,omitempty"`
 }
 
 // Save inserts the User instance if it hasn't been reated yet ot updates it if it has
-func (u *User) Save(conn *Connection) (bool, error) {
-	var count int64
+func (u *User) Save(conn *Connection) error {
+	var count int
 	var err error
-	var res *r.ResultRow
 
 	u.UsernameLower = strings.ToLower(u.Username)
 
-	// Check if username is already in use
-	if u.ID != "" {
-		res, err = conn.Db.Table("user").
-			Filter(r.Row.Field("username").
-			Eq(u.Username).
-			And(r.Row.Field("id").
-			Ne(u.ID))).Count().RunRow(conn.Session)
-	} else {
-		res, err = conn.Db.Table("user").Filter(r.Row.Field("username").Eq(u.Username)).Count().RunRow(conn.Session)
+	users := conn.Db.C("users")
+
+	// Check if the username is already in use
+	if count, err = users.Find(bson.M{"username_lower": u.UsernameLower}).Count(); err != nil {
+		return err
 	}
 
-	if err != nil {
-		return false, err
-	}
-	res.Scan(&count)
-
-	if count > 0 {
-		return false, nil
+	if u.ID.Hex() != "" && count > 1 {
+		return errors.New("username already in use")
+	} else if count > 0 {
+		return errors.New("username already in use")
 	}
 
 	// That means we're creating an user
-	if u.ID != "" {
+	if u.ID.Hex() == "" {
 		info := UserInfo{}
+		u.ID = bson.NewObjectId()
 
 		settings := UserSettings{}
 		settings.Invisible = true
@@ -136,25 +130,16 @@ func (u *User) Save(conn *Connection) (bool, error) {
 		u.Settings = settings
 	}
 
-	success, err, ID := conn.Save("user", u.ID, u)
-	if err != nil {
-		return false, err
+	if err = conn.Save("users", u.ID, u); err != nil {
+		return err
 	}
 
-	if !success {
-		return false, nil
-	}
-
-	if u.ID == "" {
-		u.ID = ID
-	}
-
-	return true, nil
+	return nil
 }
 
 // Remove deletes the user instance
-func (u *User) Remove(conn *Connection) (bool, error) {
-	return conn.Remove("user", u.ID)
+func (u *User) Remove(conn *Connection) error {
+	return conn.Remove("users", u.ID)
 }
 
 // SetEmail sets the email of the user
@@ -189,8 +174,4 @@ func (u *User) SetPassword(password string) error {
 func (u *User) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	return err == nil
-}
-
-func (u *User) table(conn *Connection) r.RqlTerm {
-	return conn.Db.Table("user")
 }

@@ -1,8 +1,8 @@
 package lamp
 
 import (
-	r "github.com/dancannon/gorethink"
 	"github.com/martini-contrib/render"
+	"labix.org/v2/mgo/bson"
 	"net/http"
 	"strings"
 	"time"
@@ -23,30 +23,26 @@ const (
 
 // Token represents a token which can be an access token or an user token
 type Token struct {
-	ID      string    `json:"id,omitempty" gorethink:"id,omitempty"`
-	Type    TokenType `json:"type" gorethink:"type"`
-	Expires float64   `json:"expires" gorethink:"expires"`
-	UserID  string    `json:"user_id,omitempty" gorethink:"user_id,omitempty"`
+	ID      bson.ObjectId `json:"id,omitempty" bson:"_id"`
+	Type    TokenType     `json:"type" bson:"type"`
+	Expires float64       `json:"expires" bson:"expires"`
+	UserID  bson.ObjectId `json:"user_id,omitempty" bson:"user_id,omitempty"`
 }
 
 // ValidateAccessToken validates the supplied access token
 func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render) {
-	token := req.Header.Get("X-Access-Token")
+	tokenID := req.Header.Get("X-Access-Token")
 
-	result, err := conn.Db.Table("token").
-		Filter(r.Row.Field("type").
-		Eq(AccessToken).
-		And(r.Row.Field("id").Eq(token)).
-		And(r.Row.Field("expires").Gt(time.Now().Unix()))).
-		Count().
-		RunRow(conn.Session)
-	if err != nil {
-		RenderError(resp, 2, 500, "Unknown error occurred")
+	if !bson.IsObjectIdHex(tokenID) {
+		RenderError(resp, 3, 403, "Invalid access token provided")
+		return
+	}
+
+	var token Token
+	if err := conn.Db.C("tokens").FindId(bson.ObjectIdHex(tokenID)).One(&token); err != nil {
+		RenderError(resp, 3, 403, "Invalid access token provided")
 	} else {
-		var count int64
-		result.Scan(&count)
-
-		if count < 1 {
+		if token.ID.Hex() == "" || token.Type != AccessToken || token.Expires < float64(time.Now().Unix()) {
 			RenderError(resp, 3, 403, "Invalid access token provided")
 		}
 	}
@@ -56,35 +52,32 @@ func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render
 
 // ValidateUserToken validates the supplied user token
 func ValidateUserToken(req *http.Request, conn *Connection, resp render.Render) {
-	token := req.Header.Get("X-User-Token")
+	tokenID := req.Header.Get("X-User-Token")
 
-	result, err := conn.Db.Table("token").
-		Filter(r.Row.Field("type").
-		Eq(UserToken).
-		And(r.Row.Field("id").Eq(token)).
-		And(r.Row.Field("expires").Gt(time.Now().Unix()))).
-		Count().
-		RunRow(conn.Session)
-	if err != nil {
-		RenderError(resp, 2, 500, "Unknown error occurred")
+	if !bson.IsObjectIdHex(tokenID) {
+		RenderError(resp, 3, 403, "Invalid user token provided")
+		return
+	}
+
+	var token Token
+	if err := conn.Db.C("tokens").FindId(bson.ObjectIdHex(tokenID)).One(&token); err != nil {
+		RenderError(resp, 3, 403, "Invalid access token provided")
 	} else {
-		var count int64
-		result.Scan(&count)
-
-		if count < 1 {
-			RenderError(resp, 4, 403, "Invalid user token provided")
+		if token.ID.Hex() == "" || token.Type != UserToken || token.Expires < float64(time.Now().Unix()) {
+			RenderError(resp, 3, 403, "Invalid access token provided")
 		}
 	}
 }
 
 func eraseExpiredTokens(conn *Connection) {
+	/* TODO rewrite
 	_, err := conn.Db.Table("token").
 		Filter(r.Row.Field("expires").Lt(time.Now().Unix())).
 		Delete().
 		RunWrite(conn.Session)
 	if err != nil {
 		// TODO log error
-	}
+	}*/
 }
 
 // GetAccessToken is a handler to retrieve an access token
@@ -93,8 +86,7 @@ func GetAccessToken(conn *Connection, resp render.Render) {
 	token.Expires = float64(time.Now().Add(AccessTokenExpirationHours * time.Hour).Unix())
 	token.Type = AccessToken
 
-	success, err := token.Save(conn)
-	if err == nil && success {
+	if err := token.Save(conn); err == nil {
 		resp.JSON(200, map[string]interface{}{
 			"error":        false,
 			"access_token": token.ID,
@@ -112,23 +104,20 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render) {
 
 	user := new(User)
 
-	res, err := conn.Db.Table("user").
-		Filter(r.Row.Field("username_lower").Eq(username).And(r.Row.Field("active").Eq(true))).
-		RunRow(conn.Session)
-	if err != nil {
-		RenderError(resp, 2, 500, "Unknown error occurred")
+	if err := conn.Db.C("users").Find((bson.M{"username_lower": username})).One(user); err != nil {
+		RenderError(resp, 1, 400, "Invalid username or password")
 		return
 	}
-	res.Scan(user)
 
-	if user.CheckPassword(password) {
+	if user.CheckPassword(password) && user.Active {
 		token := new(Token)
 		token.Expires = float64(time.Now().AddDate(0, 0, UserTokenExpirationDays).Unix())
 		token.UserID = user.ID
 		token.Type = UserToken
 
-		success, err := token.Save(conn)
-		if err == nil && !success {
+		if err := token.Save(conn); err != nil {
+			RenderError(resp, 2, 500, "Unexpected error occurred")
+		} else {
 			resp.JSON(200, map[string]interface{}{
 				"error":      false,
 				"user_token": token.ID,
@@ -144,16 +133,14 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render) {
 func DestroyUserToken(req *http.Request, conn *Connection, resp render.Render) {
 	tokenID := req.Header.Get("X-User-Token")
 
-	res, err := conn.Db.Table("token").Get(tokenID).Delete().RunWrite(conn.Session)
-	if err != nil {
-		RenderError(resp, 2, 500, "Unknown error occurred")
+	if !bson.IsObjectIdHex(tokenID) {
+		RenderError(resp, 3, 403, "Invalid user token provided")
 		return
-	} else if res.Deleted < 1 {
-		resp.JSON(200, map[string]interface{}{
-			"error":   false,
-			"deleted": false,
-			"message": "Token destroyed successfully",
-		})
+	}
+
+	if err := conn.Db.C("tokens").RemoveId(bson.ObjectIdHex(tokenID)); err != nil {
+		RenderError(resp, 2, 404, "Token not found")
+		return
 	} else {
 		resp.JSON(200, map[string]interface{}{
 			"error":   false,
@@ -164,19 +151,14 @@ func DestroyUserToken(req *http.Request, conn *Connection, resp render.Render) {
 }
 
 // Save inserts the Token instance if it hasn't been reated yet ot updates it if it has
-func (t *Token) Save(conn *Connection) (bool, error) {
-	success, err, ID := conn.Save("token", t.ID, t)
-	if err != nil {
-		return false, err
+func (t *Token) Save(conn *Connection) error {
+	if t.ID.Hex() == "" {
+		t.ID = bson.NewObjectId()
 	}
 
-	if !success {
-		return false, nil
+	if err := conn.Save("tokens", t.ID, t); err != nil {
+		return err
 	}
 
-	if t.ID == "" {
-		t.ID = ID
-	}
-
-	return true, nil
+	return nil
 }
