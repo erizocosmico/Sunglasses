@@ -90,6 +90,15 @@ type UserSettings struct {
 	RecoveryAnswer              string         `json:"recovery_answer,omitempty" bson:"recovery_answer,omitempty"`
 }
 
+// NewUser returns a new User instance
+func NewUser() *User {
+	user := new(User)
+	user.Settings = UserSettings{}
+	user.Info = UserInfo{}
+
+	return user
+}
+
 // Save inserts the User instance if it hasn't been reated yet ot updates it if it has
 func (u *User) Save(conn *Connection) error {
 	var count int
@@ -112,22 +121,16 @@ func (u *User) Save(conn *Connection) error {
 
 	// That means we're creating an user
 	if u.ID.Hex() == "" {
-		info := UserInfo{}
 		u.ID = bson.NewObjectId()
-
-		settings := UserSettings{}
-		settings.Invisible = true
-		settings.CanReceiveRequests = false
-		settings.DisplayAvatarBeforeApproval = false
-		settings.NotifyNewComment = false
-		settings.NotifyNewCommentOthers = false
-		settings.AllowPostsInMyProfile = false
-		settings.AllowCommentsInPosts = false
-		settings.DisplayEmail = false
-		settings.PasswordRecoveryMethod = RecoveryNone
-
-		u.Info = info
-		u.Settings = settings
+		u.Settings.Invisible = true
+		u.Settings.CanReceiveRequests = false
+		u.Settings.DisplayAvatarBeforeApproval = false
+		u.Settings.NotifyNewComment = false
+		u.Settings.NotifyNewCommentOthers = false
+		u.Settings.AllowPostsInMyProfile = false
+		u.Settings.AllowCommentsInPosts = false
+		u.Settings.DisplayEmail = false
+		u.Settings.PasswordRecoveryMethod = RecoveryNone
 	}
 
 	if err = conn.Save("users", u.ID, u); err != nil {
