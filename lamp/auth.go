@@ -47,7 +47,7 @@ func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render
 		}
 	}
 
-	eraseExpiredTokens(conn)
+	_ := eraseExpiredTokens(conn)
 }
 
 // ValidateUserToken validates the supplied user token
@@ -69,15 +69,13 @@ func ValidateUserToken(req *http.Request, conn *Connection, resp render.Render) 
 	}
 }
 
-func eraseExpiredTokens(conn *Connection) {
-	/* TODO rewrite
-	_, err := conn.Db.Table("token").
-		Filter(r.Row.Field("expires").Lt(time.Now().Unix())).
-		Delete().
-		RunWrite(conn.Session)
+func eraseExpiredTokens(conn *Connection) error {
+	_, err := conn.Db.C("tokens").RemoveAll(bson.M{"expires": bson.M{"$lt": float64(time.Now().Unix())}})
 	if err != nil {
 		// TODO log error
-	}*/
+	}
+
+	return err
 }
 
 // GetAccessToken is a handler to retrieve an access token
