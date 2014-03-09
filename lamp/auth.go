@@ -47,7 +47,7 @@ func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render
 		}
 	}
 
-	_ := eraseExpiredTokens(conn)
+	_ = eraseExpiredTokens(conn)
 }
 
 // ValidateUserToken validates the supplied user token
