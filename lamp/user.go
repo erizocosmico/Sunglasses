@@ -88,6 +88,13 @@ type UserSettings struct {
 	PasswordRecoveryMethod      RecoveryMethod `json:"recovery_method" bson:"recovery_method"`
 	RecoveryQuestion            string         `json:"recovery_question,omitempty" bson:"recovery_question,omitempty"`
 	RecoveryAnswer              string         `json:"recovery_answer,omitempty" bson:"recovery_answer,omitempty"`
+	// If this is true DefaultStatusPrivacy will override all the other settings
+	OverrideDefaultPrivacy bool            `json:"override_default_privacy,omitempty" bson:"override_default_privacy,omitempty"`
+	DefaultStatusPrivacy   PrivacySettings `json:"default_status_privacy,omitempty" bson:"default_status_privacy,omitempty"`
+	DefaultVideoPrivacy    PrivacySettings `json:"default_video_privacy,omitempty" bson:"default_video_privacy,omitempty"`
+	DefaultPhotoPrivacy    PrivacySettings `json:"default_photo_privacy,omitempty" bson:"default_photo_privacy,omitempty"`
+	DefaultLinkPrivacy     PrivacySettings `json:"default_link_privacy,omitempty" bson:"default_link_privacy,omitempty"`
+	DefaultAlbumPrivacy    PrivacySettings `json:"default_album_privacy,omitempty" bson:"default_album_privacy,omitempty"`
 }
 
 // NewUser returns a new User instance
@@ -99,7 +106,7 @@ func NewUser() *User {
 	return user
 }
 
-// Save inserts the User instance if it hasn't been reated yet ot updates it if it has
+// Save inserts the User instance if it hasn't been created yet or updates it if it has
 func (u *User) Save(conn *Connection) error {
 	var count int
 	var err error
@@ -121,6 +128,7 @@ func (u *User) Save(conn *Connection) error {
 
 	// That means we're creating an user
 	if u.ID.Hex() == "" {
+		pvSet := NewPrivacySettings()
 		u.ID = bson.NewObjectId()
 		u.Settings.Invisible = true
 		u.Settings.CanReceiveRequests = false
@@ -131,6 +139,11 @@ func (u *User) Save(conn *Connection) error {
 		u.Settings.AllowCommentsInPosts = false
 		u.Settings.DisplayEmail = false
 		u.Settings.PasswordRecoveryMethod = RecoveryNone
+		u.Settings.DefaultStatusPrivacy = pvSet
+		u.Settings.DefaultPhotoPrivacy = pvSet
+		u.Settings.DefaultAlbumPrivacy = pvSet
+		u.Settings.DefaultLinkPrivacy = pvSet
+		u.Settings.DefaultVideoPrivacy = pvSet
 	}
 
 	if err = conn.Save("users", u.ID, u); err != nil {
@@ -177,4 +190,24 @@ func (u *User) SetPassword(password string) error {
 func (u *User) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	return err == nil
+}
+
+// GetPrivacySettings returns the privacy settings of the user for the given object type
+func (us UserSettings) GetPrivacySettings(objectType ObjectType) PrivacySettings {
+	if us.OverrideDefaultPrivacy {
+		return us.DefaultStatusPrivacy
+	} else {
+		switch objectType {
+		case PostLink:
+			return us.DefaultLinkPrivacy
+		case PostPhoto:
+			return us.DefaultPhotoPrivacy
+		case PostVideo:
+			return us.DefaultVideoPrivacy
+		case Album:
+			return us.DefaultAlbumPrivacy
+		default:
+			return us.DefaultStatusPrivacy
+		}
+	}
 }

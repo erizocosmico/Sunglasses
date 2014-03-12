@@ -2,6 +2,7 @@ package lamp
 
 import (
 	. "github.com/smartystreets/goconvey/convey"
+	"labix.org/v2/mgo/bson"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -108,6 +109,7 @@ func TestCreateUser(t *testing.T) {
 				req.PostForm.Add("recovery_method", "0")
 			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
 				So(resp.Code, ShouldNotEqual, 200)
+				conn.Db.C("users").RemoveAll(bson.M{"username": "liam_doe"})
 			})
 		})
 	})

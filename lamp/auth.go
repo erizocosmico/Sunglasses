@@ -13,8 +13,9 @@ type TokenType int
 
 const (
 	// Token types
-	AccessToken = 0
-	UserToken   = 1
+	AccessToken  = 0
+	UserToken    = 1
+	SessionToken = 2
 
 	// Expiration times
 	AccessTokenExpirationHours = 1
@@ -31,7 +32,7 @@ type Token struct {
 
 // ValidateAccessToken validates the supplied access token
 func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render) {
-	tokenID := req.Header.Get("X-Access-Token")
+	tokenID, _ := GetRequestToken(req, true)
 
 	if !bson.IsObjectIdHex(tokenID) {
 		RenderError(resp, 3, 403, "Invalid access token provided")
@@ -52,7 +53,7 @@ func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render
 
 // ValidateUserToken validates the supplied user token
 func ValidateUserToken(req *http.Request, conn *Connection, resp render.Render) {
-	tokenID := req.Header.Get("X-User-Token")
+	tokenID, _ := GetRequestToken(req, false)
 
 	if !bson.IsObjectIdHex(tokenID) {
 		RenderError(resp, 3, 403, "Invalid user token provided")
@@ -129,26 +130,82 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render) {
 
 // DestroyUserToken destroys the current user token
 func DestroyUserToken(req *http.Request, conn *Connection, resp render.Render) {
-	tokenID := req.Header.Get("X-User-Token")
-
-	if !bson.IsObjectIdHex(tokenID) {
-		RenderError(resp, 3, 403, "Invalid user token provided")
-		return
-	}
-
-	if err := conn.Db.C("tokens").RemoveId(bson.ObjectIdHex(tokenID)); err != nil {
-		RenderError(resp, 2, 404, "Token not found")
-		return
+	tokenID, tokenType := GetRequestToken(req, false)
+	if valid, _ := IsTokenValid(tokenID, tokenType, conn); valid {
+		if err := conn.Db.C("tokens").RemoveId(bson.ObjectIdHex(tokenID)); err != nil {
+			RenderError(resp, 2, 404, "Token not found")
+			return
+		} else {
+			resp.JSON(200, map[string]interface{}{
+				"error":   false,
+				"deleted": true,
+				"message": "Token destroyed successfully",
+			})
+		}
 	} else {
-		resp.JSON(200, map[string]interface{}{
-			"error":   false,
-			"deleted": true,
-			"message": "Token destroyed successfully",
-		})
+		RenderError(resp, 3, 403, "Invalid user token provided")
 	}
 }
 
-// Save inserts the Token instance if it hasn't been reated yet ot updates it if it has
+// GetRequestToken returns the token associated with the request
+func GetRequestToken(r *http.Request, isAccessToken bool) (string, TokenType) {
+	var (
+		token     string
+		tokenType TokenType
+	)
+	if isAccessToken {
+		return r.Header.Get("X-Access-Token"), AccessToken
+	}
+
+	token = r.Header.Get("X-User-Token")
+	tokenType = UserToken
+
+	if token == "" {
+		// We're accessing via web
+		tokenType = SessionToken
+		// TODO implement
+		// token = ...
+	}
+
+	return token, tokenType
+}
+
+// IsTokenValid returns if the provided token is a valid token
+func IsTokenValid(tokenID string, tokenType TokenType, conn *Connection) (bool, bson.ObjectId) {
+	var userID bson.ObjectId
+	if !bson.IsObjectIdHex(tokenID) {
+		return false, userID
+	}
+
+	var token Token
+	if err := conn.Db.C("tokens").FindId(bson.ObjectIdHex(tokenID)).One(&token); err == nil {
+		if token.Expires > float64(time.Now().Unix()) && token.Type == tokenType {
+			return true, token.ID
+		}
+	}
+
+	return false, userID
+}
+
+// GetRequestUser returns the user associated with the request
+func GetRequestUser(r *http.Request, conn *Connection) *User {
+	var (
+		userID bson.ObjectId
+		valid  bool
+		user   User
+	)
+	token, tokenType := GetRequestToken(r, false)
+
+	if valid, userID = IsTokenValid(token, tokenType, conn); valid {
+		if err := conn.Db.C("users").FindId(userID).One(&user); err != nil {
+			return &user
+		}
+	}
+
+	return nil
+}
+
+// Save inserts the Token instance if it hasn't been created yet or updates it if it has
 func (t *Token) Save(conn *Connection) error {
 	if t.ID.Hex() == "" {
 		t.ID = bson.NewObjectId()
