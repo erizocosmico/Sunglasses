@@ -2,6 +2,7 @@ package lamp
 
 import (
 	"github.com/martini-contrib/render"
+	"github.com/martini-contrib/sessions"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"strings"
@@ -22,7 +23,7 @@ const (
 	UserTokenExpirationDays    = 15
 )
 
-// Token represents a token which can be an access token or an user token
+// Token represents a token which can be an access token, an user token or a session token
 type Token struct {
 	ID      bson.ObjectId `json:"id,omitempty" bson:"_id"`
 	Type    TokenType     `json:"type" bson:"type"`
@@ -31,8 +32,8 @@ type Token struct {
 }
 
 // ValidateAccessToken validates the supplied access token
-func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render) {
-	tokenID, _ := GetRequestToken(req, true)
+func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
+	tokenID, _ := GetRequestToken(req, true, s)
 
 	if !bson.IsObjectIdHex(tokenID) {
 		RenderError(resp, 3, 403, "Invalid access token provided")
@@ -52,8 +53,8 @@ func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render
 }
 
 // ValidateUserToken validates the supplied user token
-func ValidateUserToken(req *http.Request, conn *Connection, resp render.Render) {
-	tokenID, _ := GetRequestToken(req, false)
+func ValidateUserToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
+	tokenID, _ := GetRequestToken(req, false, s)
 
 	if !bson.IsObjectIdHex(tokenID) {
 		RenderError(resp, 3, 403, "Invalid user token provided")
@@ -96,8 +97,14 @@ func GetAccessToken(conn *Connection, resp render.Render) {
 	}
 }
 
+// Login is a handler to log the user in
+func Login(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
+	req.PostForm.Add("token_type", "session")
+	GetUserToken(req, conn, resp, s)
+}
+
 // GetUserToken is a handler to retrieve an user token
-func GetUserToken(req *http.Request, conn *Connection, resp render.Render) {
+func GetUserToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
 	username := strings.ToLower(req.PostFormValue("username"))
 	password := req.PostFormValue("password")
 
@@ -112,16 +119,28 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render) {
 		token := new(Token)
 		token.Expires = float64(time.Now().AddDate(0, 0, UserTokenExpirationDays).Unix())
 		token.UserID = user.ID
-		token.Type = UserToken
+		if req.PostFormValue("token_type") == "session" {
+			token.Type = SessionToken
+		} else {
+			token.Type = UserToken
+		}
 
 		if err := token.Save(conn); err != nil {
 			RenderError(resp, 2, 500, "Unexpected error occurred")
 		} else {
-			resp.JSON(200, map[string]interface{}{
-				"error":      false,
-				"user_token": token.ID,
-				"expires":    token.Expires,
-			})
+			if req.PostFormValue("token_type") == "session" {
+				s.Set("user_token", token.ID.Hex())
+
+				resp.JSON(200, map[string]interface{}{
+					"error":      false,
+				})
+			} else {
+				resp.JSON(200, map[string]interface{}{
+					"error":      false,
+					"user_token": token.ID,
+					"expires":    token.Expires,
+				})
+			}
 		}
 	} else {
 		RenderError(resp, 1, 400, "Invalid username or password")
@@ -129,8 +148,8 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render) {
 }
 
 // DestroyUserToken destroys the current user token
-func DestroyUserToken(req *http.Request, conn *Connection, resp render.Render) {
-	tokenID, tokenType := GetRequestToken(req, false)
+func DestroyUserToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
+	tokenID, tokenType := GetRequestToken(req, false, s)
 	if valid, _ := IsTokenValid(tokenID, tokenType, conn); valid {
 		if err := conn.Db.C("tokens").RemoveId(bson.ObjectIdHex(tokenID)); err != nil {
 			RenderError(resp, 2, 404, "Token not found")
@@ -148,7 +167,7 @@ func DestroyUserToken(req *http.Request, conn *Connection, resp render.Render) {
 }
 
 // GetRequestToken returns the token associated with the request
-func GetRequestToken(r *http.Request, isAccessToken bool) (string, TokenType) {
+func GetRequestToken(r *http.Request, isAccessToken bool, s sessions.Session) (string, TokenType) {
 	var (
 		token     string
 		tokenType TokenType
@@ -163,8 +182,10 @@ func GetRequestToken(r *http.Request, isAccessToken bool) (string, TokenType) {
 	if token == "" {
 		// We're accessing via web
 		tokenType = SessionToken
-		// TODO implement
-		// token = ...
+		v := s.Get("user_token")
+		if v != nil {
+			token = s.Get("user_token").(string)
+		}
 	}
 
 	return token, tokenType
@@ -188,13 +209,13 @@ func IsTokenValid(tokenID string, tokenType TokenType, conn *Connection) (bool, 
 }
 
 // GetRequestUser returns the user associated with the request
-func GetRequestUser(r *http.Request, conn *Connection) *User {
+func GetRequestUser(r *http.Request, conn *Connection, s sessions.Session) *User {
 	var (
 		userID bson.ObjectId
 		valid  bool
 		user   User
 	)
-	token, tokenType := GetRequestToken(r, false)
+	token, tokenType := GetRequestToken(r, false, s)
 
 	if valid, userID = IsTokenValid(token, tokenType, conn); valid {
 		if err := conn.Db.C("users").FindId(userID).One(&user); err != nil {

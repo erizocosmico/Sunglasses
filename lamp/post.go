@@ -2,6 +2,7 @@ package lamp
 
 import (
 	"github.com/martini-contrib/render"
+	"github.com/martini-contrib/sessions"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"strconv"
@@ -61,12 +62,12 @@ func NewPost(t ObjectType, user *User, r *http.Request) *Post {
 }
 
 // CreatePost creates a new post
-func CreatePost(r *http.Request, conn *Connection, res render.Render) {
+func CreatePost(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
 	var (
 		postType     = r.PostFormValue("post_type")
 		status   int = 200
 		response     = make(map[string]interface{})
-		user         = GetRequestUser(r, conn)
+		user         = GetRequestUser(r, conn, s)
 	)
 
 	switch postType {
@@ -163,9 +164,7 @@ func getPostPrivacy(postType ObjectType, r *http.Request, u *User) PrivacySettin
 			p.Users = defaultSettings.Users
 		} else {
 			us, ok := r.PostForm["privacy_users"]
-			if !ok || len(us) == 0 {
-
-			} else {
+			if ok && len(us) > 0 {
 				p.Users = make([]bson.ObjectId, len(us))
 				for _, u := range us {
 					if bson.IsObjectIdHex(u) {
