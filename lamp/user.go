@@ -106,6 +106,20 @@ func NewUser() *User {
 	return user
 }
 
+// UserExists returns if the requested user exists
+func UserExists(conn *Connection, ID bson.ObjectId) bool {
+	var (
+		err   error
+		count int
+	)
+
+	if count, err = conn.Db.C("users").FindId(ID).Count(); err != nil {
+		return false
+	}
+
+	return count == 1
+}
+
 // Save inserts the User instance if it hasn't been created yet or updates it if it has
 func (u *User) Save(conn *Connection) error {
 	var count int
