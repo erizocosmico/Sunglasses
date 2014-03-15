@@ -132,7 +132,7 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render, s ses
 				s.Set("user_token", token.ID.Hex())
 
 				resp.JSON(200, map[string]interface{}{
-					"error":      false,
+					"error": false,
 				})
 			} else {
 				resp.JSON(200, map[string]interface{}{

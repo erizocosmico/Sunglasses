@@ -23,3 +23,5 @@ _testmain.go
 .idea/**
 lamp.iml
 config.json
+
+*.txt

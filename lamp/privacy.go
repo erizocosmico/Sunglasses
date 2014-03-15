@@ -16,7 +16,9 @@ const (
 	PrivacyFollowingOnly = 3
 	PrivacyNone          = 4
 	PrivacyAllBut        = 5
-	PrivacyNoneBut       = 6
+	PrivacyFollowersBut  = 6
+	PrivacyFollowingBut  = 7
+	PrivacyNoneBut       = 8
 )
 
 // NewPrivacySettings returns a new empty instance of PrivacySettings
@@ -25,4 +27,8 @@ func NewPrivacySettings() PrivacySettings {
 	p.Type = PrivacyNone
 
 	return p
+}
+
+func isValidPrivacyType(t PrivacyType) bool {
+	return t > 0 && t <= PrivacyNoneBut
 }

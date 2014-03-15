@@ -169,6 +169,7 @@ func getPostPrivacy(postType ObjectType, r *http.Request, u *User) PrivacySettin
 				for _, u := range us {
 					if bson.IsObjectIdHex(u) {
 						p.Users = append(p.Users, bson.ObjectIdHex(u))
+						// TODO check if the users are followed by the user
 					}
 				}
 			}
@@ -176,8 +177,4 @@ func getPostPrivacy(postType ObjectType, r *http.Request, u *User) PrivacySettin
 	}
 
 	return p
-}
-
-func isValidPrivacyType(t PrivacyType) bool {
-	return t > 0 && t < 7
 }
