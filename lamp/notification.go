@@ -3,6 +3,9 @@ package lamp
 import (
 	"labix.org/v2/mgo/bson"
 	"time"
+	"net/http"
+	"github.com/martini-contrib/render"
+	"github.com/martini-contrib/sessions"
 )
 
 // NotificationType is the type of the notification
@@ -53,4 +56,45 @@ func SendNotification(notificationType NotificationType, postID, userID, userAct
 	}
 
 	return nil
+}
+
+// MarkNotificationRead marks a notification as read
+func MarkNotificationRead(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+	user := GetRequestUser(r, conn, s)
+	var n Notification
+
+	if user != nil {
+		nid := r.PostFormValue("notification_id")
+
+		if nid != "" && bson.IsObjectIdHex(nid) {
+			notificationID := bson.ObjectIdHex(nid)
+
+			if err := conn.Db.C("notifications").FindId(notificationID).One(&n); err != nil {
+				RenderError(res, CodeNotFound, 404, MsgNotFound)
+				return
+			}
+
+			if n.User != user.ID {
+				RenderError(res, CodeUnauthorized, 403, MsgUnauthorized)
+				return
+			}
+
+			if !n.Read {
+				n.Read = true
+
+				if _, err := conn.Db.C("notifications").UpsertId(n.ID, n); err != nil {
+					RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+					return
+				}
+			}
+
+			res.JSON(200, map[string]interface{}{
+				"error": false,
+				"message": "Notification marked successfully as read",
+			})
+			return
+		}
+	}
+
+	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
 }

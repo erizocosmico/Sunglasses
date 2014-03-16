@@ -55,14 +55,14 @@ func (c *Connection) Remove(collection string, ID bson.ObjectId) error {
 
 func createIndexes(conn *Connection) error {
 	indexes := map[string][]string{
-		"post":         []string{"user_id"},
-		"album":        []string{"user_id"},
-		"notification": []string{"user_id"},
-		"token":        []string{"user_id", "token"},
-		"request":      []string{"user_to", "user_from"},
-		"follow":       []string{"user_to", "user_from"},
-		"report":       []string{"user_id", "post_id"},
-		"block":        []string{"user_to", "user_from"},
+		"posts":         []string{"user_id"},
+		"albums":        []string{"user_id"},
+		"notifications": []string{"user_id"},
+		"tokens":        []string{"user_id"},
+		"requests":      []string{"user_to", "user_from"},
+		"follows":       []string{"user_to", "user_from"},
+		"reports":       []string{"user_id", "post_id"},
+		"blocks":        []string{"user_to", "user_from"},
 	}
 
 	for col, colIndexes := range indexes {

@@ -28,7 +28,7 @@ func BlockUser(from, to bson.ObjectId, conn *Connection) error {
 
 // UnblockUser unblocks an user ("from" unblocks "to")
 func UnblockUser(from, to bson.ObjectId, conn *Connection) error {
-	if err := conn.Db.C("blocks").Remove(bson.M{"from": from, "to": to}); err != nil {
+	if err := conn.Db.C("blocks").Remove(bson.M{"user_from": from, "user_to": to}); err != nil {
 		return err
 	}
 
@@ -42,7 +42,7 @@ func UserIsBlocked(from, to bson.ObjectId, conn *Connection) bool {
 		count int
 	)
 
-	if count, err = conn.Db.C("blocks").Find(bson.M{"from": from, "to": to}).Count(); err != nil {
+	if count, err = conn.Db.C("blocks").Find(bson.M{"user_from": from, "user_to": to}).Count(); err != nil {
 		return false
 	}
 

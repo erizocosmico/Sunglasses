@@ -4,6 +4,8 @@ const (
 	// Misc codes
 	CodeUnexpected  = 10
 	CodeInvalidData = 11
+	CodeUnauthorized = 12
+	CodeNotFound = 13
 
 	// Auth codes
 	CodeInvalidAccessToken        = 1
@@ -19,6 +21,8 @@ const (
 	// Misc messages
 	MsgUnexpected  = "Unexpected error occurred"
 	MsgInvalidData = "Invalid data provided"
+	MsgUnauthorized = "You are not authorized to access this resource"
+	MsgNotFound = "The resource was not found"
 
 	// Auth messages
 	MsgInvalidAccessToken        = "Invalid access token provided"

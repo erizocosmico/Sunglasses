@@ -20,8 +20,8 @@ type FollowRequest struct {
 // Follow model
 type Follow struct {
 	ID   bson.ObjectId `json:"id" bson:"_id"`
-	From bson.ObjectId `json:"from_id" bson:"from_id"`
-	To   bson.ObjectId `json:"to_id" bson:"to_id"`
+	From bson.ObjectId `json:"user_from" bson:"user_from"`
+	To   bson.ObjectId `json:"user_to" bson:"user_to"`
 	Time float64       `json:"time" bson:"time"`
 }
 
@@ -42,7 +42,7 @@ func FollowUser(from, to bson.ObjectId, conn *Connection) error {
 
 // UnfollowUser unfollows an user ("from" unfollows "to")
 func UnfollowUser(from, to bson.ObjectId, conn *Connection) error {
-	if err := conn.Db.C("follows").Remove(bson.M{"from": from, "to": to}); err != nil {
+	if err := conn.Db.C("follows").Remove(bson.M{"user_from": from, "user_to": to}); err != nil {
 		return err
 	}
 
@@ -56,7 +56,7 @@ func (u *User) Follows(to bson.ObjectId, conn *Connection) bool {
 		count int
 	)
 
-	if count, err = conn.Db.C("follows").Find(bson.M{"from": u.ID, "to": to}).Count(); err != nil {
+	if count, err = conn.Db.C("follows").Find(bson.M{"user_from": u.ID, "user_to": to}).Count(); err != nil {
 		return false
 	}
 
