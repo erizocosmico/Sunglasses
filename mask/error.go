@@ -1,4 +1,4 @@
-package lamp
+package mask
 
 const (
 	// Misc codes

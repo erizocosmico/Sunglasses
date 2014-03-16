@@ -1,4 +1,4 @@
-package lamp
+package mask
 
 import (
 	"github.com/codegangsta/martini"

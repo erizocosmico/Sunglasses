@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	. "github.com/mvader/lamp/lamp"
+	. "github.com/mvader/mask/mask"
 	"net/http"
 	"os"
 )

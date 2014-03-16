@@ -1,4 +1,4 @@
-package lamp
+package mask
 
 import (
 	"code.google.com/p/go.crypto/bcrypt"

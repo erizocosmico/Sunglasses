@@ -14,9 +14,9 @@ build:
         code: |
           cd $WERCKER_SOURCE_DIR
           go version
-          go get -t ./lamp
+          go get -t ./mask
     - script:
         name: go test
         code: |
-          cd lamp
+          cd mask
           go test -v

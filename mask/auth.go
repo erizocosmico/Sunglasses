@@ -1,4 +1,4 @@
-package lamp
+package mask
 
 import (
 	"github.com/martini-contrib/render"

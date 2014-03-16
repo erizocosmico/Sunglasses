@@ -1,4 +1,4 @@
-package lamp
+package mask
 
 import (
 	"labix.org/v2/mgo"

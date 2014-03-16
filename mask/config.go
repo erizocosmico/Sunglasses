@@ -1,4 +1,4 @@
-package lamp
+package mask
 
 import (
 	"encoding/json"

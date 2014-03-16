@@ -1,4 +1,4 @@
-package lamp
+package mask
 
 import (
 	. "github.com/smartystreets/goconvey/convey"
@@ -25,7 +25,7 @@ func TestNewConfig(t *testing.T) {
 				So(config.URL, ShouldEqual, "localhost:3000")
 				So(config.Port, ShouldEqual, ":3000")
 				So(config.Debug, ShouldEqual, true)
-				So(config.DatabaseName, ShouldEqual, "lamp_test")
+				So(config.DatabaseName, ShouldEqual, "mask_test")
 				So(config.DatabaseUrl, ShouldEqual, "127.0.0.1:27017")
 				So(config.RedisAddress, ShouldEqual, ":6379")
 				So(config.StaticContentPath, ShouldEqual, "/path/to/static/content")
