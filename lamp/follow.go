@@ -184,3 +184,42 @@ func ReplyFollowRequest(r *http.Request, conn *Connection, res render.Render, s 
 
 	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
 }
+
+// Unfollow unfollows an user
+func Unfollow(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+	user := GetRequestUser(r, conn, s)
+
+	if user != nil {
+		userTo := r.PostFormValue("user_to")
+
+		if userTo != "" && bson.IsObjectIdHex(userTo) {
+			userToID := bson.ObjectIdHex(userTo)
+
+			if toUser := UserExists(conn, userToID); toUser != nil {
+				if user.Follows(userToID, conn) {
+					if err := UnfollowUser(user.ID, userToID, conn); err != nil {
+						RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+						return
+					}
+
+					res.JSON(200, map[string]interface{}{
+						"error": false,
+						"message": "User unfollowed successfully",
+					})
+					return
+				} else {
+					res.JSON(200, map[string]interface{}{
+						"error": false,
+						"message": "You can't unfollow that user",
+					})
+					return
+				}
+			} else {
+				RenderError(res, CodeUserDoesNotExist, 404, MsgUserDoesNotExist)
+				return
+			}
+		}
+	}
+
+	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+}
