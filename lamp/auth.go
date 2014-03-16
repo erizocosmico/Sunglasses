@@ -36,16 +36,16 @@ func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render
 	tokenID, _ := GetRequestToken(req, true, s)
 
 	if !bson.IsObjectIdHex(tokenID) {
-		RenderError(resp, 3, 403, "Invalid access token provided")
+		RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
 		return
 	}
 
 	var token Token
 	if err := conn.Db.C("tokens").FindId(bson.ObjectIdHex(tokenID)).One(&token); err != nil {
-		RenderError(resp, 3, 403, "Invalid access token provided")
+		RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
 	} else {
 		if token.ID.Hex() == "" || token.Type != AccessToken || token.Expires < float64(time.Now().Unix()) {
-			RenderError(resp, 3, 403, "Invalid access token provided")
+			RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
 		}
 	}
 
@@ -57,16 +57,16 @@ func ValidateUserToken(req *http.Request, conn *Connection, resp render.Render, 
 	tokenID, _ := GetRequestToken(req, false, s)
 
 	if !bson.IsObjectIdHex(tokenID) {
-		RenderError(resp, 3, 403, "Invalid user token provided")
+		RenderError(resp, CodeInvalidUserToken, 403, MsgInvalidUserToken)
 		return
 	}
 
 	var token Token
 	if err := conn.Db.C("tokens").FindId(bson.ObjectIdHex(tokenID)).One(&token); err != nil {
-		RenderError(resp, 3, 403, "Invalid access token provided")
+		RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
 	} else {
 		if token.ID.Hex() == "" || token.Type != UserToken || token.Expires < float64(time.Now().Unix()) {
-			RenderError(resp, 3, 403, "Invalid access token provided")
+			RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
 		}
 	}
 }
@@ -93,7 +93,7 @@ func GetAccessToken(conn *Connection, resp render.Render) {
 			"expires":      token.Expires,
 		})
 	} else {
-		RenderError(resp, 2, 500, "Unknown error occurred")
+		RenderError(resp, CodeUnexpected, 500, MsgUnexpected)
 	}
 }
 
@@ -111,7 +111,7 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render, s ses
 	user := new(User)
 
 	if err := conn.Db.C("users").Find((bson.M{"username_lower": username})).One(user); err != nil {
-		RenderError(resp, 1, 400, "Invalid username or password")
+		RenderError(resp, CodeInvalidUsernameOrPassword, 400, MsgInvalidUsernameOrPassword)
 		return
 	}
 
@@ -126,7 +126,7 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render, s ses
 		}
 
 		if err := token.Save(conn); err != nil {
-			RenderError(resp, 2, 500, "Unexpected error occurred")
+			RenderError(resp, CodeUnexpected, 500, MsgUnexpected)
 		} else {
 			if req.PostFormValue("token_type") == "session" {
 				s.Set("user_token", token.ID.Hex())
@@ -143,7 +143,7 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render, s ses
 			}
 		}
 	} else {
-		RenderError(resp, 1, 400, "Invalid username or password")
+		RenderError(resp, CodeInvalidUsernameOrPassword, 400, MsgInvalidUsernameOrPassword)
 	}
 }
 
@@ -152,7 +152,7 @@ func DestroyUserToken(req *http.Request, conn *Connection, resp render.Render, s
 	tokenID, tokenType := GetRequestToken(req, false, s)
 	if valid, _ := IsTokenValid(tokenID, tokenType, conn); valid {
 		if err := conn.Db.C("tokens").RemoveId(bson.ObjectIdHex(tokenID)); err != nil {
-			RenderError(resp, 2, 404, "Token not found")
+			RenderError(resp, CodeTokenNotFound, 404, MsgTokenNotFound)
 			return
 		} else {
 			resp.JSON(200, map[string]interface{}{
@@ -162,7 +162,7 @@ func DestroyUserToken(req *http.Request, conn *Connection, resp render.Render, s
 			})
 		}
 	} else {
-		RenderError(resp, 3, 403, "Invalid user token provided")
+		RenderError(resp, CodeInvalidUserToken, 403, MsgInvalidUserToken)
 	}
 }
 
