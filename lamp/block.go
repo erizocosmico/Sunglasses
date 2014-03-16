@@ -50,7 +50,7 @@ func UserIsBlocked(from, to bson.ObjectId, conn *Connection) bool {
 }
 
 // Block blocks an user
-func Block(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+func BlockHandler(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
 	user := GetRequestUser(r, conn, s)
 
 	if user != nil {
