@@ -5,8 +5,10 @@ import (
 	"time"
 )
 
+// NotificationType is the type of the notification
 type NotificationType int
 
+// Notification model
 type Notification struct {
 	ID           bson.ObjectId    `json:"id" bson:"_id"`
 	Type         NotificationType `json:"notification_type" bson:"notification_type"`
@@ -30,6 +32,7 @@ const (
 
 // SendNotification sends a new notification to the user
 func SendNotification(notificationType NotificationType, postID, userID, userActionID bson.ObjectId, conn *Connection) error {
+	// TODO check if user can be notified
 	n := Notification{}
 	n.ID = bson.NewObjectId()
 	n.Type = notificationType
@@ -37,11 +40,11 @@ func SendNotification(notificationType NotificationType, postID, userID, userAct
 	n.Read = false
 	n.Time = float64(time.Now().Unix())
 
-	if postID != nil {
+	if postID.Hex() != "" {
 		n.PostID = postID
 	}
 
-	if userActionID != nil {
+	if userActionID.Hex() != "" {
 		n.UserActionID = userActionID
 	}
 
