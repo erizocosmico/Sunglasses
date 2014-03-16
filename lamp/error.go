@@ -2,10 +2,10 @@ package lamp
 
 const (
 	// Misc codes
-	CodeUnexpected  = 10
-	CodeInvalidData = 11
+	CodeUnexpected   = 10
+	CodeInvalidData  = 11
 	CodeUnauthorized = 12
-	CodeNotFound = 13
+	CodeNotFound     = 13
 
 	// Auth codes
 	CodeInvalidAccessToken        = 1
@@ -19,10 +19,10 @@ const (
 	CodeFollowRequestDoesNotExist = 22
 
 	// Misc messages
-	MsgUnexpected  = "Unexpected error occurred"
-	MsgInvalidData = "Invalid data provided"
+	MsgUnexpected   = "Unexpected error occurred"
+	MsgInvalidData  = "Invalid data provided"
 	MsgUnauthorized = "You are not authorized to access this resource"
-	MsgNotFound = "The resource was not found"
+	MsgNotFound     = "The resource was not found"
 
 	// Auth messages
 	MsgInvalidAccessToken        = "Invalid access token provided"

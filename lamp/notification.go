@@ -1,11 +1,11 @@
 package lamp
 
 import (
-	"labix.org/v2/mgo/bson"
-	"time"
-	"net/http"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/sessions"
+	"labix.org/v2/mgo/bson"
+	"net/http"
+	"time"
 )
 
 // NotificationType is the type of the notification
@@ -89,7 +89,7 @@ func MarkNotificationRead(r *http.Request, conn *Connection, res render.Render, 
 			}
 
 			res.JSON(200, map[string]interface{}{
-				"error": false,
+				"error":   false,
 				"message": "Notification marked successfully as read",
 			})
 			return

@@ -203,13 +203,13 @@ func Unfollow(r *http.Request, conn *Connection, res render.Render, s sessions.S
 					}
 
 					res.JSON(200, map[string]interface{}{
-						"error": false,
+						"error":   false,
 						"message": "User unfollowed successfully",
 					})
 					return
 				} else {
 					res.JSON(200, map[string]interface{}{
-						"error": false,
+						"error":   false,
 						"message": "You can't unfollow that user",
 					})
 					return
