@@ -22,6 +22,7 @@ _testmain.go
 *.exe
 .idea/**
 lamp.iml
+Mask.iml
 config.json
 
 *.txt

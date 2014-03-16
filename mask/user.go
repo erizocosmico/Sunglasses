@@ -79,6 +79,7 @@ type UserInfo struct {
 type UserSettings struct {
 	Invisible                   bool           `json:"invisible" bson:"invisible"`
 	CanReceiveRequests          bool           `json:"can_receive_requests" bson:"can_receive_requests"`
+	FollowApprovalRequired      bool           `json:"follow_approval_required" bson:"follow_approval_required"`
 	DisplayAvatarBeforeApproval bool           `json:"display_avatar_before_approval" bson:"display_avatar_before_approval"`
 	NotifyNewComment            bool           `json:"notify_new_comment" bson:"notify_new_comment"`
 	NotifyNewCommentOthers      bool           `json:"notify_new_comment_others" bson:"notify_new_comment_others"`
@@ -136,7 +137,7 @@ func (u *User) Save(conn *Connection) error {
 
 	if u.ID.Hex() != "" && count > 1 {
 		return errors.New("username already in use")
-	} else if count > 0 {
+	} else if u.ID.Hex() == "" && count > 0 {
 		return errors.New("username already in use")
 	}
 
@@ -146,6 +147,7 @@ func (u *User) Save(conn *Connection) error {
 		u.ID = bson.NewObjectId()
 		u.Settings.Invisible = true
 		u.Settings.CanReceiveRequests = false
+		u.Settings.FollowApprovalRequired = true
 		u.Settings.DisplayAvatarBeforeApproval = false
 		u.Settings.NotifyNewComment = false
 		u.Settings.NotifyNewCommentOthers = false

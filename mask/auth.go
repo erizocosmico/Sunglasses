@@ -201,7 +201,7 @@ func IsTokenValid(tokenID string, tokenType TokenType, conn *Connection) (bool, 
 	var token Token
 	if err := conn.Db.C("tokens").FindId(bson.ObjectIdHex(tokenID)).One(&token); err == nil {
 		if token.Expires > float64(time.Now().Unix()) && token.Type == tokenType {
-			return true, token.ID
+			return true, token.UserID
 		}
 	}
 
@@ -218,7 +218,7 @@ func GetRequestUser(r *http.Request, conn *Connection, s sessions.Session) *User
 	token, tokenType := GetRequestToken(r, false, s)
 
 	if valid, userID = IsTokenValid(token, tokenType, conn); valid {
-		if err := conn.Db.C("users").FindId(userID).One(&user); err != nil {
+		if err := conn.Db.C("users").FindId(userID).One(&user); err == nil {
 			return &user
 		}
 	}
@@ -233,6 +233,15 @@ func (t *Token) Save(conn *Connection) error {
 	}
 
 	if err := conn.Save("tokens", t.ID, t); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Remove removes the Token instance
+func (t *Token) Remove(conn *Connection) error {
+	if err := conn.Remove("tokens", t.ID); err != nil {
 		return err
 	}
 

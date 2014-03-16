@@ -6,7 +6,14 @@ import (
 	"github.com/martini-contrib/sessions"
 	"net/http"
 	"net/http/httptest"
+	"time"
 )
+
+type errorResponse struct {
+	Error   bool   `json:"error"`
+	Code    int    `json:"code,omitempty"`
+	Message string `json:"message"`
+}
 
 func testGetHandler(handler, middleware martini.Handler, conn *Connection, reqUrl, handlerUrl string, testFunc func(*httptest.ResponseRecorder)) {
 	testHandler(func(m *martini.ClassicMartini) {
@@ -45,4 +52,23 @@ func getConnection() *Connection {
 	}
 
 	return conn
+}
+
+func createRequestUser(conn *Connection) (*User, *Token) {
+	user := NewUser()
+	user.Username = "testing"
+
+	if err := user.Save(conn); err != nil {
+		panic(err)
+	}
+
+	token := new(Token)
+	token.Type = UserToken
+	token.Expires = float64(time.Now().Unix() + int64(3600*time.Second))
+	token.UserID = user.ID
+	if err := token.Save(conn); err != nil {
+		panic(err)
+	}
+
+	return user, token
 }

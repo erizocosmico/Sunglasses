@@ -95,15 +95,22 @@ func SendFollowRequest(r *http.Request, conn *Connection, res render.Render, s s
 			userToID := bson.ObjectIdHex(userTo)
 
 			if toUser = UserExists(conn, userToID); toUser != nil {
+
 				if !userFrom.Follows(userToID, conn) {
 					// If the user we want to follow already follows us, skip privacy settings
-					if toUser.Follows(userFrom.ID, conn) {
+					if toUser.Follows(userFrom.ID, conn) || !toUser.Settings.FollowApprovalRequired {
 						if err := FollowUser(userFrom.ID, userToID, conn); err == nil {
 							SendNotification(NotificationFollowed, blankID, userFrom.ID, userToID, conn)
 						} else {
 							RenderError(res, CodeUnexpected, 500, MsgUnexpected)
 							return
 						}
+
+						res.JSON(200, map[string]interface{}{
+							"error":   false,
+							"message": "User followed successfully",
+						})
+						return
 					} else {
 						if !toUser.Settings.CanReceiveRequests || UserIsBlocked(userFrom.ID, userToID, conn) {
 							RenderError(res, CodeUserCantBeRequested, 403, MsgUserCantBeRequested)

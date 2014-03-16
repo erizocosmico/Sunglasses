@@ -20,6 +20,7 @@ func BlockUser(from, to bson.ObjectId, conn *Connection) error {
 	f.Time = float64(time.Now().Unix())
 
 	if err := conn.Save("blocks", f.ID, f); err != nil {
+		// Remove user blocked from follows
 		return err
 	}
 
