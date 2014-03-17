@@ -34,12 +34,31 @@ const (
 )
 
 // SendNotification sends a new notification to the user
-func SendNotification(notificationType NotificationType, postID, userID, userActionID bson.ObjectId, conn *Connection) error {
-	// TODO check if user can be notified
+func SendNotification(notificationType NotificationType, user *User, postID, userActionID bson.ObjectId, conn *Connection) error {
+	switch int(notificationType) {
+	case NotificationPostLiked:
+		if !user.Settings.NotifyLikes {
+			return nil
+		}
+		break
+
+	case NotificationPostCommented:
+		if !user.Settings.NotifyNewComment {
+			return nil
+		}
+		break
+
+	case NotificationPostOnMyWall:
+		if !user.Settings.NotifyPostsInMyProfile {
+			return nil
+		}
+		break
+	}
+
 	n := Notification{}
 	n.ID = bson.NewObjectId()
 	n.Type = notificationType
-	n.User = userID
+	n.User = user.ID
 	n.Read = false
 	n.Time = float64(time.Now().Unix())
 

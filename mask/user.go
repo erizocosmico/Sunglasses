@@ -47,8 +47,8 @@ type User struct {
 	ID                bson.ObjectId `json:"id,omitempty" bson:"_id"`
 	Username          string        `json:"username" bson:"username"`
 	UsernameLower     string        `json:"username_lower" bson:"username_lower"`
-	Password          string        `json:"password" bson:"password"`
-	EMail             string        `json:"email,omitempty" bson:"email,omitempty"`
+	Password          string        `json:"-" bson:"password"`
+	EMail             string        `json:"-" bson:"email,omitempty"`
 	PublicName        string        `json:"public_name,omitempty" bson:"public_name,omitempty"`
 	PrivateName       string        `json:"private_name,omitempty" bson:"private_name,omitempty"`
 	Role              UserRole      `json:"role" bson:"role"`
@@ -83,6 +83,8 @@ type UserSettings struct {
 	DisplayAvatarBeforeApproval bool           `json:"display_avatar_before_approval" bson:"display_avatar_before_approval"`
 	NotifyNewComment            bool           `json:"notify_new_comment" bson:"notify_new_comment"`
 	NotifyNewCommentOthers      bool           `json:"notify_new_comment_others" bson:"notify_new_comment_others"`
+	NotifyPostsInMyProfile      bool           `json:"notify_posts_in_my_profile" bson:"notify_posts_in_my_profile"`
+	NotifyLikes                 bool           `json:"notify_likes" bson:"notify_likes"`
 	AllowPostsInMyProfile       bool           `json:"allow_posts_in_my_profile" bson:"allow_posts_in_my_profile"`
 	AllowCommentsInPosts        bool           `json:"allow_comments_in_posts" bson:"allow_comments_in_posts"`
 	DisplayEmail                bool           `json:"display_email" bson:"display_email"`
@@ -148,6 +150,8 @@ func (u *User) Save(conn *Connection) error {
 		u.Settings.Invisible = true
 		u.Settings.CanReceiveRequests = false
 		u.Settings.FollowApprovalRequired = true
+		u.Settings.NotifyPostsInMyProfile = false
+		u.Settings.NotifyLikes = false
 		u.Settings.DisplayAvatarBeforeApproval = false
 		u.Settings.NotifyNewComment = false
 		u.Settings.NotifyNewCommentOthers = false

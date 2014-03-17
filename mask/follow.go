@@ -100,7 +100,7 @@ func SendFollowRequest(r *http.Request, conn *Connection, res render.Render, s s
 					// If the user we want to follow already follows us, skip privacy settings
 					if toUser.Follows(userFrom.ID, conn) || !toUser.Settings.FollowApprovalRequired {
 						if err := FollowUser(userFrom.ID, userToID, conn); err == nil {
-							SendNotification(NotificationFollowed, blankID, userFrom.ID, userToID, conn)
+							SendNotification(NotificationFollowed, toUser, blankID, userFrom.ID, conn)
 						} else {
 							RenderError(res, CodeUnexpected, 500, MsgUnexpected)
 							return
@@ -124,7 +124,7 @@ func SendFollowRequest(r *http.Request, conn *Connection, res render.Render, s s
 						fr.Time = float64(time.Now().Unix())
 
 						if err := fr.Save(conn); err == nil {
-							SendNotification(NotificationFollowRequest, blankID, userToID, userFrom.ID, conn)
+							SendNotification(NotificationFollowRequest, toUser, blankID, userFrom.ID, conn)
 
 							res.JSON(200, map[string]interface{}{
 								"error":   false,
@@ -170,7 +170,7 @@ func ReplyFollowRequest(r *http.Request, conn *Connection, res render.Render, s 
 					if err := (&fr).Remove(conn); err == nil {
 						if r.PostFormValue("accept") == "yes" {
 							if err := FollowUser(fr.From, user.ID, conn); err == nil {
-								SendNotification(NotificationFollowRequestAccepted, blankID, fr.From, fr.To, conn)
+								SendNotification(NotificationFollowRequestAccepted, user, blankID, fr.To, conn)
 							} else {
 								RenderError(res, CodeUnexpected, 500, MsgUnexpected)
 								return
