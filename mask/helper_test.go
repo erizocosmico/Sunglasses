@@ -27,6 +27,18 @@ func testPostHandler(handler, middleware martini.Handler, conn *Connection, reqU
 	}, middleware, conn, reqUrl, "POST", testFunc)
 }
 
+func testPutHandler(handler, middleware martini.Handler, conn *Connection, reqUrl, handlerUrl string, testFunc func(*httptest.ResponseRecorder)) {
+	testHandler(func(m *martini.ClassicMartini) {
+		m.Put(handlerUrl, handler)
+	}, middleware, conn, reqUrl, "PUT", testFunc)
+}
+
+func testDeleteHandler(handler, middleware martini.Handler, conn *Connection, reqUrl, handlerUrl string, testFunc func(*httptest.ResponseRecorder)) {
+	testHandler(func(m *martini.ClassicMartini) {
+		m.Delete(handlerUrl, handler)
+	}, middleware, conn, reqUrl, "DELETE", testFunc)
+}
+
 func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.Handler, conn *Connection, reqUrl, method string, testFunc func(*httptest.ResponseRecorder)) {
 	req, _ := http.NewRequest(method, reqUrl, nil)
 	m := martini.Classic()

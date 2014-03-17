@@ -131,22 +131,22 @@ func SendFollowRequest(r *http.Request, conn *Connection, res render.Render, s s
 								"message": "Follow request sent successfully",
 							})
 							return
-						} else {
-							RenderError(res, CodeUnexpected, 500, MsgUnexpected)
-							return
 						}
+
+						RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+						return
 					}
-				} else {
-					res.JSON(200, map[string]interface{}{
-						"error":   false,
-						"message": "You already follow that user",
-					})
-					return
 				}
-			} else {
-				RenderError(res, CodeUserDoesNotExist, 404, MsgUserDoesNotExist)
+
+				res.JSON(200, map[string]interface{}{
+					"error":   false,
+					"message": "You already follow that user",
+				})
 				return
 			}
+
+			RenderError(res, CodeUserDoesNotExist, 404, MsgUserDoesNotExist)
+			return
 		}
 	}
 
@@ -166,22 +166,30 @@ func ReplyFollowRequest(r *http.Request, conn *Connection, res render.Render, s 
 			var fr FollowRequest
 
 			if err := conn.Db.C("requests").FindId(reqID).One(&fr); err == nil {
-				if err := (&fr).Remove(conn); err == nil {
-					if r.PostFormValue("accept") == "yes" {
-						if err := FollowUser(fr.From, user.ID, conn); err == nil {
-							SendNotification(NotificationFollowRequestAccepted, blankID, fr.From, fr.To, conn)
-						} else {
-							RenderError(res, CodeUnexpected, 500, MsgUnexpected)
-							return
+				if fr.To.Hex() == user.ID.Hex() {
+					if err := (&fr).Remove(conn); err == nil {
+						if r.PostFormValue("accept") == "yes" {
+							if err := FollowUser(fr.From, user.ID, conn); err == nil {
+								SendNotification(NotificationFollowRequestAccepted, blankID, fr.From, fr.To, conn)
+							} else {
+								RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+								return
+							}
 						}
+
+						res.JSON(200, map[string]interface{}{
+							"error":   false,
+							"message": "Successfully replied to follow request",
+						})
+						return
 					}
 
-					res.JSON(200, map[string]interface{}{
-						"error":   false,
-						"message": "Successfully replied to follow request",
-					})
+					RenderError(res, CodeUnexpected, 500, MsgUnexpected)
 					return
 				}
+
+				RenderError(res, CodeUnauthorized, 404, MsgUnauthorized)
+				return
 			}
 
 			RenderError(res, CodeFollowRequestDoesNotExist, 404, MsgFollowRequestDoesNotExist)
@@ -214,17 +222,17 @@ func Unfollow(r *http.Request, conn *Connection, res render.Render, s sessions.S
 						"message": "User unfollowed successfully",
 					})
 					return
-				} else {
-					res.JSON(200, map[string]interface{}{
-						"error":   false,
-						"message": "You can't unfollow that user",
-					})
-					return
 				}
-			} else {
-				RenderError(res, CodeUserDoesNotExist, 404, MsgUserDoesNotExist)
+
+				res.JSON(200, map[string]interface{}{
+					"error":   false,
+					"message": "You can't unfollow that user",
+				})
 				return
 			}
+
+			RenderError(res, CodeUserDoesNotExist, 404, MsgUserDoesNotExist)
+			return
 		}
 	}
 

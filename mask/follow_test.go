@@ -271,3 +271,305 @@ func TestSendFollowRequest(t *testing.T) {
 		})
 	})
 }
+
+func TestReplyFollowRequest(t *testing.T) {
+	conn := getConnection()
+
+	Convey("Replying follow requests", t, func() {
+		Convey("With invalid request user", func() {
+			testPostHandler(ReplyFollowRequest, func(r *http.Request) {}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 400)
+					So(errResp.Code, ShouldEqual, CodeInvalidData)
+					So(errResp.Message, ShouldEqual, MsgInvalidData)
+				})
+		})
+
+		Convey("With invalid request id", func() {
+			user, token := createRequestUser(conn)
+
+			defer func() {
+				user.Remove(conn)
+				token.Remove(conn)
+			}()
+			testPostHandler(ReplyFollowRequest, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 400)
+					So(errResp.Code, ShouldEqual, CodeInvalidData)
+					So(errResp.Message, ShouldEqual, MsgInvalidData)
+				})
+		})
+
+		Convey("With a valid request id which does not exist", func() {
+			user, token := createRequestUser(conn)
+
+			defer func() {
+				user.Remove(conn)
+				token.Remove(conn)
+			}()
+			testPostHandler(ReplyFollowRequest, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("request_id", bson.NewObjectId().Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 404)
+					So(errResp.Code, ShouldEqual, CodeFollowRequestDoesNotExist)
+					So(errResp.Message, ShouldEqual, MsgFollowRequestDoesNotExist)
+				})
+		})
+
+		Convey("With a valid request id that does not belong to the user", func() {
+			user, token := createRequestUser(conn)
+
+			req := new(FollowRequest)
+			req.From = bson.NewObjectId()
+			req.To = bson.NewObjectId()
+			if err := req.Save(conn); err != nil {
+				panic(err)
+			}
+
+			defer func() {
+				user.Remove(conn)
+				token.Remove(conn)
+				req.Remove(conn)
+			}()
+			testPostHandler(ReplyFollowRequest, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("request_id", req.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 404)
+					So(errResp.Code, ShouldEqual, CodeUnauthorized)
+					So(errResp.Message, ShouldEqual, MsgUnauthorized)
+				})
+		})
+
+		Convey("With a valid request id and 'accept' != 'yes'", func() {
+			user, token := createRequestUser(conn)
+
+			req := new(FollowRequest)
+			req.From = bson.NewObjectId()
+			req.To = user.ID
+			if err := req.Save(conn); err != nil {
+				panic(err)
+			}
+
+			defer func() {
+				user.Remove(conn)
+				token.Remove(conn)
+			}()
+			testPostHandler(ReplyFollowRequest, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("request_id", req.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp.Error, ShouldEqual, false)
+					So(errResp.Message, ShouldEqual, "Successfully replied to follow request")
+				})
+		})
+
+		Convey("With a valid request id and 'accept' = 'yes'", func() {
+			user, token := createRequestUser(conn)
+
+			req := new(FollowRequest)
+			req.From = bson.NewObjectId()
+			req.To = user.ID
+			if err := req.Save(conn); err != nil {
+				panic(err)
+			}
+
+			defer func() {
+				user.Remove(conn)
+				token.Remove(conn)
+			}()
+			testPostHandler(ReplyFollowRequest, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("request_id", req.ID.Hex())
+				r.PostForm.Add("accept", "yes")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp.Error, ShouldEqual, false)
+					So(errResp.Message, ShouldEqual, "Successfully replied to follow request")
+				})
+		})
+	})
+}
+
+func TestUnfollow(t *testing.T) {
+	conn := getConnection()
+
+	Convey("Unfollowing an user", t, func() {
+
+		Convey("With invalid request user", func() {
+			user, token := createRequestUser(conn)
+			defer func() {
+				user.Remove(conn)
+				token.Remove(conn)
+			}()
+			testPostHandler(Unfollow, func(r *http.Request) {}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 400)
+					So(errResp.Code, ShouldEqual, CodeInvalidData)
+					So(errResp.Message, ShouldEqual, MsgInvalidData)
+				})
+		})
+
+		Convey("With invalid 'user_to'", func() {
+			user, token := createRequestUser(conn)
+			defer func() {
+				user.Remove(conn)
+				token.Remove(conn)
+			}()
+			testPostHandler(Unfollow, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 400)
+					So(errResp.Code, ShouldEqual, CodeInvalidData)
+					So(errResp.Message, ShouldEqual, MsgInvalidData)
+				})
+		})
+
+		Convey("When 'user_to' does not exist", func() {
+			user, token := createRequestUser(conn)
+			defer func() {
+				user.Remove(conn)
+				token.Remove(conn)
+			}()
+			testPostHandler(Unfollow, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("user_to", bson.NewObjectId().Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 404)
+					So(errResp.Code, ShouldEqual, CodeUserDoesNotExist)
+					So(errResp.Message, ShouldEqual, MsgUserDoesNotExist)
+				})
+		})
+
+		Convey("When the user does not follow 'user_to'", func() {
+			user, token := createRequestUser(conn)
+			userTo := NewUser()
+			userTo.Username = "testing_to"
+
+			if err := userTo.Save(conn); err != nil {
+				panic(err)
+			}
+
+			defer func() {
+				user.Remove(conn)
+				token.Remove(conn)
+				userTo.Remove(conn)
+			}()
+
+			testPostHandler(Unfollow, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("user_to", userTo.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp.Error, ShouldEqual, false)
+					So(errResp.Message, ShouldEqual, "You can't unfollow that user")
+				})
+		})
+
+		Convey("When the user follows 'user_to'", func() {
+			user, token := createRequestUser(conn)
+			userTo := NewUser()
+			userTo.Username = "testing_to"
+
+			if err := userTo.Save(conn); err != nil {
+				panic(err)
+			}
+
+			if err := FollowUser(user.ID, userTo.ID, conn); err != nil {
+				panic(err)
+			}
+
+			defer func() {
+				user.Remove(conn)
+				token.Remove(conn)
+				userTo.Remove(conn)
+			}()
+
+			testPostHandler(Unfollow, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("user_to", userTo.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp.Error, ShouldEqual, false)
+					So(errResp.Message, ShouldEqual, "User unfollowed successfully")
+				})
+		})
+	})
+}

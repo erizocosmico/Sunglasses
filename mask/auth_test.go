@@ -239,7 +239,7 @@ func TestDestroyUserToken(t *testing.T) {
 		}
 
 		Convey("When a valid user token is given the response status will be 200", func() {
-			testGetHandler(DestroyUserToken, func(request *http.Request) {
+			testDeleteHandler(DestroyUserToken, func(request *http.Request) {
 				request.Header.Add("X-User-Token", token.ID.Hex())
 			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
 				So(response.Code, ShouldEqual, 200)
