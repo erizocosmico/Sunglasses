@@ -9,12 +9,13 @@ import (
 	"testing"
 )
 
-func TestCreateUser(t *testing.T) {
+func TestCreateAccount(t *testing.T) {
+	// TODO needs revisit
 	Convey("Subject: Creating a new user", t, func() {
 		conn := getConnection()
 
 		Convey("When the recovery method is not valid it should fail", func() {
-			testPostHandler(CreateUser, func(req *http.Request) {
+			testPostHandler(CreateAccount, func(req *http.Request) {
 				if req.PostForm == nil {
 					req.PostForm = make(url.Values)
 				}
@@ -28,7 +29,7 @@ func TestCreateUser(t *testing.T) {
 		})
 
 		Convey("When passwords don't match it should fail", func() {
-			testPostHandler(CreateUser, func(req *http.Request) {
+			testPostHandler(CreateAccount, func(req *http.Request) {
 				if req.PostForm == nil {
 					req.PostForm = make(url.Values)
 				}
@@ -42,7 +43,7 @@ func TestCreateUser(t *testing.T) {
 		})
 
 		Convey("When username is not valid it should fail", func() {
-			testPostHandler(CreateUser, func(req *http.Request) {
+			testPostHandler(CreateAccount, func(req *http.Request) {
 				if req.PostForm == nil {
 					req.PostForm = make(url.Values)
 				}
@@ -56,7 +57,7 @@ func TestCreateUser(t *testing.T) {
 		})
 
 		Convey("When recovery method is set to email and the email is not valid it should fail", func() {
-			testPostHandler(CreateUser, func(req *http.Request) {
+			testPostHandler(CreateAccount, func(req *http.Request) {
 				if req.PostForm == nil {
 					req.PostForm = make(url.Values)
 				}
@@ -70,7 +71,7 @@ func TestCreateUser(t *testing.T) {
 		})
 
 		Convey("When recovery method is set to security question and the either the answer or the question are empty it should fail", func() {
-			testPostHandler(CreateUser, func(req *http.Request) {
+			testPostHandler(CreateAccount, func(req *http.Request) {
 				if req.PostForm == nil {
 					req.PostForm = make(url.Values)
 				}
@@ -85,7 +86,7 @@ func TestCreateUser(t *testing.T) {
 		})
 
 		Convey("When all the data is correct it should not fail", func() {
-			testPostHandler(CreateUser, func(req *http.Request) {
+			testPostHandler(CreateAccount, func(req *http.Request) {
 				if req.PostForm == nil {
 					req.PostForm = make(url.Values)
 				}
@@ -99,7 +100,7 @@ func TestCreateUser(t *testing.T) {
 		})
 
 		Convey("When the user already exists it should fail", func() {
-			testPostHandler(CreateUser, func(req *http.Request) {
+			testPostHandler(CreateAccount, func(req *http.Request) {
 				if req.PostForm == nil {
 					req.PostForm = make(url.Values)
 				}

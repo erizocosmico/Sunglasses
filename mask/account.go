@@ -8,14 +8,15 @@ import (
 	"strconv"
 )
 
-// CreateUser creates a new user account
-func CreateUser(r *http.Request, conn *Connection, res render.Render) {
+// CreateAccount creates a new user account
+func CreateAccount(r *http.Request, conn *Connection, res render.Render) {
 	var (
 		username                = r.PostFormValue("username")
 		password                = r.PostFormValue("password")
 		passwordRepeat          = r.PostFormValue("password_repeat")
 		question, answer, email string
 		errorList               = make([]string, 0)
+		codeList                = make([]int, 0)
 		responseStatus          = 400
 	)
 
@@ -31,7 +32,8 @@ func CreateUser(r *http.Request, conn *Connection, res render.Render) {
 		email = r.PostFormValue("email")
 
 		if _, err := mail.ParseAddress(email); err != nil {
-			errorList = append(errorList, "Invalid email address")
+			errorList = append(errorList, MsgInvalidEmail)
+			codeList = append(codeList, CodeInvalidEmail)
 		}
 		break
 	case RecoverByQuestion:
@@ -39,28 +41,34 @@ func CreateUser(r *http.Request, conn *Connection, res render.Render) {
 		answer = r.PostFormValue("recovery_answer")
 
 		if question == "" || answer == "" {
-			errorList = append(errorList, "Recovery question and answer can not be blank")
+			errorList = append(errorList, MsgInvalidRecoveryQuestion)
+			codeList = append(codeList, CodeInvalidRecoveryQuestion)
 		}
 		break
 	default:
-		errorList = append(errorList, "Invalid recovery method")
+		errorList = append(errorList, MsgInvalidRecoveryMethod)
+		codeList = append(codeList, CodeInvalidRecoveryMethod)
 	}
 
 	reg, err := regexp.Compile("^[a-zA-Z_0-9]{2,30}$")
 	if err != nil {
-		errorList = append(errorList, "Invalid username")
+		errorList = append(errorList, MsgInvalidUsername)
+		codeList = append(codeList, CodeInvalidUsername)
 	}
 
 	if !reg.MatchString(username) {
-		errorList = append(errorList, "Invalid username")
+		errorList = append(errorList, MsgInvalidUsername)
+		codeList = append(codeList, CodeInvalidUsername)
 	}
 
-	if password == "" {
-		errorList = append(errorList, "Password can not be blank")
+	if len(password) < 6 {
+		errorList = append(errorList, MsgPasswordLength)
+		codeList = append(codeList, CodePasswordLength)
 	}
 
 	if password != passwordRepeat {
-		errorList = append(errorList, "Passwords don't match")
+		errorList = append(errorList, MsgPasswordMatch)
+		codeList = append(codeList, CodePasswordMatch)
 	}
 
 	if len(errorList) == 0 {
@@ -89,13 +97,15 @@ func CreateUser(r *http.Request, conn *Connection, res render.Render) {
 			return
 		} else {
 			if err.Error() == "username already in use" {
-				errorList = append(errorList, "The username is taken")
+				errorList = append(errorList, MsgUsernameTaken)
+				codeList = append(codeList, CodeInvalidRecoveryQuestion)
 			} else {
 				responseStatus = 500
-				errorList = append(errorList, "Unexpected error occurred")
+				errorList = append(errorList, MsgUnexpected)
+				codeList = append(codeList, CodeInvalidRecoveryQuestion)
 			}
 		}
 	}
 
-	RenderErrors(res, responseStatus, errorList)
+	RenderErrors(res, responseStatus, codeList, errorList)
 }

@@ -9,16 +9,19 @@ import (
 func RenderError(resp render.Render, code, status int, message string) {
 	resp.JSON(status, map[string]interface{}{
 		"error":   true,
+		"single":  true,
 		"code":    code,
 		"message": message,
 	})
 }
 
 // RenderErrors renders a json response with an array of errors
-func RenderErrors(resp render.Render, status int, messages []string) {
+func RenderErrors(resp render.Render, status int, codes []int, messages []string) {
 	resp.JSON(status, map[string]interface{}{
 		"error":    true,
+		"single":   false,
 		"messages": messages,
+		"codes":    codes,
 	})
 }
 
