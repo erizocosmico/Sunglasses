@@ -61,6 +61,14 @@ func BlockHandler(r *http.Request, conn *Connection, res render.Render, s sessio
 			userToID := bson.ObjectIdHex(userTo)
 
 			if toUser := UserExists(conn, userToID); toUser != nil {
+				if UserIsBlocked(user.ID, userToID, conn) {
+					res.JSON(200, map[string]interface{}{
+						"error":   false,
+						"message": "User was already blocked",
+					})
+					return
+				}
+
 				if err := BlockUser(user.ID, userToID, conn); err != nil {
 					RenderError(res, CodeUnexpected, 500, MsgUnexpected)
 					return
@@ -92,6 +100,14 @@ func Unblock(r *http.Request, conn *Connection, res render.Render, s sessions.Se
 			userToID := bson.ObjectIdHex(userTo)
 
 			if toUser := UserExists(conn, userToID); toUser != nil {
+				if !UserIsBlocked(user.ID, userToID, conn) {
+					res.JSON(200, map[string]interface{}{
+						"error":   false,
+						"message": "User was not blocked",
+					})
+					return
+				}
+
 				if err := UnblockUser(user.ID, userToID, conn); err != nil {
 					RenderError(res, CodeUnexpected, 500, MsgUnexpected)
 					return
@@ -102,10 +118,10 @@ func Unblock(r *http.Request, conn *Connection, res render.Render, s sessions.Se
 					"message": "User unblocked successfully",
 				})
 				return
-			} else {
-				RenderError(res, CodeUserDoesNotExist, 404, MsgUserDoesNotExist)
-				return
 			}
+
+			RenderError(res, CodeUserDoesNotExist, 404, MsgUserDoesNotExist)
+			return
 		}
 	}
 
