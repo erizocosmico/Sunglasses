@@ -13,6 +13,7 @@ type Config struct {
 	StaticContentPath string `json:"static_content_path"`
 	RedisAddress      string `json:"redis_address"`
 	SecretKey         string `json:"secret_key"`
+	SessionName string `json:"session_name"`
 	DatabaseUrl       string `json:"database_url"`
 	DatabaseName      string `json:"database_name"`
 	Debug             bool   `json:"debug"`

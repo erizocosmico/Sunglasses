@@ -3,6 +3,7 @@ package mask
 import (
 	"github.com/codegangsta/martini"
 	"github.com/martini-contrib/render"
+	"github.com/martini-contrib/sessions"
 )
 
 // NewApp instantiates the application
@@ -26,6 +27,8 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 	m.Map(config)
 	m.Map(conn)
 	m.Use(render.Renderer())
+	store := sessions.NewCookieStore([]byte(config.SecretKey))
+	m.Use(sessions.Sessions(config.SessionName, store))
 
 	// Add routes
 

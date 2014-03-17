@@ -6,5 +6,6 @@
     "database_url": "127.0.0.1:27017",
     "redis_address": ":6379",
     "static_content_path": "/path/to/static/content",
-    "secret_key": "my fancy secret key"
+    "secret_key": "my fancy secret key",
+    "session_name": "mask_test"
 }
