@@ -2,6 +2,7 @@ package mask
 
 import (
 	"encoding/json"
+	"fmt"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"net/http"
@@ -327,4 +328,130 @@ func TestUnblock(t *testing.T) {
 				})
 		})
 	})
+}
+
+func TestListBlocks(t *testing.T) {
+	conn := getConnection()
+	users := make([]bson.ObjectId, 0, 24)
+	user, token := createRequestUser(conn)
+
+	for i := 0; i < 24; i++ {
+		u := NewUser()
+		u.Username = fmt.Sprintf("test_%i", i)
+		if err := u.Save(conn); err != nil {
+			panic(err)
+		}
+		u.Settings.Invisible = false
+		u.Settings.DisplayAvatarBeforeApproval = true
+		if err := u.Save(conn); err != nil {
+			panic(err)
+		}
+		users = append(users, u.ID)
+	}
+
+	for _, uid := range users {
+		if err := BlockUser(user.ID, uid, conn); err != nil {
+			panic(err)
+		}
+	}
+
+	Convey("Listing blocked users", t, func() {
+		Convey("When invalid user is provided", func() {
+			testGetHandler(ListBlocks, func(r *http.Request) {}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 403)
+					So(errResp.Code, ShouldEqual, CodeUnauthorized)
+					So(errResp.Message, ShouldEqual, MsgUnauthorized)
+				})
+		})
+
+		Convey("When no count params are passed", func() {
+			testGetHandler(ListBlocks, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(24))
+					So(len(errResp["blocks"].([]interface{})), ShouldEqual, 24)
+				})
+		})
+
+		Convey("When count param is passed", func() {
+			testGetHandler(ListBlocks, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "10")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(10))
+					So(len(errResp["blocks"].([]interface{})), ShouldEqual, 10)
+				})
+		})
+
+		Convey("When count param and offset are passed", func() {
+			testGetHandler(ListBlocks, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "10")
+				r.Form.Add("offset", "15")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(9))
+					So(len(errResp["blocks"].([]interface{})), ShouldEqual, 9)
+				})
+		})
+
+		Convey("When invalid count param are passed", func() {
+			testGetHandler(ListBlocks, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "2")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(24))
+					So(len(errResp["blocks"].([]interface{})), ShouldEqual, 24)
+				})
+		})
+	})
+
+	for _, u := range users {
+		if err := UnblockUser(user.ID, u, conn); err != nil {
+			panic(err)
+		}
+	}
+
+	user.Remove(conn)
+	token.Remove(conn)
+	if _, err := conn.Db.C("users").RemoveAll(bson.M{"_id": bson.M{"$in": users}}); err != nil {
+		panic(err)
+	}
 }

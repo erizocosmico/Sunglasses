@@ -127,3 +127,55 @@ func Unblock(r *http.Request, conn *Connection, res render.Render, s sessions.Se
 
 	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
 }
+
+// ListBlocks retrieves a list with the users the user has blocked
+func ListBlocks(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+	user := GetRequestUser(r, conn, s)
+	count, offset := ListCountParams(r)
+	var result Block
+	blocks := make([]Block, 0)
+
+	if user != nil {
+		cursor := conn.Db.C("blocks").Find(bson.M{"user_from": user.ID}).Limit(count).Skip(offset).Iter()
+		for cursor.Next(&result) {
+			blocks = append(blocks, result)
+		}
+
+		if err := cursor.Close(); err != nil {
+			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			return
+		}
+
+		users := make([]bson.ObjectId, 0, len(blocks))
+		for _, b := range blocks {
+			if b.To.Hex() != "" {
+				users = append(users, b.To)
+			}
+		}
+
+		usersData := GetUsersData(users, false, conn)
+		if usersData == nil {
+			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			return
+		}
+
+		blocksResponse := make([]map[string]interface{}, 0, len(usersData))
+		for _, b := range blocks {
+			if v, ok := usersData[b.To]; ok {
+				blocksResponse = append(blocksResponse, map[string]interface{}{
+					"time":         b.Time,
+					"user_blocked": v,
+				})
+			}
+		}
+
+		res.JSON(200, map[string]interface{}{
+			"error":  false,
+			"blocks": blocksResponse,
+			"count":  len(blocksResponse),
+		})
+		return
+	}
+
+	RenderError(res, CodeUnauthorized, 403, MsgUnauthorized)
+}

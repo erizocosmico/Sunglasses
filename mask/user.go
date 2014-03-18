@@ -46,19 +46,19 @@ const (
 type User struct {
 	ID                bson.ObjectId `json:"id,omitempty" bson:"_id"`
 	Username          string        `json:"username" bson:"username"`
-	UsernameLower     string        `json:"username_lower" bson:"username_lower"`
+	UsernameLower     string        `json:"username_lower,omitempty" bson:"username_lower"`
 	Password          string        `json:"-" bson:"password"`
 	EMail             string        `json:"-" bson:"email,omitempty"`
 	PublicName        string        `json:"public_name,omitempty" bson:"public_name,omitempty"`
 	PrivateName       string        `json:"private_name,omitempty" bson:"private_name,omitempty"`
-	Role              UserRole      `json:"role" bson:"role"`
+	Role              UserRole      `json:"role,omitempty" bson:"role"`
 	PreferredLanguage string        `json:"preferred_lang,omitempty" bson:"preferred_lang,omitempty"`
 	Timezone          int           `json:"timezone,omitempty" bson:"timezone,omitempty"`
 	Avatar            string        `json:"avatar,omitempty" bson:"avatar,omitempty"`
 	PublicAvatar      string        `json:"public_avatar,omitempty" bson:"public_avatar,omitempty"`
-	Active            bool          `json:"active" bson:"active"`
-	Info              UserInfo      `json:"info" bson:"info"`
-	Settings          UserSettings  `json:"settings" bson:"settings"`
+	Active            bool          `json:"active,omitempty" bson:"active"`
+	Info              UserInfo      `json:"info,omitempty" bson:"info"`
+	Settings          UserSettings  `json:"settings,omitempty" bson:"settings"`
 }
 
 // UserInfo stores all personal information about the user
@@ -230,4 +230,36 @@ func (us UserSettings) GetPrivacySettings(objectType ObjectType) PrivacySettings
 			return us.DefaultStatusPrivacy
 		}
 	}
+}
+
+// GetUserData retrieves basic data from users for responses
+func GetUsersData(ids []bson.ObjectId, privateAccess bool, conn *Connection) map[bson.ObjectId]User {
+	var u User
+	users := make(map[bson.ObjectId]User)
+	cursor := conn.Db.C("users").Find(bson.M{"_id": bson.M{"$in": ids}}).Iter()
+
+	for cursor.Next(&u) {
+		if !u.Settings.Invisible || privateAccess {
+			user := User{
+				ID:           u.ID,
+				Username:     u.Username,
+				PublicAvatar: u.PublicAvatar,
+				PublicName:   u.PublicName,
+			}
+
+			if u.Settings.DisplayAvatarBeforeApproval || privateAccess {
+				user.Avatar = u.Avatar
+				user.PrivateName = u.PrivateName
+			}
+
+			users[u.ID] = user
+		}
+	}
+
+	if err := cursor.Close(); err != nil {
+		panic(err)
+		return nil
+	}
+
+	return users
 }
