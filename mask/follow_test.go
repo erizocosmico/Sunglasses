@@ -2,12 +2,14 @@ package mask
 
 import (
 	"encoding/json"
+	"fmt"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 )
 
 func TestFollowUser(t *testing.T) {
@@ -572,4 +574,386 @@ func TestUnfollow(t *testing.T) {
 				})
 		})
 	})
+}
+
+func TestListFollowers(t *testing.T) {
+	conn := getConnection()
+	users := make([]bson.ObjectId, 0, 24)
+	user, token := createRequestUser(conn)
+
+	for i := 0; i < 24; i++ {
+		u := NewUser()
+		u.Username = fmt.Sprintf("test_%i", i)
+		if err := u.Save(conn); err != nil {
+			panic(err)
+		}
+		u.Settings.Invisible = false
+		u.Settings.DisplayAvatarBeforeApproval = true
+		if err := u.Save(conn); err != nil {
+			panic(err)
+		}
+		users = append(users, u.ID)
+	}
+
+	for _, uid := range users {
+		if err := FollowUser(uid, user.ID, conn); err != nil {
+			panic(err)
+		}
+	}
+
+	Convey("Listing followers", t, func() {
+		Convey("When invalid user is provided", func() {
+			testGetHandler(ListFollowers, func(r *http.Request) {}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 403)
+					So(errResp.Code, ShouldEqual, CodeUnauthorized)
+					So(errResp.Message, ShouldEqual, MsgUnauthorized)
+				})
+		})
+
+		Convey("When no count params are passed", func() {
+			testGetHandler(ListFollowers, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(24))
+					So(len(errResp["followers"].([]interface{})), ShouldEqual, 24)
+				})
+		})
+
+		Convey("When count param is passed", func() {
+			testGetHandler(ListFollowers, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "10")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(10))
+					So(len(errResp["followers"].([]interface{})), ShouldEqual, 10)
+				})
+		})
+
+		Convey("When count param and offset are passed", func() {
+			testGetHandler(ListFollowers, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "10")
+				r.Form.Add("offset", "15")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(9))
+					So(len(errResp["followers"].([]interface{})), ShouldEqual, 9)
+				})
+		})
+
+		Convey("When invalid count params are passed", func() {
+			testGetHandler(ListFollowers, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "2")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(24))
+					So(len(errResp["followers"].([]interface{})), ShouldEqual, 24)
+				})
+		})
+	})
+
+	for _, u := range users {
+		if err := UnfollowUser(u, user.ID, conn); err != nil {
+			panic(err)
+		}
+	}
+
+	user.Remove(conn)
+	token.Remove(conn)
+	if _, err := conn.Db.C("users").RemoveAll(bson.M{"_id": bson.M{"$in": users}}); err != nil {
+		panic(err)
+	}
+}
+
+func TestListFollowing(t *testing.T) {
+	conn := getConnection()
+	users := make([]bson.ObjectId, 0, 24)
+	user, token := createRequestUser(conn)
+
+	for i := 0; i < 24; i++ {
+		u := NewUser()
+		u.Username = fmt.Sprintf("test_%i", i)
+		if err := u.Save(conn); err != nil {
+			panic(err)
+		}
+		u.Settings.Invisible = false
+		u.Settings.DisplayAvatarBeforeApproval = true
+		if err := u.Save(conn); err != nil {
+			panic(err)
+		}
+		users = append(users, u.ID)
+	}
+
+	for _, uid := range users {
+		if err := FollowUser(user.ID, uid, conn); err != nil {
+			panic(err)
+		}
+	}
+
+	Convey("Listing followings", t, func() {
+		Convey("When invalid user is provided", func() {
+			testGetHandler(ListFollowing, func(r *http.Request) {}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 403)
+					So(errResp.Code, ShouldEqual, CodeUnauthorized)
+					So(errResp.Message, ShouldEqual, MsgUnauthorized)
+				})
+		})
+
+		Convey("When no count params are passed", func() {
+			testGetHandler(ListFollowing, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(24))
+					So(len(errResp["followings"].([]interface{})), ShouldEqual, 24)
+				})
+		})
+
+		Convey("When count param is passed", func() {
+			testGetHandler(ListFollowing, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "10")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(10))
+					So(len(errResp["followings"].([]interface{})), ShouldEqual, 10)
+				})
+		})
+
+		Convey("When count param and offset are passed", func() {
+			testGetHandler(ListFollowing, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "10")
+				r.Form.Add("offset", "15")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(9))
+					So(len(errResp["followings"].([]interface{})), ShouldEqual, 9)
+				})
+		})
+
+		Convey("When invalid count params are passed", func() {
+			testGetHandler(ListFollowing, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "2")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(24))
+					So(len(errResp["followings"].([]interface{})), ShouldEqual, 24)
+				})
+		})
+	})
+
+	for _, u := range users {
+		if err := UnfollowUser(user.ID, u, conn); err != nil {
+			panic(err)
+		}
+	}
+
+	user.Remove(conn)
+	token.Remove(conn)
+	if _, err := conn.Db.C("users").RemoveAll(bson.M{"_id": bson.M{"$in": users}}); err != nil {
+		panic(err)
+	}
+}
+
+func TestListFollowRequests(t *testing.T) {
+	conn := getConnection()
+	users := make([]bson.ObjectId, 0, 24)
+	user, token := createRequestUser(conn)
+
+	for i := 0; i < 24; i++ {
+		u := NewUser()
+		u.Username = fmt.Sprintf("test_%i", i)
+		if err := u.Save(conn); err != nil {
+			panic(err)
+		}
+		u.Settings.Invisible = false
+		u.Settings.DisplayAvatarBeforeApproval = true
+		if err := u.Save(conn); err != nil {
+			panic(err)
+		}
+		users = append(users, u.ID)
+	}
+
+	for _, uid := range users {
+		fr := new(FollowRequest)
+		fr.From = uid
+		fr.To = user.ID
+		fr.Msg = "Message"
+		fr.Time = float64(time.Now().Unix())
+
+		if err := fr.Save(conn); err == nil {
+			panic(err)
+		}
+	}
+
+	Convey("Listing follow requests", t, func() {
+		Convey("When invalid user is provided", func() {
+			testGetHandler(ListFollowRequests, func(r *http.Request) {}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 403)
+					So(errResp.Code, ShouldEqual, CodeUnauthorized)
+					So(errResp.Message, ShouldEqual, MsgUnauthorized)
+				})
+		})
+
+		Convey("When no count params are passed", func() {
+			testGetHandler(ListFollowRequests, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(24))
+					So(len(errResp["follow_requests"].([]interface{})), ShouldEqual, 24)
+				})
+		})
+
+		Convey("When count param is passed", func() {
+			testGetHandler(ListFollowRequests, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "10")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(10))
+					So(len(errResp["follow_requests"].([]interface{})), ShouldEqual, 10)
+				})
+		})
+
+		Convey("When count param and offset are passed", func() {
+			testGetHandler(ListFollowRequests, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "10")
+				r.Form.Add("offset", "15")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(9))
+					So(len(errResp["follow_requests"].([]interface{})), ShouldEqual, 9)
+				})
+		})
+
+		Convey("When invalid count params are passed", func() {
+			testGetHandler(ListFollowRequests, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.ID.Hex())
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "2")
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(24))
+					So(len(errResp["follow_requests"].([]interface{})), ShouldEqual, 24)
+				})
+		})
+	})
+
+	if _, err := conn.Db.C("requests").RemoveAll(bson.M{"user_to": user.ID}); err != nil {
+		panic(err)
+	}
+
+	user.Remove(conn)
+	token.Remove(conn)
+	if _, err := conn.Db.C("users").RemoveAll(bson.M{"_id": bson.M{"$in": users}}); err != nil {
+		panic(err)
+	}
 }

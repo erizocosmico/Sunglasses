@@ -423,7 +423,7 @@ func TestListBlocks(t *testing.T) {
 				})
 		})
 
-		Convey("When invalid count param are passed", func() {
+		Convey("When invalid count params are passed", func() {
 			testGetHandler(ListBlocks, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.ID.Hex())
 				if r.Form == nil {

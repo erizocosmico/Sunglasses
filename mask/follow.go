@@ -11,8 +11,8 @@ import (
 // FollowRequest model
 type FollowRequest struct {
 	ID   bson.ObjectId `json:"id" bson:"_id"`
-	From bson.ObjectId `json:"id" bson:"from_id"`
-	To   bson.ObjectId `json:"id" bson:"to_id"`
+	From bson.ObjectId `json:"user_from" bson:"user_from"`
+	To   bson.ObjectId `json:"user_to" bson:"user_to"`
 	Msg  string        `json:"msg,omitempty" bson:"msg,omitempty"`
 	Time float64       `json:"time" bson:"time"`
 }
@@ -237,4 +237,141 @@ func Unfollow(r *http.Request, conn *Connection, res render.Render, s sessions.S
 	}
 
 	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+}
+
+// ListFollowers retrieves a list with the user's followers
+func ListFollowers(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+	listFollows(r, conn, res, s, true)
+}
+
+// ListFollowing retrieves a list with the users followed by the user
+func ListFollowing(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+	listFollows(r, conn, res, s, false)
+}
+
+func listFollows(r *http.Request, conn *Connection, res render.Render, s sessions.Session, listFollowers bool) {
+	user := GetRequestUser(r, conn, s)
+	count, offset := ListCountParams(r)
+	var result Follow
+	follows := make([]Follow, 0)
+
+	if user != nil {
+		var key, outputKey string
+		if listFollowers {
+			key = "user_to"
+			outputKey = "followers"
+		} else {
+			key = "user_from"
+			outputKey = "followings"
+		}
+
+		cursor := conn.Db.C("follows").Find(bson.M{key: user.ID}).Limit(count).Skip(offset).Iter()
+		for cursor.Next(&result) {
+			follows = append(follows, result)
+		}
+
+		if err := cursor.Close(); err != nil {
+			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			return
+		}
+
+		users := make([]bson.ObjectId, 0, len(follows))
+		for _, f := range follows {
+			if listFollowers {
+				if f.From.Hex() != "" {
+					users = append(users, f.From)
+				}
+			} else {
+				if f.To.Hex() != "" {
+					users = append(users, f.To)
+				}
+			}
+
+		}
+
+		usersData := GetUsersData(users, false, conn)
+		if usersData == nil {
+			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			return
+		}
+
+		followsResponse := make([]map[string]interface{}, 0, len(usersData))
+		for _, f := range follows {
+			var u bson.ObjectId
+			if listFollowers {
+				u = f.From
+			} else {
+				u = f.To
+			}
+
+			if v, ok := usersData[u]; ok {
+				followsResponse = append(followsResponse, map[string]interface{}{
+					"time": f.Time,
+					"user": v,
+				})
+			}
+		}
+
+		res.JSON(200, map[string]interface{}{
+			"error":   false,
+			outputKey: followsResponse,
+			"count":   len(followsResponse),
+		})
+		return
+	}
+
+	RenderError(res, CodeUnauthorized, 403, MsgUnauthorized)
+}
+
+// ListFollowRequests returns all the user's follow requests
+func ListFollowRequests(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+	user := GetRequestUser(r, conn, s)
+	count, offset := ListCountParams(r)
+	var result FollowRequest
+	requests := make([]FollowRequest, 0)
+
+	if user != nil {
+		cursor := conn.Db.C("requests").Find(bson.M{"user_to": user.ID}).Limit(count).Skip(offset).Iter()
+		for cursor.Next(&result) {
+			requests = append(requests, result)
+		}
+
+		if err := cursor.Close(); err != nil {
+			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			return
+		}
+
+		users := make([]bson.ObjectId, 0, len(requests))
+		for _, f := range requests {
+			if f.From.Hex() != "" {
+				users = append(users, f.From)
+			}
+		}
+
+		usersData := GetUsersData(users, false, conn)
+		if usersData == nil {
+			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			return
+		}
+
+		requestsResponse := make([]map[string]interface{}, 0, len(usersData))
+		for _, f := range requests {
+			if v, ok := usersData[f.From]; ok {
+				requestsResponse = append(requestsResponse, map[string]interface{}{
+					"time":    f.Time,
+					"user":    v,
+					"message": f.Msg,
+				})
+			}
+		}
+
+		res.JSON(200, map[string]interface{}{
+			"error":           false,
+			"follow_requests": requestsResponse,
+			"count":           len(requestsResponse),
+		})
+		return
+	}
+
+	RenderError(res, CodeUnauthorized, 403, MsgUnauthorized)
 }
