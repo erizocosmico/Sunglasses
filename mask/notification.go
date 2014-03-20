@@ -15,10 +15,9 @@ type NotificationType int
 type Notification struct {
 	ID           bson.ObjectId    `json:"id" bson:"_id"`
 	Type         NotificationType `json:"notification_type" bson:"notification_type"`
-	PostID       bson.ObjectId    `json:"-" bson:"post_id,omitempty"`
+	PostID       bson.ObjectId    `json:"post_id" bson:"post_id,omitempty"`
 	User         bson.ObjectId    `json:"user_id" bson:"user_id"`
 	UserActionID bson.ObjectId    `json:"-" bson:"user_action_id,omitempty"`
-	Post         Post             `json:"post" bson:"-"`
 	UserAction   User             `json:"user_action" bson:"-"`
 	Time         float64          `json:"time" bson:"time"`
 	Read         bool             `json:"read" bson:"read"`
@@ -116,4 +115,52 @@ func MarkNotificationRead(r *http.Request, conn *Connection, res render.Render, 
 	}
 
 	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+}
+
+// ListNotifications list all the user's notifications
+func ListNotifications(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+	user := GetRequestUser(r, conn, s)
+	count, offset := ListCountParams(r)
+	var result Notification
+	notifications := make([]Notification, 0, count)
+
+	if user != nil {
+		cursor := conn.Db.C("notifications").Find(bson.M{"user_id": user.ID}).Limit(count).Skip(offset).Iter()
+		for cursor.Next(&result) {
+			notifications = append(notifications, result)
+		}
+
+		if err := cursor.Close(); err != nil {
+			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			return
+		}
+
+		users := make([]bson.ObjectId, 0, len(notifications))
+		for _, n := range notifications {
+			if n.UserActionID.Hex() != "" {
+				users = append(users, n.UserActionID)
+			}
+		}
+
+		usersData := GetUsersData(users, false, conn)
+		if usersData == nil {
+			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			return
+		}
+
+		for i, n := range notifications {
+			if u, ok := usersData[n]; ok {
+				notifications[i].UserAction = u
+			}
+		}
+
+		res.JSON(200, map[string]interface{}{
+			"error":   false,
+			"notifications": notifications,
+			"count":   len(notifications),
+		})
+		return
+	}
+
+	RenderError(res, CodeUnauthorized, 403, MsgUnauthorized)
 }
