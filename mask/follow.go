@@ -253,7 +253,7 @@ func listFollows(r *http.Request, conn *Connection, res render.Render, s session
 	user := GetRequestUser(r, conn, s)
 	count, offset := ListCountParams(r)
 	var result Follow
-	follows := make([]Follow, 0)
+	follows := make([]Follow, 0, count)
 
 	if user != nil {
 		var key, outputKey string

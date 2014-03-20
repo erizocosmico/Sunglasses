@@ -165,7 +165,7 @@ func getPostPrivacy(postType ObjectType, r *http.Request, u *User) PrivacySettin
 		} else {
 			us, ok := r.PostForm["privacy_users"]
 			if ok && len(us) > 0 {
-				p.Users = make([]bson.ObjectId, len(us))
+				p.Users = make([]bson.ObjectId, 0, len(us))
 				for _, u := range us {
 					if bson.IsObjectIdHex(u) {
 						p.Users = append(p.Users, bson.ObjectIdHex(u))

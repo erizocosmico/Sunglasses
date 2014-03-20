@@ -133,7 +133,7 @@ func ListBlocks(r *http.Request, conn *Connection, res render.Render, s sessions
 	user := GetRequestUser(r, conn, s)
 	count, offset := ListCountParams(r)
 	var result Block
-	blocks := make([]Block, 0)
+	blocks := make([]Block, 0, count)
 
 	if user != nil {
 		cursor := conn.Db.C("blocks").Find(bson.M{"user_from": user.ID}).Limit(count).Skip(offset).Iter()
