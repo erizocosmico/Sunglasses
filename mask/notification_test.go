@@ -2,13 +2,13 @@ package mask
 
 import (
 	"encoding/json"
+	"fmt"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
-	"fmt"
 )
 
 func TestSendNotification(t *testing.T) {
