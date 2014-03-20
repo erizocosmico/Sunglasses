@@ -583,7 +583,7 @@ func TestListFollowers(t *testing.T) {
 
 	for i := 0; i < 24; i++ {
 		u := NewUser()
-		u.Username = fmt.Sprintf("test_%i", i)
+		u.Username = fmt.Sprintf("test_%d", i)
 		if err := u.Save(conn); err != nil {
 			panic(err)
 		}
@@ -709,7 +709,7 @@ func TestListFollowing(t *testing.T) {
 
 	for i := 0; i < 24; i++ {
 		u := NewUser()
-		u.Username = fmt.Sprintf("test_%i", i)
+		u.Username = fmt.Sprintf("test_%d", i)
 		if err := u.Save(conn); err != nil {
 			panic(err)
 		}
@@ -835,7 +835,7 @@ func TestListFollowRequests(t *testing.T) {
 
 	for i := 0; i < 24; i++ {
 		u := NewUser()
-		u.Username = fmt.Sprintf("test_%i", i)
+		u.Username = fmt.Sprintf("test_%d", i)
 		if err := u.Save(conn); err != nil {
 			panic(err)
 		}
@@ -854,7 +854,7 @@ func TestListFollowRequests(t *testing.T) {
 		fr.Msg = "Message"
 		fr.Time = float64(time.Now().Unix())
 
-		if err := fr.Save(conn); err == nil {
+		if err := fr.Save(conn); err != nil {
 			panic(err)
 		}
 	}

@@ -337,7 +337,7 @@ func TestListBlocks(t *testing.T) {
 
 	for i := 0; i < 24; i++ {
 		u := NewUser()
-		u.Username = fmt.Sprintf("test_%i", i)
+		u.Username = fmt.Sprintf("test_%d", i)
 		if err := u.Save(conn); err != nil {
 			panic(err)
 		}

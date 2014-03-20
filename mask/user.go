@@ -257,7 +257,6 @@ func GetUsersData(ids []bson.ObjectId, privateAccess bool, conn *Connection) map
 	}
 
 	if err := cursor.Close(); err != nil {
-		panic(err)
 		return nil
 	}
 

@@ -149,15 +149,15 @@ func ListNotifications(r *http.Request, conn *Connection, res render.Render, s s
 		}
 
 		for i, n := range notifications {
-			if u, ok := usersData[n]; ok {
+			if u, ok := usersData[n.UserActionID]; ok {
 				notifications[i].UserAction = u
 			}
 		}
 
 		res.JSON(200, map[string]interface{}{
-			"error":   false,
+			"error":         false,
 			"notifications": notifications,
-			"count":   len(notifications),
+			"count":         len(notifications),
 		})
 		return
 	}
