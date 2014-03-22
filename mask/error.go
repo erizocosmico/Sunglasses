@@ -2,10 +2,11 @@ package mask
 
 const (
 	// Misc codes
-	CodeUnexpected   = 10
-	CodeInvalidData  = 11
-	CodeUnauthorized = 12
-	CodeNotFound     = 13
+	CodeUnexpected       = 10
+	CodeInvalidData      = 11
+	CodeUnauthorized     = 12
+	CodeNotFound         = 13
+	CodeInvalidSignature = 14
 
 	// Auth codes
 	CodeInvalidAccessToken        = 1
@@ -26,10 +27,11 @@ const (
 	CodePasswordMatch             = 29
 
 	// Misc messages
-	MsgUnexpected   = "Unexpected error occurred"
-	MsgInvalidData  = "Invalid data provided"
-	MsgUnauthorized = "You are not authorized to access this resource"
-	MsgNotFound     = "The resource was not found"
+	MsgUnexpected       = "Unexpected error occurred"
+	MsgInvalidData      = "Invalid data provided"
+	MsgUnauthorized     = "You are not authorized to access this resource"
+	MsgNotFound         = "The resource was not found"
+	MsgInvalidSignature = "Invalid signature"
 
 	// Auth messages
 	MsgInvalidAccessToken        = "Invalid access token provided"

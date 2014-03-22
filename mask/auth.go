@@ -1,10 +1,13 @@
 package mask
 
 import (
+	"fmt"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/sessions"
 	"labix.org/v2/mgo/bson"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -34,6 +37,11 @@ type Token struct {
 
 // ValidateAccessToken validates the supplied access token
 func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
+	if !RequestIsValid(req, conn, s, true) {
+		RenderError(resp, CodeInvalidSignature, 400, MsgInvalidSignature)
+		return
+	}
+
 	tokenID, _ := GetRequestToken(req, true, s)
 
 	var token Token
@@ -50,6 +58,11 @@ func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render
 
 // ValidateUserToken validates the supplied user token
 func ValidateUserToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
+	if !RequestIsValid(req, conn, s, false) {
+		RenderError(resp, CodeInvalidSignature, 400, MsgInvalidSignature)
+		return
+	}
+
 	tokenID, _ := GetRequestToken(req, false, s)
 
 	var token Token
@@ -216,6 +229,45 @@ func GetRequestUser(r *http.Request, conn *Connection, s sessions.Session) *User
 	}
 
 	return nil
+}
+
+// RequestIsValid returns if the current request signature is valid and thus is a valid request
+func RequestIsValid(r *http.Request, conn *Connection, s sessions.Session, isAccessKey bool) bool {
+	signature := r.FormValue("signature")
+	URL := r.URL
+
+	if signature != "" {
+		timestamp, err := strconv.ParseInt(r.FormValue("timestamp"), 10, 64)
+		if err != nil || time.Now().Unix()-timestamp > 300 {
+			return false
+		}
+
+		isAPIRequest := r.Header.Get("X-User-Token") != "" || isAccessKey
+		key := r.FormValue("api_key")
+
+		if isAPIRequest {
+			return validateAPISignature(conn, signature, timestamp, key, URL)
+		} else {
+			return validateWebSignature(signature, timestamp, s.Get("csrf_key").(string), URL)
+		}
+	}
+
+	return false
+}
+
+func validateAPISignature(conn *Connection, signature string, timestamp int64, key string, URL *url.URL) bool {
+	/* TODO Application not implemented yet
+	var app Application
+	if err := conn.Db.C("applications").Find(bson.M{"public_key":Hash(key), "active":true}).One(&app); err != nil {
+		return false
+	}
+	privateKey := app.PrivateKey*/
+	privateKey := ""
+	return signature == Hash(URL.Path+privateKey+fmt.Sprint(timestamp))
+}
+
+func validateWebSignature(signature string, timestamp int64, csrfKey string, URL *url.URL) bool {
+	return signature == Hash(URL.Path+csrfKey+fmt.Sprint(timestamp))
 }
 
 // Save inserts the Token instance if it hasn't been created yet or updates it if it has

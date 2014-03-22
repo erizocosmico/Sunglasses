@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// TODO refactor
 func TestAccessTokenValidation(t *testing.T) {
 	conn := getConnection()
 	token := new(Token)
@@ -55,6 +56,7 @@ func TestAccessTokenValidation(t *testing.T) {
 	})
 }
 
+// TODO refactor
 func TestUserTokenValidation(t *testing.T) {
 	conn := getConnection()
 	Convey("Subject: Testing user token validation", t, func() {

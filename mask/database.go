@@ -58,7 +58,7 @@ func createIndexes(conn *Connection) error {
 		"posts":         []string{"user_id"},
 		"albums":        []string{"user_id"},
 		"notifications": []string{"user_id"},
-		"tokens":        []string{"user_id"},
+		"tokens":        []string{"user_id", "hash"},
 		"requests":      []string{"user_to", "user_from"},
 		"follows":       []string{"user_to", "user_from"},
 		"reports":       []string{"user_id", "post_id"},
