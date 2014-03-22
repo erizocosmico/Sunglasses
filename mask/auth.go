@@ -20,7 +20,7 @@ const (
 
 	// Expiration times
 	AccessTokenExpirationHours = 1
-	UserTokenExpirationDays    = 15
+	UserTokenExpirationDays    = 30
 )
 
 // Token represents a token which can be an access token, an user token or a session token

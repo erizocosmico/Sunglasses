@@ -13,10 +13,14 @@ type Config struct {
 	StaticContentPath string `json:"static_content_path"`
 	RedisAddress      string `json:"redis_address"`
 	SecretKey         string `json:"secret_key"`
+	EncriptionKey     string `json:"encryption_key"`
 	SessionName       string `json:"session_name"`
 	DatabaseUrl       string `json:"database_url"`
 	DatabaseName      string `json:"database_name"`
 	Debug             bool   `json:"debug"`
+	SecureCookies     bool   `json:"secure_cookies"`
+	CookiesDomain     string `json:"cookies_domain"`
+	CookiesPath       string `json:"cookies_path"`
 }
 
 // NewConfig creates a new config struct

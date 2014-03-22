@@ -27,7 +27,14 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 	m.Map(config)
 	m.Map(conn)
 	m.Use(render.Renderer())
-	store := sessions.NewCookieStore([]byte(config.SecretKey))
+	store := sessions.NewCookieStore([]byte(config.SecretKey), []byte(config.EncriptionKey))
+	store.Options(sessions.Options{
+		MaxAge:   UserTokenExpirationDays * 86400,
+		Secure:   config.SecureCookies,
+		Path:     config.CookiesPath,
+		Domain:   config.CookiesDomain,
+		HttpOnly: true,
+	})
 	m.Use(sessions.Sessions(config.SessionName, store))
 
 	// Add routes
