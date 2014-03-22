@@ -75,7 +75,7 @@ func TestMarkNotificationAsRead(t *testing.T) {
 
 		Convey("When no valid notification_id is given", func() {
 			testPutHandler(MarkNotificationRead, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/",
 				func(resp *httptest.ResponseRecorder) {
 					var errResp errorResponse
@@ -90,7 +90,7 @@ func TestMarkNotificationAsRead(t *testing.T) {
 
 		Convey("When a non existent notification_id is given", func() {
 			testPutHandler(MarkNotificationRead, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
@@ -109,7 +109,7 @@ func TestMarkNotificationAsRead(t *testing.T) {
 
 		Convey("When the notification doesn't belong to the user", func() {
 			testPutHandler(MarkNotificationRead, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
@@ -128,7 +128,7 @@ func TestMarkNotificationAsRead(t *testing.T) {
 
 		Convey("When everything is OK", func() {
 			testPutHandler(MarkNotificationRead, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
@@ -198,7 +198,7 @@ func TestListNotifications(t *testing.T) {
 
 		Convey("When no count params are passed", func() {
 			testGetHandler(ListNotifications, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/",
 				func(resp *httptest.ResponseRecorder) {
 					var errResp map[string]interface{}
@@ -213,7 +213,7 @@ func TestListNotifications(t *testing.T) {
 
 		Convey("When count param is passed", func() {
 			testGetHandler(ListNotifications, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.Form == nil {
 					r.Form = make(url.Values)
 				}
@@ -232,7 +232,7 @@ func TestListNotifications(t *testing.T) {
 
 		Convey("When count param and offset are passed", func() {
 			testGetHandler(ListNotifications, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.Form == nil {
 					r.Form = make(url.Values)
 				}
@@ -252,7 +252,7 @@ func TestListNotifications(t *testing.T) {
 
 		Convey("When invalid count params are passed", func() {
 			testGetHandler(ListNotifications, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.Form == nil {
 					r.Form = make(url.Values)
 				}

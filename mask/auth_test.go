@@ -33,7 +33,7 @@ func TestAccessTokenValidation(t *testing.T) {
 
 		Convey("When a valid access token is given", func() {
 			testGetHandler(ValidateAccessToken, func(request *http.Request) {
-				request.Header.Add("X-Access-Token", token.ID.Hex())
+				request.Header.Add("X-Access-Token", token.Hash)
 			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
 				So(response.Code, ShouldEqual, 200)
 			})
@@ -47,7 +47,7 @@ func TestAccessTokenValidation(t *testing.T) {
 			}
 
 			testGetHandler(ValidateAccessToken, func(request *http.Request) {
-				request.Header.Add("X-Access-Token", token.ID.Hex())
+				request.Header.Add("X-Access-Token", token.Hash)
 			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
 				So(response.Code, ShouldEqual, 403)
 			})
@@ -76,7 +76,7 @@ func TestUserTokenValidation(t *testing.T) {
 
 		Convey("When a valid user token is given the response code will be 200", func() {
 			testGetHandler(ValidateUserToken, func(request *http.Request) {
-				request.Header.Add("X-User-Token", token.ID.Hex())
+				request.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
 				So(response.Code, ShouldEqual, 200)
 			})
@@ -90,7 +90,7 @@ func TestUserTokenValidation(t *testing.T) {
 			}
 
 			testGetHandler(ValidateUserToken, func(request *http.Request) {
-				request.Header.Add("X-User-Token", token.ID.Hex())
+				request.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
 				So(response.Code, ShouldEqual, 403)
 			})
@@ -240,7 +240,7 @@ func TestDestroyUserToken(t *testing.T) {
 
 		Convey("When a valid user token is given the response status will be 200", func() {
 			testDeleteHandler(DestroyUserToken, func(request *http.Request) {
-				request.Header.Add("X-User-Token", token.ID.Hex())
+				request.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
 				So(response.Code, ShouldEqual, 200)
 			})

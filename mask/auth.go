@@ -27,6 +27,7 @@ const (
 type Token struct {
 	ID      bson.ObjectId `json:"id,omitempty" bson:"_id"`
 	Type    TokenType     `json:"type" bson:"type"`
+	Hash    string        `json:"hash" bson:"hash"`
 	Expires float64       `json:"expires" bson:"expires"`
 	UserID  bson.ObjectId `json:"user_id,omitempty" bson:"user_id,omitempty"`
 }
@@ -35,13 +36,8 @@ type Token struct {
 func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
 	tokenID, _ := GetRequestToken(req, true, s)
 
-	if !bson.IsObjectIdHex(tokenID) {
-		RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
-		return
-	}
-
 	var token Token
-	if err := conn.Db.C("tokens").FindId(bson.ObjectIdHex(tokenID)).One(&token); err != nil {
+	if err := conn.Db.C("tokens").Find(bson.M{"hash": tokenID}).One(&token); err != nil {
 		RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
 	} else {
 		if token.ID.Hex() == "" || token.Type != AccessToken || token.Expires < float64(time.Now().Unix()) {
@@ -56,13 +52,8 @@ func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render
 func ValidateUserToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
 	tokenID, _ := GetRequestToken(req, false, s)
 
-	if !bson.IsObjectIdHex(tokenID) {
-		RenderError(resp, CodeInvalidUserToken, 403, MsgInvalidUserToken)
-		return
-	}
-
 	var token Token
-	if err := conn.Db.C("tokens").FindId(bson.ObjectIdHex(tokenID)).One(&token); err != nil {
+	if err := conn.Db.C("tokens").Find(bson.M{"hash": tokenID}).One(&token); err != nil {
 		RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
 	} else {
 		if token.ID.Hex() == "" || token.Type != UserToken || token.Expires < float64(time.Now().Unix()) {
@@ -84,12 +75,13 @@ func eraseExpiredTokens(conn *Connection) error {
 func GetAccessToken(conn *Connection, resp render.Render) {
 	token := new(Token)
 	token.Expires = float64(time.Now().Add(AccessTokenExpirationHours * time.Hour).Unix())
+	token.Hash = NewRandomHash()
 	token.Type = AccessToken
 
 	if err := token.Save(conn); err == nil {
 		resp.JSON(200, map[string]interface{}{
 			"error":        false,
-			"access_token": token.ID,
+			"access_token": token.Hash,
 			"expires":      token.Expires,
 		})
 	} else {
@@ -117,6 +109,7 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render, s ses
 
 	if user.CheckPassword(password) && user.Active {
 		token := new(Token)
+		token.Hash = NewRandomHash()
 		token.Expires = float64(time.Now().AddDate(0, 0, UserTokenExpirationDays).Unix())
 		token.UserID = user.ID
 		if req.PostFormValue("token_type") == "session" {
@@ -129,15 +122,16 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render, s ses
 			RenderError(resp, CodeUnexpected, 500, MsgUnexpected)
 		} else {
 			if req.PostFormValue("token_type") == "session" {
-				s.Set("user_token", token.ID.Hex())
+				s.Set("user_token", token.Hash)
 
 				resp.JSON(200, map[string]interface{}{
-					"error": false,
+					"error":   false,
+					"expires": token.Expires,
 				})
 			} else {
 				resp.JSON(200, map[string]interface{}{
 					"error":      false,
-					"user_token": token.ID,
+					"user_token": token.Hash,
 					"expires":    token.Expires,
 				})
 			}
@@ -151,7 +145,7 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render, s ses
 func DestroyUserToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
 	tokenID, tokenType := GetRequestToken(req, false, s)
 	if valid, _ := IsTokenValid(tokenID, tokenType, conn); valid {
-		if err := conn.Db.C("tokens").RemoveId(bson.ObjectIdHex(tokenID)); err != nil {
+		if err := conn.Db.C("tokens").Remove(bson.M{"hash": tokenID}); err != nil {
 			RenderError(resp, CodeTokenNotFound, 404, MsgTokenNotFound)
 			return
 		} else {
@@ -172,8 +166,9 @@ func GetRequestToken(r *http.Request, isAccessToken bool, s sessions.Session) (s
 		token     string
 		tokenType TokenType
 	)
+
 	if isAccessToken {
-		return r.Header.Get("X-Access-Token"), AccessToken
+		return Hash(r.Header.Get("X-Access-Token")), AccessToken
 	}
 
 	token = r.Header.Get("X-User-Token")
@@ -188,18 +183,15 @@ func GetRequestToken(r *http.Request, isAccessToken bool, s sessions.Session) (s
 		}
 	}
 
-	return token, tokenType
+	return Hash(token), tokenType
 }
 
 // IsTokenValid returns if the provided token is a valid token
 func IsTokenValid(tokenID string, tokenType TokenType, conn *Connection) (bool, bson.ObjectId) {
 	var userID bson.ObjectId
-	if !bson.IsObjectIdHex(tokenID) {
-		return false, userID
-	}
 
 	var token Token
-	if err := conn.Db.C("tokens").FindId(bson.ObjectIdHex(tokenID)).One(&token); err == nil {
+	if err := conn.Db.C("tokens").Find(bson.M{"hash": tokenID}).One(&token); err == nil {
 		if token.Expires > float64(time.Now().Unix()) && token.Type == tokenType {
 			return true, token.UserID
 		}
@@ -228,13 +220,23 @@ func GetRequestUser(r *http.Request, conn *Connection, s sessions.Session) *User
 
 // Save inserts the Token instance if it hasn't been created yet or updates it if it has
 func (t *Token) Save(conn *Connection) error {
+	var hashTmp string
 	if t.ID.Hex() == "" {
 		t.ID = bson.NewObjectId()
 	}
 
+	if t.Hash == "" {
+		t.Hash = NewRandomHash()
+	}
+
+	hashTmp = t.Hash
+	t.Hash = Hash(t.Hash)
+
 	if err := conn.Save("tokens", t.ID, t); err != nil {
 		return err
 	}
+
+	t.Hash = hashTmp
 
 	return nil
 }

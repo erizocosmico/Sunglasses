@@ -2,9 +2,14 @@ package mask
 
 import (
 	"code.google.com/p/go.crypto/bcrypt"
+	"crypto/rand"
+	"crypto/sha512"
+	"encoding/base64"
+	"fmt"
 	"github.com/martini-contrib/render"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // RenderError renders an error message
@@ -56,4 +61,31 @@ func crypt(str string) (string, error) {
 	}
 
 	return string(bytes[:]), nil
+}
+
+func randomString(n int) string {
+	const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	var bytes = make([]byte, n)
+
+	rand.Read(bytes)
+	for i, b := range bytes {
+		bytes[i] = alphanum[b%byte(len(alphanum))]
+	}
+
+	return string(bytes)
+}
+
+// NewRandomHash returns a random hash
+func NewRandomHash() string {
+	s := randomString(25) + fmt.Sprint(time.Now().UnixNano())
+	hasher := sha512.New()
+	hasher.Write([]byte(s))
+	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+}
+
+// Hash hashes a string
+func Hash(h string) string {
+	hasher := sha512.New()
+	hasher.Write([]byte(h))
+	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 }

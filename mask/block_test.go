@@ -76,7 +76,7 @@ func TestBlockHandler(t *testing.T) {
 				token.Remove(conn)
 			}()
 			testPostHandler(BlockHandler, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/",
 				func(resp *httptest.ResponseRecorder) {
 					var errResp errorResponse
@@ -96,7 +96,7 @@ func TestBlockHandler(t *testing.T) {
 				token.Remove(conn)
 			}()
 			testPostHandler(BlockHandler, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
@@ -136,7 +136,7 @@ func TestBlockHandler(t *testing.T) {
 			}()
 
 			testPostHandler(BlockHandler, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
@@ -172,7 +172,7 @@ func TestBlockHandler(t *testing.T) {
 			}()
 
 			testPostHandler(BlockHandler, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
@@ -221,7 +221,7 @@ func TestUnblock(t *testing.T) {
 				token.Remove(conn)
 			}()
 			testPostHandler(Unblock, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/",
 				func(resp *httptest.ResponseRecorder) {
 					var errResp errorResponse
@@ -241,7 +241,7 @@ func TestUnblock(t *testing.T) {
 				token.Remove(conn)
 			}()
 			testPostHandler(Unblock, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
@@ -274,7 +274,7 @@ func TestUnblock(t *testing.T) {
 			}()
 
 			testPostHandler(Unblock, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
@@ -311,7 +311,7 @@ func TestUnblock(t *testing.T) {
 			}()
 
 			testPostHandler(Unblock, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
@@ -371,7 +371,7 @@ func TestListBlocks(t *testing.T) {
 
 		Convey("When no count params are passed", func() {
 			testGetHandler(ListBlocks, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/",
 				func(resp *httptest.ResponseRecorder) {
 					var errResp map[string]interface{}
@@ -386,7 +386,7 @@ func TestListBlocks(t *testing.T) {
 
 		Convey("When count param is passed", func() {
 			testGetHandler(ListBlocks, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.Form == nil {
 					r.Form = make(url.Values)
 				}
@@ -405,7 +405,7 @@ func TestListBlocks(t *testing.T) {
 
 		Convey("When count param and offset are passed", func() {
 			testGetHandler(ListBlocks, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.Form == nil {
 					r.Form = make(url.Values)
 				}
@@ -425,7 +425,7 @@ func TestListBlocks(t *testing.T) {
 
 		Convey("When invalid count params are passed", func() {
 			testGetHandler(ListBlocks, func(r *http.Request) {
-				r.Header.Add("X-User-Token", token.ID.Hex())
+				r.Header.Add("X-User-Token", token.Hash)
 				if r.Form == nil {
 					r.Form = make(url.Values)
 				}
