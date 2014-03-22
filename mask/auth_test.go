@@ -2,6 +2,7 @@ package mask
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/sessions"
 	. "github.com/smartystreets/goconvey/convey"
@@ -12,8 +13,13 @@ import (
 	"time"
 )
 
-// TODO refactor
 func TestAccessTokenValidation(t *testing.T) {
+	var (
+		publicKey  = ""
+		privateKey = ""
+		timestamp  = fmt.Sprint(time.Now().Unix())
+	)
+
 	conn := getConnection()
 	token := new(Token)
 	token.Expires = float64(time.Now().Add(AccessTokenExpirationHours * time.Hour).Unix())
@@ -24,19 +30,78 @@ func TestAccessTokenValidation(t *testing.T) {
 	}
 
 	Convey("Subject: Testing access token validation", t, func() {
+		Convey("When an invalid signature is given", func() {
+			testGetHandler(ValidateAccessToken, func(request *http.Request) {
+				request.Header.Add("X-Access-Token", "")
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/invalid"+privateKey+timestamp))
+				request.Form.Add("api_key", publicKey)
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidSignature)
+				So(errResp.Message, ShouldEqual, MsgInvalidSignature)
+			})
+		})
+
+		Convey("When an invalid timestamp is given", func() {
+			testGetHandler(ValidateAccessToken, func(request *http.Request) {
+				request.Header.Add("X-Access-Token", "")
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				timestamp := fmt.Sprint(time.Now().Unix() - 50000)
+				request.Form.Add("signature", Hash("/"+privateKey+timestamp))
+				request.Form.Add("api_key", publicKey)
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidSignature)
+				So(errResp.Message, ShouldEqual, MsgInvalidSignature)
+			})
+		})
+
 		Convey("When an invalid access token is given", func() {
 			testGetHandler(ValidateAccessToken, func(request *http.Request) {
 				request.Header.Add("X-Access-Token", "")
-			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
-				So(response.Code, ShouldEqual, 403)
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/"+privateKey+timestamp))
+				request.Form.Add("api_key", publicKey)
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 403)
+				So(errResp.Code, ShouldEqual, CodeInvalidAccessToken)
+				So(errResp.Message, ShouldEqual, MsgInvalidAccessToken)
 			})
 		})
 
 		Convey("When a valid access token is given", func() {
 			testGetHandler(ValidateAccessToken, func(request *http.Request) {
 				request.Header.Add("X-Access-Token", token.Hash)
-			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
-				So(response.Code, ShouldEqual, 200)
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/"+privateKey+timestamp))
+				request.Form.Add("api_key", publicKey)
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				So(resp.Code, ShouldEqual, 200)
 			})
 
 		})
@@ -49,43 +114,118 @@ func TestAccessTokenValidation(t *testing.T) {
 
 			testGetHandler(ValidateAccessToken, func(request *http.Request) {
 				request.Header.Add("X-Access-Token", token.Hash)
-			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
-				So(response.Code, ShouldEqual, 403)
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/"+privateKey+timestamp))
+				request.Form.Add("api_key", publicKey)
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 403)
+				So(errResp.Code, ShouldEqual, CodeInvalidAccessToken)
+				So(errResp.Message, ShouldEqual, MsgInvalidAccessToken)
 			})
 		})
 	})
 }
 
-// TODO refactor
-func TestUserTokenValidation(t *testing.T) {
-	conn := getConnection()
-	Convey("Subject: Testing user token validation", t, func() {
-		token := new(Token)
-		token.Expires = float64(time.Now().Add(AccessTokenExpirationHours * time.Hour).Unix())
-		token.Type = UserToken
+func TestAPIUserTokenValidation(t *testing.T) {
+	var (
+		publicKey  = ""
+		privateKey = ""
+		timestamp  = fmt.Sprint(time.Now().Unix())
+	)
 
-		if err := token.Save(conn); err != nil {
-			panic(err)
-		}
+	conn := getConnection()
+	token := new(Token)
+	token.Expires = float64(time.Now().Add(AccessTokenExpirationHours * time.Hour).Unix())
+	token.Type = UserToken
+
+	if err := token.Save(conn); err != nil {
+		panic(err)
+	}
+	Convey("Subject: Testing user token validation", t, func() {
+		Convey("When an invalid signature is given", func() {
+			testGetHandler(ValidateUserToken, func(request *http.Request) {
+				request.Header.Add("X-User-Token", "")
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/invalid"+privateKey+timestamp))
+				request.Form.Add("api_key", publicKey)
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidSignature)
+				So(errResp.Message, ShouldEqual, MsgInvalidSignature)
+			})
+		})
+
+		Convey("When an invalid timestamp is given", func() {
+			testGetHandler(ValidateUserToken, func(request *http.Request) {
+				request.Header.Add("X-User-Token", "")
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				timestamp := fmt.Sprint(time.Now().Unix() - 50000)
+				request.Form.Add("signature", Hash("/"+privateKey+timestamp))
+				request.Form.Add("api_key", publicKey)
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidSignature)
+				So(errResp.Message, ShouldEqual, MsgInvalidSignature)
+			})
+		})
 
 		Convey("When an invalid user token is given", func() {
 			testGetHandler(ValidateUserToken, func(request *http.Request) {
-				request.Header.Add("X-User-Token", "")
-			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
-				So(response.Code, ShouldEqual, 403)
+				request.Header.Add("X-User-Token", "invalid token")
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/"+privateKey+timestamp))
+				request.Form.Add("api_key", publicKey)
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 403)
+				So(errResp.Code, ShouldEqual, CodeInvalidUserToken)
+				So(errResp.Message, ShouldEqual, MsgInvalidUserToken)
 			})
 		})
 
-		Convey("When a valid user token is given the response code will be 200", func() {
+		Convey("When a valid user token is given", func() {
 			testGetHandler(ValidateUserToken, func(request *http.Request) {
 				request.Header.Add("X-User-Token", token.Hash)
-			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
-				So(response.Code, ShouldEqual, 200)
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/"+privateKey+timestamp))
+				request.Form.Add("api_key", publicKey)
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				So(resp.Code, ShouldEqual, 200)
 			})
 
 		})
 
-		Convey("When the token is expired the response status will be 403", func() {
+		Convey("But when the token is expired the response status will be 403", func() {
 			token.Expires = float64(time.Now().Add(-(AccessTokenExpirationHours + 1) * time.Hour).Unix())
 			if err := token.Save(conn); err != nil {
 				panic(err)
@@ -93,8 +233,138 @@ func TestUserTokenValidation(t *testing.T) {
 
 			testGetHandler(ValidateUserToken, func(request *http.Request) {
 				request.Header.Add("X-User-Token", token.Hash)
-			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
-				So(response.Code, ShouldEqual, 403)
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/"+privateKey+timestamp))
+				request.Form.Add("api_key", publicKey)
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 403)
+				So(errResp.Code, ShouldEqual, CodeInvalidUserToken)
+				So(errResp.Message, ShouldEqual, MsgInvalidUserToken)
+			})
+		})
+	})
+}
+
+func TestWebUserTokenValidation(t *testing.T) {
+	var (
+		csrfKey   = "1234"
+		timestamp = fmt.Sprint(time.Now().Unix())
+	)
+
+	conn := getConnection()
+	token := new(Token)
+	token.Expires = float64(time.Now().Add(AccessTokenExpirationHours * time.Hour).Unix())
+	token.Type = SessionToken
+
+	if err := token.Save(conn); err != nil {
+		panic(err)
+	}
+	Convey("Subject: Testing user token validation", t, func() {
+		Convey("When an invalid signature is given", func() {
+			testGetHandler(ValidateUserToken, func(request *http.Request, s sessions.Session) {
+				s.Set("user_token", token.Hash)
+				s.Set("csrf_key", csrfKey)
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/invalid"+csrfKey+timestamp))
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidSignature)
+				So(errResp.Message, ShouldEqual, MsgInvalidSignature)
+			})
+		})
+
+		Convey("When an invalid timestamp is given", func() {
+			testGetHandler(ValidateUserToken, func(request *http.Request, s sessions.Session) {
+				s.Set("user_token", token.Hash)
+				s.Set("csrf_key", csrfKey)
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				timestamp := fmt.Sprint(time.Now().Unix() - 50000)
+				request.Form.Add("signature", Hash("/"+csrfKey+timestamp))
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidSignature)
+				So(errResp.Message, ShouldEqual, MsgInvalidSignature)
+			})
+		})
+
+		Convey("When an invalid user token is given", func() {
+			testGetHandler(ValidateUserToken, func(request *http.Request, s sessions.Session) {
+				s.Set("user_token", "sjdhaksjdhsa")
+				s.Set("csrf_key", csrfKey)
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/"+csrfKey+timestamp))
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 403)
+				So(errResp.Code, ShouldEqual, CodeInvalidUserToken)
+				So(errResp.Message, ShouldEqual, MsgInvalidUserToken)
+			})
+		})
+
+		Convey("When a valid user token is given", func() {
+			testGetHandler(ValidateUserToken, func(request *http.Request, s sessions.Session) {
+				s.Set("user_token", token.Hash)
+				s.Set("csrf_key", csrfKey)
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/"+csrfKey+timestamp))
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+					fmt.Println(resp.Body)
+				So(resp.Code, ShouldEqual, 200)
+			})
+		})
+
+		Convey("But when the token is expired the response status will be 403", func() {
+			token.Expires = float64(time.Now().Add(-(AccessTokenExpirationHours + 1) * time.Hour).Unix())
+			if err := token.Save(conn); err != nil {
+				panic(err)
+			}
+
+			testGetHandler(ValidateUserToken, func(request *http.Request, s sessions.Session) {
+				s.Set("user_token", token.Hash)
+				s.Set("csrf_key", csrfKey)
+				if request.Form == nil {
+					request.Form = make(url.Values)
+				}
+				request.Form.Add("signature", Hash("/"+csrfKey+timestamp))
+				request.Form.Add("timestamp", timestamp)
+			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(resp.Code, ShouldEqual, 403)
+				So(errResp.Code, ShouldEqual, CodeInvalidUserToken)
+				So(errResp.Message, ShouldEqual, MsgInvalidUserToken)
 			})
 		})
 	})

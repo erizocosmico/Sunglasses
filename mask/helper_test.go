@@ -46,10 +46,8 @@ func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.H
 	m.Use(render.Renderer())
 	store := sessions.NewCookieStore([]byte("secret123"))
 	store.Options(sessions.Options{
-		MaxAge:   UserTokenExpirationDays * 86400,
+		MaxAge:   0,
 		Secure:   false,
-		Path:     "/",
-		Domain:   "localhost:3000",
 		HttpOnly: true,
 	})
 	m.Use(sessions.Sessions("my_session", store))

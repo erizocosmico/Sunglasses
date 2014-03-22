@@ -63,14 +63,14 @@ func ValidateUserToken(req *http.Request, conn *Connection, resp render.Render, 
 		return
 	}
 
-	tokenID, _ := GetRequestToken(req, false, s)
+	tokenID, tokenType := GetRequestToken(req, false, s)
 
 	var token Token
 	if err := conn.Db.C("tokens").Find(bson.M{"hash": tokenID}).One(&token); err != nil {
-		RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
+		RenderError(resp, CodeInvalidUserToken, 403, MsgInvalidUserToken)
 	} else {
-		if token.ID.Hex() == "" || token.Type != UserToken || token.Expires < float64(time.Now().Unix()) {
-			RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
+		if token.ID.Hex() == "" || token.Type != tokenType || token.Expires < float64(time.Now().Unix()) {
+			RenderError(resp, CodeInvalidUserToken, 403, MsgInvalidUserToken)
 		}
 	}
 }
@@ -162,6 +162,11 @@ func DestroyUserToken(req *http.Request, conn *Connection, resp render.Render, s
 			RenderError(resp, CodeTokenNotFound, 404, MsgTokenNotFound)
 			return
 		} else {
+			if tokenType == SessionToken {
+				s.Delete("user_token")
+				s.Delete("csrf_key")
+			}
+
 			resp.JSON(200, map[string]interface{}{
 				"error":   false,
 				"deleted": true,
@@ -248,7 +253,18 @@ func RequestIsValid(r *http.Request, conn *Connection, s sessions.Session, isAcc
 		if isAPIRequest {
 			return validateAPISignature(conn, signature, timestamp, key, URL)
 		} else {
-			return validateWebSignature(signature, timestamp, s.Get("csrf_key").(string), URL)
+			var csrfKey string
+			if s.Get("csrf_key") == nil {
+				csrfKey = ""
+			} else {
+				csrfKey = s.Get("csrf_key").(string)
+			}
+
+			if csrfKey == "" {
+				return false
+			}
+
+			return validateWebSignature(signature, timestamp, csrfKey, URL)
 		}
 	}
 
