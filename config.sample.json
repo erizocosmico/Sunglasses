@@ -7,9 +7,7 @@
     "redis_address": ":6379",
     "static_content_path": "/path/to/static/content",
     "secret_key": "my fancy secret key",
-    "encryption_key": "my fancy encyption key",
+    "encryption_key": "qwertyuiopasdfghjklzxcvbnm123456",
     "session_name": "mask_test",
-    "secure_cookies": false,
-    "cookies_domain": "localhost:3000",
-    "cookies_path": "/"
+    "secure_cookies": false
 }
