@@ -9,7 +9,9 @@ import (
 	"github.com/martini-contrib/render"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 // RenderError renders an error message
@@ -88,4 +90,18 @@ func Hash(h string) string {
 	hasher := sha512.New()
 	hasher.Write([]byte(h))
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+}
+
+func strlen(s string) int {
+	return utf8.RuneCountInString(s)
+}
+
+func getBoolean(r *http.Request, key string) bool {
+	if v := r.FormValue(key); v != "" {
+		if strings.ToLower(v) == "true" || v == "1" {
+			return true
+		}
+	}
+
+	return false
 }
