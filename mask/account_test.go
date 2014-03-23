@@ -289,3 +289,142 @@ func TestUpdateAccountInfo(t *testing.T) {
 		})
 	})
 }
+
+func TestUpdateAccountSettings(t *testing.T) {
+	conn := getConnection()
+	user, token := createRequestUser(conn)
+	defer func() {
+		user.Remove(conn)
+		token.Remove(conn)
+	}()
+
+	Convey("Testing the update of account settings", t, func() {
+
+		Convey("When invalid user is given", func() {
+			testPutHandler(UpdateAccountSettings, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidData)
+				So(errResp.Message, ShouldEqual, MsgInvalidData)
+			})
+		})
+
+		Convey("When override default privacy is true and there is an error with privacy settings", func() {
+			testPutHandler(UpdateAccountSettings, func(req *http.Request) {
+				req.Header.Add("X-User-Token", token.Hash)
+				if req.PostForm == nil {
+					req.PostForm = make(url.Values)
+				}
+				req.PostForm.Add("override_default_privacy", "true")
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidPrivacySettings)
+				So(errResp.Message, ShouldEqual, MsgInvalidPrivacySettings)
+			})
+		})
+
+		Convey("When override default privacy is true and everything is OK", func() {
+			testPutHandler(UpdateAccountSettings, func(req *http.Request) {
+				req.Header.Add("X-User-Token", token.Hash)
+				if req.PostForm == nil {
+					req.PostForm = make(url.Values)
+				}
+				req.PostForm.Add("override_default_privacy", "true")
+				req.PostForm.Add("privacy_status_type", "1")
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 200)
+				So(errResp.Message, ShouldEqual, "User settings updated successfully")
+			})
+		})
+
+		Convey("When override default privacy is true and users are required but not provided", func() {
+			testPutHandler(UpdateAccountSettings, func(req *http.Request) {
+				req.Header.Add("X-User-Token", token.Hash)
+				if req.PostForm == nil {
+					req.PostForm = make(url.Values)
+				}
+				req.PostForm.Add("override_default_privacy", "true")
+				req.PostForm.Add("privacy_status_type", "5")
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidPrivacySettings)
+				So(errResp.Message, ShouldEqual, MsgInvalidPrivacySettings)
+			})
+		})
+
+		Convey("When override default privacy is false and there is an error with privacy settings", func() {
+			testPutHandler(UpdateAccountSettings, func(req *http.Request) {
+				req.Header.Add("X-User-Token", token.Hash)
+				if req.PostForm == nil {
+					req.PostForm = make(url.Values)
+				}
+				req.PostForm.Add("override_default_privacy", "false")
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidPrivacySettings)
+				So(errResp.Message, ShouldEqual, MsgInvalidPrivacySettings)
+			})
+		})
+
+		Convey("When override default privacy is false and everything is OK", func() {
+			testPutHandler(UpdateAccountSettings, func(req *http.Request) {
+				req.Header.Add("X-User-Token", token.Hash)
+				if req.PostForm == nil {
+					req.PostForm = make(url.Values)
+				}
+				req.PostForm.Add("override_default_privacy", "false")
+				req.PostForm.Add("privacy_status_type", "1")
+				req.PostForm.Add("privacy_video_type", "1")
+				req.PostForm.Add("privacy_link_type", "1")
+				req.PostForm.Add("privacy_photo_type", "1")
+				req.PostForm.Add("privacy_album_type", "1")
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 200)
+				So(errResp.Message, ShouldEqual, "User settings updated successfully")
+			})
+		})
+
+		Convey("When recovery question or recovery answer are empty", func() {
+			testPutHandler(UpdateAccountSettings, func(req *http.Request) {
+				req.Header.Add("X-User-Token", token.Hash)
+				if req.PostForm == nil {
+					req.PostForm = make(url.Values)
+				}
+				req.PostForm.Add("override_default_privacy", "true")
+				req.PostForm.Add("privacy_status_type", "1")
+				req.PostForm.Add("recovery_method", "2")
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidRecoveryQuestion)
+				So(errResp.Message, ShouldEqual, MsgInvalidRecoveryQuestion)
+			})
+		})
+	})
+}

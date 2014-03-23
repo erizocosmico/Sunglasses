@@ -250,6 +250,8 @@ func UpdateAccountSettings(r *http.Request, conn *Connection, res render.Render,
 				}
 
 				p.Type = PrivacyType(pType)
+			} else {
+				return p, errors.New("privacy type is required")
 			}
 
 			if users, ok := r.Form["privacy_"+kind+"_users"]; ok {
@@ -264,6 +266,8 @@ func UpdateAccountSettings(r *http.Request, conn *Connection, res render.Render,
 				// TODO check if users are followed by the user
 
 				p.Users = uids
+			} else if p.Type > PrivacyNone {
+				return p, errors.New("users param required for this privacy type")
 			}
 
 			return p, nil
