@@ -88,6 +88,7 @@ type UserSettings struct {
 	AllowPostsInMyProfile       bool           `json:"allow_posts_in_my_profile" bson:"allow_posts_in_my_profile"`
 	AllowCommentsInPosts        bool           `json:"allow_comments_in_posts" bson:"allow_comments_in_posts"`
 	DisplayEmail                bool           `json:"display_email" bson:"display_email"`
+	DisplayInfoFollowersOnly    bool           `json:"display_info_followers_only" bson:"display_info_followers_only"`
 	PasswordRecoveryMethod      RecoveryMethod `json:"recovery_method" bson:"recovery_method"`
 	RecoveryQuestion            string         `json:"recovery_question,omitempty" bson:"recovery_question,omitempty"`
 	RecoveryAnswer              string         `json:"recovery_answer,omitempty" bson:"recovery_answer,omitempty"`
@@ -158,12 +159,14 @@ func (u *User) Save(conn *Connection) error {
 		u.Settings.AllowPostsInMyProfile = false
 		u.Settings.AllowCommentsInPosts = false
 		u.Settings.DisplayEmail = false
+		u.Settings.DisplayInfoFollowersOnly = true
 		u.Settings.PasswordRecoveryMethod = RecoveryNone
 		u.Settings.DefaultStatusPrivacy = pvSet
 		u.Settings.DefaultPhotoPrivacy = pvSet
 		u.Settings.DefaultAlbumPrivacy = pvSet
 		u.Settings.DefaultLinkPrivacy = pvSet
 		u.Settings.DefaultVideoPrivacy = pvSet
+		u.Active = true
 	}
 
 	if err = conn.Save("users", u.ID, u); err != nil {
