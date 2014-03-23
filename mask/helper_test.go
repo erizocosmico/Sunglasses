@@ -53,7 +53,9 @@ func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.H
 	m.Use(sessions.Sessions("my_session", store))
 	methHandler(m)
 	response := httptest.NewRecorder()
-	m.Use(middleware)
+	if middleware != nil {
+		m.Use(middleware)
+	}
 	m.ServeHTTP(response, req)
 	testFunc(response)
 }

@@ -7,7 +7,6 @@ import (
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"net/mail"
-	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -150,7 +149,11 @@ func UpdateAccountInfo(r *http.Request, conn *Connection, res render.Render, s s
 			sites := make([]string, 0, len(v))
 
 			for _, site := range v {
-				if _, err := url.Parse(site); err != nil {
+				if !strings.HasPrefix(site, "http://") && !strings.HasPrefix(site, "https://") {
+					site = "http://" + site
+				}
+
+				if !isValidURL(site) {
 					RenderError(res, CodeInvalidWebsites, 400, MsgInvalidWebsites)
 					return
 				}

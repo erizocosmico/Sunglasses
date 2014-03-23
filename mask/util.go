@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/martini-contrib/render"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -104,4 +105,9 @@ func getBoolean(r *http.Request, key string) bool {
 	}
 
 	return false
+}
+
+func isValidURL(URL string) bool {
+	r := regexp.MustCompile("https?://[-A-Za-z0-9+&@]+\\.[a-zA-Z0-9\\.-]+([/#\\?&\\.-_a-zA-Z0-9%=,:;$\\(\\)]+)?")
+	return r.MatchString(URL)
 }
