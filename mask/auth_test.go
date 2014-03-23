@@ -338,7 +338,7 @@ func TestWebUserTokenValidation(t *testing.T) {
 				request.Form.Add("signature", Hash("/"+csrfKey+timestamp))
 				request.Form.Add("timestamp", timestamp)
 			}, conn, "/", "/", func(resp *httptest.ResponseRecorder) {
-					fmt.Println(resp.Body)
+				fmt.Println(resp.Body)
 				So(resp.Code, ShouldEqual, 200)
 			})
 		})

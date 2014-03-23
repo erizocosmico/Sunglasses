@@ -25,6 +25,11 @@ const (
 	CodeInvalidUsername           = 27
 	CodePasswordLength            = 28
 	CodePasswordMatch             = 29
+	CodeInvalidGender             = 30
+	CodeInvalidStatus             = 31
+	CodeInvalidWebsites           = 32
+	CodeInvalidInfoLength         = 33
+	CodeInvalidPrivacySettings    = 34
 
 	// Misc messages
 	MsgUnexpected       = "Unexpected error occurred"
@@ -50,4 +55,9 @@ const (
 	MsgInvalidUsername           = "Invalid username"
 	MsgPasswordLength            = "Password must be at least 6 characters long"
 	MsgPasswordMatch             = "Passwords don't match"
+	MsgInvalidGender             = "Invalid gender"
+	MsgInvalidStatus             = "Invalid user status"
+	MsgInvalidWebsites           = "One or more of the provided websites is not a valid url"
+	MsgInvalidInfoLength         = "One or more of the provided fields is more than 500 characters long"
+	MsgInvalidPrivacySettings    = "Invalid privacy settings provided"
 )
