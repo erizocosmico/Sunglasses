@@ -59,6 +59,8 @@ func StoreUploadedFile(r *http.Request, key string, options UploadOptions) error
 			if _, err := io.Copy(dst, file); err != nil {
 				return err
 			}
+
+			return nil
 		}
 	}
 
