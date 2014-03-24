@@ -1,20 +1,20 @@
 package mask
 
 import (
-	"net/http"
 	"errors"
-	"os"
-	"io"
+	"image"
+	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
-	_ "image/gif"
-	"image"
+	"io"
+	"net/http"
+	"os"
 )
 
 type UploadOptions struct {
 	StorePath string
 	MaxHeight int
-	MaxWidth int
+	MaxWidth  int
 }
 
 // StoreUploadedFile stores in disk a file received with the request
