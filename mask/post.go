@@ -110,7 +110,7 @@ func postStatus(user *User, conn *Connection, r *http.Request) (int, map[string]
 		response         = make(map[string]interface{})
 	)
 
-	if len(statusText) > 0 && len(statusText) <= 1500 {
+	if strlen(statusText) > 0 && strlen(statusText) <= 1500 {
 		post := NewPost(PostStatus, user, r)
 		post.Text = statusText
 		post.Privacy = getPostPrivacy(PostStatus, r, user)

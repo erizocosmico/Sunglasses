@@ -86,6 +86,12 @@ func NewRandomHash() string {
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 }
 
+// NewFileName returns an unique name for the file
+func NewFileName(extension string) string {
+	r := regexp.MustCompile("[^a-zA-Z0-9]")
+	return r.ReplaceAllString(NewRandomHash(), "") + "." + extension
+}
+
 // Hash hashes a string
 func Hash(h string) string {
 	hasher := sha512.New()
