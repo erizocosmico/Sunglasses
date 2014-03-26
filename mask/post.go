@@ -5,6 +5,7 @@ import (
 	"github.com/martini-contrib/sessions"
 	"labix.org/v2/mgo/bson"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -62,7 +63,7 @@ func NewPost(t ObjectType, user *User, r *http.Request) *Post {
 }
 
 // CreatePost creates a new post
-func CreatePost(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+func CreatePost(r *http.Request, conn *Connection, res render.Render, s sessions.Session, config *Config) {
 	var (
 		postType     = r.PostFormValue("post_type")
 		status   int = 200
@@ -71,11 +72,10 @@ func CreatePost(r *http.Request, conn *Connection, res render.Render, s sessions
 	)
 
 	switch postType {
-	/* TODO implement
 	case "photo":
-		status, response = postPhoto(user, conn, r)
+		status, response = postPhoto(user, conn, r, config)
 		break
-	case "video":
+	/*case "video":
 		status, response = postVideo(user, conn, r)
 		break
 	case "link":
@@ -89,12 +89,64 @@ func CreatePost(r *http.Request, conn *Connection, res render.Render, s sessions
 	res.JSON(status, response)
 }
 
-/* TODO implement
-func postPhoto(user *User, conn *Connection, r *http.Request) (int, map[string]interface{}) {
+func postPhoto(user *User, conn *Connection, r *http.Request, config *Config) (int, map[string]interface{}) {
+	var (
+		responseCode int = 400
+		response         = make(map[string]interface{})
+	)
 
+	response["error"] = true
+	file, err := RetrieveUploadedImage(r, "post_picture")
+	if err != nil {
+		code, msg := CodeAndMessageForUploadError(err)
+		response["code"] = code
+		response["message"] = msg
+	} else {
+		imagePath, thumbnailPath, err := StoreImage(file, DefaultUploadOptions(config))
+		if err != nil {
+			code, msg := CodeAndMessageForUploadError(err)
+			response["code"] = code
+			response["message"] = msg
+		} else {
+			p := NewPost(PostPhoto, user, r)
+			p.PhotoURL = imagePath
+			p.Thumbnail = thumbnailPath
+			p.Caption = strings.TrimSpace(r.FormValue("caption"))
+			p.Text = strings.TrimSpace(r.PostFormValue("post_text"))
+
+			if strlen(p.Text) <= 1500 {
+				if strlen(p.Caption) > 255 {
+					if err := p.Save(conn); err != nil {
+						responseCode = 500
+						response["message"] = MsgUnexpected
+						response["code"] = CodeUnexpected
+
+						os.Remove(p.PhotoURL)
+						os.Remove(p.Thumbnail)
+					} else {
+						responseCode = 200
+						response["error"] = false
+						response["message"] = "Photo posted successfully"
+					}
+				} else {
+					response["code"] = CodeInvalidCaption
+					response["message"] = MsgInvalidCaption
+				}
+			} else {
+				response["code"] = CodeInvalidStatusText
+				response["message"] = MsgInvalidStatusText
+			}
+		}
+	}
+
+	if response["error"].(bool) {
+		response["single"] = true
+	}
+
+	return responseCode, response
 }
 
-func postVideo(user *User, conn *Connection, r *http.Request) (int, map[string]interface{}) {
+/*func postVideo(user *User, conn *Connection, r *http.Request) (int, map[string]interface{}) {
 
 }
 
@@ -115,11 +167,18 @@ func postStatus(user *User, conn *Connection, r *http.Request) (int, map[string]
 		post.Text = statusText
 		post.Privacy = getPostPrivacy(PostStatus, r, user)
 		if err := post.Save(conn); err != nil {
-
+			responseCode = 500
+			response["error"] = true
+			response["code"] = CodeUnexpected
+			response["message"] = MsgUnexpected
+			response["single"] = true
 		}
 	} else {
 		responseCode = 400
-		response["error"] = "Invalid status text given"
+		response["error"] = true
+		response["code"] = CodeInvalidStatusText
+		response["message"] = MsgInvalidStatusText
+		response["single"] = true
 	}
 
 	return responseCode, response

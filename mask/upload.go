@@ -18,7 +18,19 @@ type UploadOptions struct {
 	MaxHeight, MaxWidth, ThumbnailHeight, ThumbnailWidth int
 }
 
-const maxFileSize = 10 * 1000 * 1024 + 1
+const maxFileSize = 10*1000*1024 + 1
+
+// DefaultUploadOptions returns a the default configuration options for uploading
+func DefaultUploadOptions(config *Config) UploadOptions {
+	return UploadOptions{
+		MaxHeight:          3000,
+		MaxWidth:           6000,
+		ThumbnailHeight:    150,
+		ThumbnailWidth:     150,
+		StorePath:          config.StorePath,
+		ThumbnailStorePath: config.ThumbnailStorePath,
+	}
+}
 
 // RetrieveUploadedImage returns the uploaded file at the given key
 func RetrieveUploadedImage(r *http.Request, key string) (io.ReadCloser, error) {
@@ -81,6 +93,39 @@ func StoreImage(file io.ReadCloser, options UploadOptions) (string, string, erro
 	thumbDst.Close()
 
 	return imagePath, thumbnailPath, nil
+}
+
+// CodeAndMessageForUploadError returns a code and an error message for the given error
+func CodeAndMessageForUploadError(err error) (int, string) {
+	var (
+		code    int
+		message string
+	)
+
+	switch err.Error() {
+	case "file too large":
+		code = CodeFileTooLarge
+		message = MsgFileTooLarge
+		break
+	case "no file was uploaded":
+		code = CodeNoFileUploaded
+		message = MsgNoFileUploaded
+		break
+
+	case "invalid file format":
+		code = CodeInvalidFileFormat
+		message = MsgInvalidFileFormat
+		break
+	case "file dimensions are too large":
+		code = CodeInvalidFileDimensions
+		message = MsgInvalidFileDimensions
+		break
+	default:
+		code = CodeInvalidFile
+		message = MsgInvalidFile
+	}
+
+	return code, message
 }
 
 func generateThumbnail(src image.Image, options UploadOptions) (image.Image, error) {

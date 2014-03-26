@@ -9,5 +9,7 @@
     "secret_key": "my fancy secret key",
     "encryption_key": "qwertyuiopasdfghjklzxcvbnm123456",
     "session_name": "mask_test",
-    "secure_cookies": false
+    "secure_cookies": false,
+    "store_path": "/path/to/store/dir",
+    "thumbnail_store_path": "/path/to/thumbnail/store/dir"
 }

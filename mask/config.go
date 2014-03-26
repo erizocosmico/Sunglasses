@@ -8,17 +8,19 @@ import (
 
 // Config gathers all the necessary data to run the app
 type Config struct {
-	URL               string `json:"url"`
-	Port              string `json:"port"`
-	StaticContentPath string `json:"static_content_path"`
-	RedisAddress      string `json:"redis_address"`
-	SecretKey         string `json:"secret_key"`
-	EncriptionKey     string `json:"encryption_key"`
-	SessionName       string `json:"session_name"`
-	DatabaseUrl       string `json:"database_url"`
-	DatabaseName      string `json:"database_name"`
-	Debug             bool   `json:"debug"`
-	SecureCookies     bool   `json:"secure_cookies"`
+	URL                string `json:"url"`
+	Port               string `json:"port"`
+	StaticContentPath  string `json:"static_content_path"`
+	RedisAddress       string `json:"redis_address"`
+	SecretKey          string `json:"secret_key"`
+	EncriptionKey      string `json:"encryption_key"`
+	SessionName        string `json:"session_name"`
+	DatabaseUrl        string `json:"database_url"`
+	DatabaseName       string `json:"database_name"`
+	Debug              bool   `json:"debug"`
+	SecureCookies      bool   `json:"secure_cookies"`
+	StorePath          string `json:"store_path`
+	ThumbnailStorePath string `json:"thumbnail_store_path`
 }
 
 // NewConfig creates a new config struct
