@@ -19,25 +19,23 @@ type UploadOptions struct {
 
 // RetrieveUploadedImage returns the uploaded file at the given key
 func RetrieveUploadedImage(r *http.Request, key string) (io.ReadCloser, error) {
-	r.ParseMultipartForm(100000)
-	if files, ok := r.MultipartForm.File[key]; ok {
-		if len(files) > 0 {
-			file, err := files[0].Open()
-			if err != nil {
-				return nil, err
-			}
-
-			fi, err := file.(*os.File).Stat()
-			if err != nil {
-				return nil, err
-			}
-
-			if fi.Size() > 50000 {
-				return nil, errors.New("file too large")
-			}
-
-			return file, nil
+	_, fh, err := r.FormFile(key)
+	if err == nil && fh != nil {
+		file, err := fh.Open()
+		if err != nil {
+			return nil, err
 		}
+
+		fi, err := file.(*os.File).Stat()
+		if err != nil {
+			return nil, err
+		}
+
+		if fi.Size() > 50000 {
+			return nil, errors.New("file too large")
+		}
+
+		return file, nil
 	}
 
 	return nil, errors.New("no file was uploaded")
