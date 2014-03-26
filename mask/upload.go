@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 type UploadOptions struct {
@@ -17,25 +18,18 @@ type UploadOptions struct {
 	MaxHeight, MaxWidth, ThumbnailHeight, ThumbnailWidth int
 }
 
+const maxFileSize = 10 * 1000 * 1024 + 1
+
 // RetrieveUploadedImage returns the uploaded file at the given key
 func RetrieveUploadedImage(r *http.Request, key string) (io.ReadCloser, error) {
-	_, fh, err := r.FormFile(key)
-	if err == nil && fh != nil {
-		file, err := fh.Open()
-		if err != nil {
-			return nil, err
-		}
-
-		fi, err := file.(*os.File).Stat()
-		if err != nil {
-			return nil, err
-		}
-
-		if fi.Size() > 50000 {
+	f, _, err := r.FormFile(key)
+	if err == nil && f != nil {
+		cLen := r.Header.Get("Content-Length")
+		if len, err := strconv.ParseInt(cLen, 10, 64); err != nil || len > maxFileSize {
 			return nil, errors.New("file too large")
 		}
 
-		return file, nil
+		return f, nil
 	}
 
 	return nil, errors.New("no file was uploaded")
