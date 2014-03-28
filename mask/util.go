@@ -141,17 +141,12 @@ func responseTitle(resp *http.Response) string {
 }
 
 func isValidLink(URL string) (bool, string, string) {
-	var (
-		valid bool
-		title string
-	)
-
 	resp, err := http.Get(URL)
 	if err != nil || resp.StatusCode != 200 {
 		return false, "", ""
 	}
 
-	title = responseTitle(resp)
+	title := responseTitle(resp)
 
-	return valid, URL, title
+	return true, URL, title
 }
