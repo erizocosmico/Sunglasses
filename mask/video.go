@@ -28,6 +28,11 @@ func isValidVideo(URL string) (bool, string, VideoService, string) {
 		return false, "", 0, ""
 	}
 
+	// Youtube does not reply with a not found status :-)
+	if service == VideoServiceYoutube {
+		URL = "http://gdata.youtube.com/feeds/api/videos/" + ID
+	}
+
 	resp, err := http.Get(URL)
 	if err != nil || resp.StatusCode != 200 {
 		return false, "", 0, ""

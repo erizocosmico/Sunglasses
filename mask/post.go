@@ -157,7 +157,7 @@ func postVideo(user *User, conn *Connection, r *http.Request) (int, map[string]i
 		response         = make(map[string]interface{})
 	)
 
-	if strlen(statusText) > 0 && strlen(statusText) <= 1500 {
+	if strlen(statusText) <= 1500 {
 		post := NewPost(PostVideo, user, r)
 		post.Text = statusText
 		post.Privacy = getPostPrivacy(PostVideo, r, user)
@@ -199,7 +199,7 @@ func postLink(user *User, conn *Connection, r *http.Request) (int, map[string]in
 		response         = make(map[string]interface{})
 	)
 
-	if strlen(statusText) > 0 && strlen(statusText) <= 1500 {
+	if strlen(statusText) <= 1500 {
 		post := NewPost(PostVideo, user, r)
 		post.Text = statusText
 		post.Privacy = getPostPrivacy(PostVideo, r, user)
