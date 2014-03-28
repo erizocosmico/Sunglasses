@@ -125,7 +125,12 @@ func responseTitle(resp *http.Response) string {
 	r := regexp.MustCompile("<title>(.*)</title>")
 	defer resp.Body.Close()
 
-	matches := r.FindStringSubmatch(string(ioutil.ReadAll(resp.Body)))
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return ""
+	}
+
+	matches := r.FindStringSubmatch(string(bytes))
 	if len(matches) > 1 {
 		title = matches[1]
 	} else {

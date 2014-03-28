@@ -40,9 +40,15 @@ func testDeleteHandler(handler, middleware martini.Handler, conn *Connection, re
 }
 
 func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.Handler, conn *Connection, reqUrl, method string, testFunc func(*httptest.ResponseRecorder)) {
+	config, err := NewConfig("../config.sample.json")
+	if err != nil {
+		panic(err)
+	}
+
 	req, _ := http.NewRequest(method, reqUrl, nil)
 	m := martini.Classic()
 	m.Map(conn)
+	m.Map(config)
 	m.Use(render.Renderer())
 	store := sessions.NewCookieStore([]byte("secret123"))
 	store.Options(sessions.Options{

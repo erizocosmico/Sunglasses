@@ -35,7 +35,7 @@ type Post struct {
 	Text     string          `json:"text,omitempty" bson:"text,omitempty"`
 
 	// Video specific fields
-	Serivce VideoService `json:"video_service,omitempty" bson:"video_service,omitempty"`
+	Service VideoService `json:"video_service,omitempty" bson:"video_service,omitempty"`
 	VideoID string       `json:"video_id,omitempty" bson:"video_id,omitempty"`
 	// Also used in link
 	Title string `json:"title,omitempty" bson:"title,omitempty"`
@@ -69,6 +69,11 @@ func CreatePost(r *http.Request, conn *Connection, res render.Render, s sessions
 		response     = make(map[string]interface{})
 		user         = GetRequestUser(r, conn, s)
 	)
+
+	if user == nil {
+		RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+		return
+	}
 
 	switch postType {
 	case "photo":
@@ -245,6 +250,8 @@ func postStatus(user *User, conn *Connection, r *http.Request) (int, map[string]
 			response["code"] = CodeUnexpected
 			response["message"] = MsgUnexpected
 			response["single"] = true
+		} else {
+			response["message"] = "Status posted successfully"
 		}
 	} else {
 		responseCode = 400
