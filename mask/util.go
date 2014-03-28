@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/martini-contrib/render"
+	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -116,4 +117,36 @@ func getBoolean(r *http.Request, key string) bool {
 func isValidURL(URL string) bool {
 	r := regexp.MustCompile("https?://[-A-Za-z0-9+&@]+\\.[a-zA-Z0-9\\.-]+([/#\\?&\\.-_a-zA-Z0-9%=,:;$\\(\\)]+)?")
 	return r.MatchString(URL)
+}
+
+func responseTitle(resp *http.Response) string {
+	var title string
+
+	r := regexp.MustCompile("<title>(.*)</title>")
+	defer resp.Body.Close()
+
+	matches := r.FindStringSubmatch(string(ioutil.ReadAll(resp.Body)))
+	if len(matches) > 1 {
+		title = matches[1]
+	} else {
+		title = "Untitled"
+	}
+
+	return title
+}
+
+func isValidLink(URL string) (bool, string, string) {
+	var (
+		valid bool
+		title string
+	)
+
+	resp, err := http.Get(URL)
+	if err != nil || resp.StatusCode != 200 {
+		return false, "", ""
+	}
+
+	title = responseTitle(resp)
+
+	return valid, URL, title
 }

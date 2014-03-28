@@ -39,6 +39,8 @@ const (
 	CodeInvalidFileFormat     = 54
 	CodeInvalidFileDimensions = 55
 	CodeInvalidFile           = 56
+	CodeInvalidVideoURL       = 57
+	CodeInvalidLinkURL        = 58
 
 	// Misc messages
 	MsgUnexpected       = "Unexpected error occurred"
@@ -78,4 +80,6 @@ const (
 	MsgInvalidFileFormat     = "Invalid file format"
 	MsgInvalidFileDimensions = "Invalid file dimensiones"
 	MsgInvalidFile           = "Invalid file"
+	MsgInvalidVideoURL       = "Invalid video URL"
+	MsgInvalidLinkURL        = "Invalid link URL"
 )

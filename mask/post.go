@@ -12,7 +12,6 @@ import (
 )
 
 type ObjectType int
-type VideoService int
 
 const (
 	// Post types
@@ -75,12 +74,12 @@ func CreatePost(r *http.Request, conn *Connection, res render.Render, s sessions
 	case "photo":
 		status, response = postPhoto(user, conn, r, config)
 		break
-	/*case "video":
+	case "video":
 		status, response = postVideo(user, conn, r)
 		break
 	case "link":
 		status, response = postLink(user, conn, r)
-		break*/
+		break
 	default:
 		// Default post type is status
 		status, response = postStatus(user, conn, r)
@@ -146,14 +145,88 @@ func postPhoto(user *User, conn *Connection, r *http.Request, config *Config) (i
 	return responseCode, response
 }
 
-/*func postVideo(user *User, conn *Connection, r *http.Request) (int, map[string]interface{}) {
+func postVideo(user *User, conn *Connection, r *http.Request) (int, map[string]interface{}) {
+	var (
+		responseCode int = 400
+		statusText       = strings.TrimSpace(r.PostFormValue("post_text"))
+		response         = make(map[string]interface{})
+	)
 
+	if strlen(statusText) > 0 && strlen(statusText) <= 1500 {
+		post := NewPost(PostVideo, user, r)
+		post.Text = statusText
+		post.Privacy = getPostPrivacy(PostVideo, r, user)
+		valid, videoID, service, title := isValidVideo(strings.TrimSpace(r.PostFormValue("video_url")))
+		if !valid {
+			response["error"] = true
+			response["single"] = true
+			response["message"] = MsgInvalidVideoURL
+			response["code"] = CodeInvalidVideoURL
+		} else {
+			post.VideoID = videoID
+			post.Service = service
+			post.Title = title
+
+			if err := post.Save(conn); err != nil {
+				responseCode = 500
+				response["error"] = true
+				response["single"] = true
+				response["message"] = MsgUnexpected
+				response["code"] = CodeUnexpected
+			} else {
+				responseCode = 200
+				response["error"] = false
+				response["message"] = "Video posted successfully"
+			}
+		}
+	} else {
+		response["code"] = CodeInvalidStatusText
+		response["message"] = MsgInvalidStatusText
+	}
+
+	return responseCode, response
 }
 
 func postLink(user *User, conn *Connection, r *http.Request) (int, map[string]interface{}) {
+	var (
+		responseCode int = 400
+		statusText       = strings.TrimSpace(r.PostFormValue("post_text"))
+		response         = make(map[string]interface{})
+	)
 
+	if strlen(statusText) > 0 && strlen(statusText) <= 1500 {
+		post := NewPost(PostVideo, user, r)
+		post.Text = statusText
+		post.Privacy = getPostPrivacy(PostVideo, r, user)
+		valid, link, title := isValidLink(strings.TrimSpace(r.PostFormValue("link_url")))
+		if !valid {
+			response["error"] = true
+			response["single"] = true
+			response["message"] = MsgInvalidLinkURL
+			response["code"] = CodeInvalidLinkURL
+		} else {
+			post.URL = link
+			post.Title = title
+
+			if err := post.Save(conn); err != nil {
+				responseCode = 500
+				response["error"] = true
+				response["single"] = true
+				response["message"] = MsgUnexpected
+				response["code"] = CodeUnexpected
+			} else {
+				responseCode = 200
+				response["error"] = false
+				response["message"] = "Link posted successfully"
+			}
+		}
+	} else {
+		response["code"] = CodeInvalidStatusText
+		response["message"] = MsgInvalidStatusText
+	}
+
+	return responseCode, response
 }
-*/
 
 func postStatus(user *User, conn *Connection, r *http.Request) (int, map[string]interface{}) {
 	var (
