@@ -14,6 +14,7 @@ import (
 func TestSendNotification(t *testing.T) {
 	var blankID bson.ObjectId
 	conn := getConnection()
+	defer conn.Session.Close()
 	user, token := createRequestUser(conn)
 
 	Convey("Sending notifications", t, func() {
@@ -32,6 +33,7 @@ func TestMarkNotificationAsRead(t *testing.T) {
 	var blankID, userNotificationID, userTmpNotificationID bson.ObjectId
 	var notification Notification
 	conn := getConnection()
+	defer conn.Session.Close()
 	user, token := createRequestUser(conn)
 	userTmp := NewUser()
 	userTmp.Username = "testing_tmp"
@@ -159,6 +161,7 @@ func TestMarkNotificationAsRead(t *testing.T) {
 func TestListNotifications(t *testing.T) {
 	var blankID bson.ObjectId
 	conn := getConnection()
+	defer conn.Session.Close()
 	users := make([]bson.ObjectId, 0, 24)
 	user, token := createRequestUser(conn)
 

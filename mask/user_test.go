@@ -6,21 +6,17 @@ import (
 )
 
 func TestUser(t *testing.T) {
+	// TODO revisit
+	conn := getConnection()
+	defer conn.Session.Close()
+
 	Convey("Subject: Creating an user and removing it", t, func() {
 		Convey("Given a database connection", func() {
-			config, err := NewConfig("../config.sample.json")
-			if err != nil {
-				panic(err)
-			}
-			conn, err := NewDatabaseConn(config)
-			if err != nil {
-				panic(err)
-			}
 
 			Convey("and an user instance", func() {
 				user := new(User)
 				user.Username = "John Doe"
-				err = user.SetPassword("testing")
+				err := user.SetPassword("testing")
 				if err != nil {
 					panic(err)
 				}

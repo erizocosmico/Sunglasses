@@ -13,6 +13,8 @@ import (
 
 func TestBlockUser(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
+
 	Convey("Blocking users", t, func() {
 		from := bson.NewObjectId()
 		to := bson.NewObjectId()
@@ -29,6 +31,8 @@ func TestBlockUser(t *testing.T) {
 
 func TestUnblockUser(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
+
 	Convey("Unblocking users", t, func() {
 		from := bson.NewObjectId()
 		to := bson.NewObjectId()
@@ -49,6 +53,7 @@ func TestUnblockUser(t *testing.T) {
 
 func TestBlockHandler(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 
 	Convey("Blocking an user", t, func() {
 		Convey("With invalid request user", func() {
@@ -193,6 +198,7 @@ func TestBlockHandler(t *testing.T) {
 
 func TestUnblock(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 
 	Convey("Unblocking an user", t, func() {
 
@@ -332,6 +338,7 @@ func TestUnblock(t *testing.T) {
 
 func TestListBlocks(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 	users := make([]bson.ObjectId, 0, 24)
 	user, token := createRequestUser(conn)
 

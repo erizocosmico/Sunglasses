@@ -21,6 +21,7 @@ func TestAccessTokenValidation(t *testing.T) {
 	)
 
 	conn := getConnection()
+	defer conn.Session.Close()
 	token := new(Token)
 	token.Expires = float64(time.Now().Add(AccessTokenExpirationHours * time.Hour).Unix())
 	token.Type = AccessToken
@@ -141,6 +142,7 @@ func TestAPIUserTokenValidation(t *testing.T) {
 	)
 
 	conn := getConnection()
+	defer conn.Session.Close()
 	token := new(Token)
 	token.Expires = float64(time.Now().Add(AccessTokenExpirationHours * time.Hour).Unix())
 	token.Type = UserToken
@@ -259,6 +261,7 @@ func TestWebUserTokenValidation(t *testing.T) {
 	)
 
 	conn := getConnection()
+	defer conn.Session.Close()
 	token := new(Token)
 	token.Expires = float64(time.Now().Add(AccessTokenExpirationHours * time.Hour).Unix())
 	token.Type = SessionToken
@@ -371,8 +374,10 @@ func TestWebUserTokenValidation(t *testing.T) {
 }
 
 func TestGetAccessToken(t *testing.T) {
+	conn := getConnection()
+	defer conn.Session.Close()
+
 	Convey("Subject: Getting access token", t, func() {
-		conn := getConnection()
 
 		Convey("When we request an access token the response status will be 200 and we must receive a token", func() {
 			testGetHandler(GetAccessToken, func(_ *http.Request) {}, conn, "/", "/",
@@ -391,6 +396,7 @@ func TestGetAccessToken(t *testing.T) {
 
 func TestGetUserToken(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 
 	user := new(User)
 	user.Username = "Jane Doe"
@@ -443,6 +449,7 @@ func TestGetUserToken(t *testing.T) {
 
 func TestLogin(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 
 	user := new(User)
 	user.Username = "Jane Doe"
@@ -499,9 +506,10 @@ func TestLogin(t *testing.T) {
 }
 
 func TestDestroyUserToken(t *testing.T) {
-	Convey("Subject: Testing user token destruction", t, func() {
-		conn := getConnection()
+	conn := getConnection()
+	defer conn.Session.Close()
 
+	Convey("Subject: Testing user token destruction", t, func() {
 		token := new(Token)
 		token.Expires = float64(time.Now().Add(AccessTokenExpirationHours * time.Hour).Unix())
 		token.Type = UserToken

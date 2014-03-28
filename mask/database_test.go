@@ -15,6 +15,7 @@ func TestNewDatabaseConn(t *testing.T) {
 
 			Convey("And a valid mongodb address", func() {
 				conn, err := NewDatabaseConn(config)
+				defer conn.Session.Close()
 				So(conn, ShouldNotEqual, nil)
 				So(err, ShouldEqual, nil)
 			})

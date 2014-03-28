@@ -16,6 +16,7 @@ func TestPostStatus(t *testing.T) {
 		conn.Db.C("posts").RemoveAll(nil)
 		user.Remove(conn)
 		token.Remove(conn)
+		conn.Session.Close()
 	}()
 
 	Convey("Posting a status", t, func() {
@@ -75,6 +76,7 @@ func TestPostVideo(t *testing.T) {
 		conn.Db.C("posts").RemoveAll(nil)
 		user.Remove(conn)
 		token.Remove(conn)
+		conn.Session.Close()
 	}()
 
 	Convey("Posting a video", t, func() {
@@ -192,6 +194,7 @@ func TestPostLink(t *testing.T) {
 		conn.Db.C("posts").RemoveAll(nil)
 		user.Remove(conn)
 		token.Remove(conn)
+		conn.Session.Close()
 	}()
 
 	Convey("Posting a link", t, func() {

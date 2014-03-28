@@ -14,6 +14,8 @@ import (
 
 func TestFollowUser(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
+
 	Convey("Following users", t, func() {
 		from := bson.NewObjectId()
 		to := bson.NewObjectId()
@@ -30,6 +32,8 @@ func TestFollowUser(t *testing.T) {
 
 func TestUnfollowUser(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
+
 	Convey("Unfollowing users", t, func() {
 		from := bson.NewObjectId()
 		to := bson.NewObjectId()
@@ -50,6 +54,7 @@ func TestUnfollowUser(t *testing.T) {
 
 func TestSendFollowRequest(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 
 	Convey("Sending follow requests", t, func() {
 
@@ -276,6 +281,7 @@ func TestSendFollowRequest(t *testing.T) {
 
 func TestReplyFollowRequest(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 
 	Convey("Replying follow requests", t, func() {
 		Convey("With invalid request user", func() {
@@ -439,6 +445,7 @@ func TestReplyFollowRequest(t *testing.T) {
 
 func TestUnfollow(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 
 	Convey("Unfollowing an user", t, func() {
 
@@ -578,6 +585,7 @@ func TestUnfollow(t *testing.T) {
 
 func TestListFollowers(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 	users := make([]bson.ObjectId, 0, 24)
 	user, token := createRequestUser(conn)
 
@@ -704,6 +712,7 @@ func TestListFollowers(t *testing.T) {
 
 func TestListFollowing(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 	users := make([]bson.ObjectId, 0, 24)
 	user, token := createRequestUser(conn)
 
@@ -830,6 +839,7 @@ func TestListFollowing(t *testing.T) {
 
 func TestListFollowRequests(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 	users := make([]bson.ObjectId, 0, 24)
 	user, token := createRequestUser(conn)
 

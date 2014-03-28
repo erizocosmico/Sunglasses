@@ -12,8 +12,9 @@ import (
 
 func TestCreateAccount(t *testing.T) {
 	// TODO needs revisit
+	conn := getConnection()
+	defer conn.Session.Close()
 	Convey("Subject: Creating a new user", t, func() {
-		conn := getConnection()
 
 		Convey("When the recovery method is not valid it should fail", func() {
 			testPostHandler(CreateAccount, func(req *http.Request) {
@@ -119,6 +120,7 @@ func TestCreateAccount(t *testing.T) {
 
 func TestGetAccountInfo(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 
 	Convey("Testing the retrieval of account info", t, func() {
 		Convey("When no user is passed", func() {
@@ -146,6 +148,7 @@ func TestGetAccountInfo(t *testing.T) {
 
 func TestGetAccountSettings(t *testing.T) {
 	conn := getConnection()
+	defer conn.Session.Close()
 
 	Convey("Testing the retrieval of account settings", t, func() {
 		Convey("When no user is passed", func() {
@@ -177,6 +180,7 @@ func TestUpdateAccountInfo(t *testing.T) {
 	defer func() {
 		user.Remove(conn)
 		token.Remove(conn)
+		conn.Session.Close()
 	}()
 
 	Convey("Testing the update of account info", t, func() {
@@ -296,6 +300,7 @@ func TestUpdateAccountSettings(t *testing.T) {
 	defer func() {
 		user.Remove(conn)
 		token.Remove(conn)
+		conn.Session.Close()
 	}()
 
 	Convey("Testing the update of account settings", t, func() {
