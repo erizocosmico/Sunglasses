@@ -41,6 +41,7 @@ const (
 	CodeInvalidFile           = 56
 	CodeInvalidVideoURL       = 57
 	CodeInvalidLinkURL        = 58
+	CodeInvalidUserList = 59
 
 	// Misc messages
 	MsgUnexpected       = "Unexpected error occurred"
@@ -82,4 +83,5 @@ const (
 	MsgInvalidFile           = "Invalid file"
 	MsgInvalidVideoURL       = "Invalid video URL"
 	MsgInvalidLinkURL        = "Invalid link URL"
+	MsgInvalidUserList = "Invalid user list provided"
 )

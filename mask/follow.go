@@ -63,6 +63,20 @@ func (u *User) Follows(to bson.ObjectId, conn *Connection) bool {
 	return count > 0
 }
 
+// FollowedBy checks if the user is followed by another user
+func (u *User) FollowedBy(from bson.ObjectId, conn *Connection) bool {
+	var (
+		err   error
+		count int
+	)
+
+	if count, err = conn.Db.C("follows").Find(bson.M{"user_to": u.ID, "user_from": from}).Count(); err != nil {
+		return false
+	}
+
+	return count > 0
+}
+
 // Save inserts the FollowRequest instance if it hasn't been created yet or updates it if it has
 func (fr *FollowRequest) Save(conn *Connection) error {
 	if fr.ID.Hex() == "" {
