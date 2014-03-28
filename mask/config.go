@@ -28,6 +28,7 @@ func NewConfig(configPath string) (*Config, error) {
 	var config = new(Config)
 
 	file, err := os.Open(configPath)
+	defer file.Close()
 	if err != nil {
 		return nil, err
 	}
