@@ -119,7 +119,7 @@ func postPhoto(user *User, conn *Connection, r *http.Request, config *Config) (i
 			p.Text = strings.TrimSpace(r.PostFormValue("post_text"))
 
 			if strlen(p.Text) <= 1500 {
-				if strlen(p.Caption) > 255 {
+				if strlen(p.Caption) <= 255 {
 					if err := p.Save(conn); err != nil {
 						responseCode = 500
 						response["message"] = MsgUnexpected

@@ -105,7 +105,7 @@ func TestRetrieveUploadedImage(t *testing.T) {
 				panic(err)
 			}
 
-			f.WriteString(randomString(100000000))
+			f.WriteString(randomString(20000000))
 			f.Close()
 
 			testUploadFileHandler("../test_assets/large_file.txt", "image", "/", func(r *http.Request) {

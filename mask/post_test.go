@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -263,6 +265,87 @@ func TestPostLink(t *testing.T) {
 				}
 				So(res.Code, ShouldEqual, 200)
 				So(errResp.Message, ShouldEqual, "Link posted successfully")
+			})
+		})
+	})
+}
+
+func TestPostPhoto(t *testing.T) {
+	conn := getConnection()
+	user, token := createRequestUser(conn)
+	defer func() {
+		conn.Db.C("posts").RemoveAll(nil)
+		user.Remove(conn)
+		token.Remove(conn)
+		conn.Session.Close()
+		filepath.Walk("../test_assets/", func(path string, _ os.FileInfo, _ error) error {
+			if path[strlen(path)-4:] == "jpeg" {
+				os.Remove(path)
+			}
+			return nil
+		})
+	}()
+
+	Convey("Posting a photo", t, func() {
+		Convey("When no user is passed", func() {
+			testPostHandler(CreatePost, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidData)
+				So(errResp.Message, ShouldEqual, MsgInvalidData)
+			})
+		})
+
+		Convey("When the status text is invalid", func() {
+			testUploadFileHandler("../test_assets/gopher.jpg", "post_picture", "/", CreatePost, conn, func(r *http.Request) {
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("post_type", "photo")
+				r.Header.Add("X-User-Token", token.Hash)
+				r.PostForm.Add("post_text", randomString(3000))
+			}, func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+			})
+		})
+
+		Convey("When no file is uploaded", func() {
+			testPostHandler(CreatePost, func(r *http.Request) {
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("post_type", "link")
+				r.Header.Add("X-User-Token", token.Hash)
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+			})
+		})
+
+		Convey("When everything is OK", func() {
+			testUploadFileHandler("../test_assets/gopher.jpg", "post_picture", "/", CreatePost, conn, func(r *http.Request) {
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("post_type", "photo")
+				r.Header.Add("X-User-Token", token.Hash)
+				r.PostForm.Add("post_text", "Fancy pic")
+			}, func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 200)
 			})
 		})
 	})

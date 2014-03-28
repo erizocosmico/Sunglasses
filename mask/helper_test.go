@@ -96,6 +96,9 @@ func testUploadFileHandler(file, key, url string, handler martini.Handler, conn 
 		panic(err)
 	}
 
+	config.StorePath = "../test_assets/"
+	config.ThumbnailStorePath = "../test_assets/"
+
 	m := martini.Classic()
 	m.Map(conn)
 	m.Map(config)
