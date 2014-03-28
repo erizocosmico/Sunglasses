@@ -18,7 +18,22 @@ type UploadOptions struct {
 	MaxHeight, MaxWidth, ThumbnailHeight, ThumbnailWidth int
 }
 
-const maxFileSize = 10*1000*1024 + 1
+type ByteSize float64
+
+const (
+	_           = iota // ignore first value by assigning to blank identifier
+	KB ByteSize = 1 << (10 * iota)
+	MB
+	GB
+	TB
+	PB
+	EB
+	ZB
+	YB
+	maxFileSize = 10 * MB
+)
+
+//const maxFileSize = 10*MB
 
 // DefaultUploadOptions returns a the default configuration options for uploading
 func DefaultUploadOptions(config *Config) UploadOptions {
@@ -37,7 +52,7 @@ func RetrieveUploadedImage(r *http.Request, key string) (io.ReadCloser, error) {
 	f, _, err := r.FormFile(key)
 	if err == nil && f != nil {
 		cLen := r.Header.Get("Content-Length")
-		if len, err := strconv.ParseInt(cLen, 10, 64); err != nil || len > maxFileSize {
+		if len, err := strconv.ParseInt(cLen, 10, 64); err != nil || ByteSize(len) > maxFileSize {
 			return nil, errors.New("file too large")
 		}
 

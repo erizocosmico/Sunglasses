@@ -1,11 +1,16 @@
 package mask
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/codegangsta/martini"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/sessions"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"time"
 )
 
@@ -37,6 +42,81 @@ func testDeleteHandler(handler, middleware martini.Handler, conn *Connection, re
 	testHandler(func(m *martini.ClassicMartini) {
 		m.Delete(handlerUrl, handler)
 	}, middleware, conn, reqUrl, "DELETE", testFunc)
+}
+
+func uploadFile(file, key, url string) (*http.Request, error) {
+	var b bytes.Buffer
+	contentType := "application/octet-stream"
+
+	if file != "" {
+		w := multipart.NewWriter(&b)
+
+		f, err := os.Open(file)
+		if err != nil {
+			return nil, err
+		}
+
+		fw, err := w.CreateFormFile(key, file)
+		if err != nil {
+			return nil, err
+		}
+
+		if _, err = io.Copy(fw, f); err != nil {
+			return nil, err
+		}
+
+		if fw, err = w.CreateFormFile(key, file); err != nil {
+			return nil, err
+		}
+
+		w.Close()
+
+		contentType = w.FormDataContentType()
+	}
+
+	req, err := http.NewRequest("POST", url, &b)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("Content-Length", fmt.Sprint(req.ContentLength))
+
+	return req, nil
+}
+
+func testUploadFileHandler(file, key, url string, handler martini.Handler, conn *Connection, middleware func(*http.Request), testFunc func(*httptest.ResponseRecorder)) {
+	config, err := NewConfig("../config.sample.json")
+	if err != nil {
+		panic(err)
+	}
+
+	req, err := uploadFile(file, key, url)
+	if err != nil {
+		panic(err)
+	}
+
+	m := martini.Classic()
+	m.Map(conn)
+	m.Map(config)
+	m.Use(render.Renderer())
+	store := sessions.NewCookieStore([]byte("secret123"))
+	store.Options(sessions.Options{
+		MaxAge:   0,
+		Secure:   false,
+		HttpOnly: true,
+	})
+	m.Use(sessions.Sessions("my_session", store))
+	m.Post(url, handler)
+	response := httptest.NewRecorder()
+	if middleware != nil {
+		m.Use(middleware)
+	}
+	m.ServeHTTP(response, req)
+	if testFunc != nil {
+		testFunc(response)
+	}
+
 }
 
 func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.Handler, conn *Connection, reqUrl, method string, testFunc func(*httptest.ResponseRecorder)) {

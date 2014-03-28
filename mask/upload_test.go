@@ -6,6 +6,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
+	"net/http"
 	"os"
 	"testing"
 )
@@ -82,6 +83,49 @@ func TestStoreImage(t *testing.T) {
 
 			os.Remove(img)
 			os.Remove(thumb)
+		})
+	})
+}
+
+func TestRetrieveUploadedImage(t *testing.T) {
+	Convey("Retrievng uploaded images", t, func() {
+		Convey("When no file was sent", func() {
+			testUploadFileHandler("", "image", "/", func(r *http.Request) {
+				f, err := RetrieveUploadedImage(r, "image")
+
+				So(err, ShouldNotEqual, nil)
+				So(f, ShouldEqual, nil)
+				So(err.Error(), ShouldEqual, "no file was uploaded")
+			}, nil, nil, nil)
+		})
+
+		Convey("When file is too large", func() {
+			f, err := os.Create("../test_assets/large_file.txt")
+			if err != nil {
+				panic(err)
+			}
+
+			f.WriteString(randomString(100000000))
+			f.Close()
+
+			testUploadFileHandler("../test_assets/large_file.txt", "image", "/", func(r *http.Request) {
+				f, err := RetrieveUploadedImage(r, "image")
+
+				So(err, ShouldNotEqual, nil)
+				So(f, ShouldEqual, nil)
+				//So(err.Error(), ShouldEqual, "file too large")
+			}, nil, nil, nil)
+
+			os.Remove("../test_assets/large_file.txt")
+		})
+
+		Convey("When everything is OK", func() {
+			testUploadFileHandler("../test_assets/gopher.jpg", "image", "/", func(r *http.Request) {
+				f, err := RetrieveUploadedImage(r, "image")
+
+				So(err, ShouldEqual, nil)
+				So(f, ShouldNotEqual, nil)
+			}, nil, nil, nil)
 		})
 	})
 }
