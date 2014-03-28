@@ -19,8 +19,8 @@ type Config struct {
 	DatabaseName       string `json:"database_name"`
 	Debug              bool   `json:"debug"`
 	SecureCookies      bool   `json:"secure_cookies"`
-	StorePath          string `json:"store_path`
-	ThumbnailStorePath string `json:"thumbnail_store_path`
+	StorePath          string `json:"store_path"`
+	ThumbnailStorePath string `json:"thumbnail_store_path"`
 }
 
 // NewConfig creates a new config struct
