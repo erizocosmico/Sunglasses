@@ -27,6 +27,8 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 	m.Map(config)
 	m.Map(conn)
 	m.Use(render.Renderer())
+	m.Use(martini.Static(config.StorePath))
+	m.Use(martini.Static(config.ThumbnailStorePath))
 	store := sessions.NewCookieStore([]byte(config.SecretKey), []byte(config.EncriptionKey))
 	store.Options(sessions.Options{
 		MaxAge:   UserTokenExpirationDays * 86400,

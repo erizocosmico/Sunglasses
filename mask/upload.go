@@ -14,8 +14,8 @@ import (
 )
 
 type UploadOptions struct {
-	StorePath, ThumbnailStorePath                        string
-	MaxHeight, MaxWidth, ThumbnailHeight, ThumbnailWidth int
+	StorePath, ThumbnailStorePath, WebStorePath, WebThumbnailStorePath string
+	MaxHeight, MaxWidth, ThumbnailHeight, ThumbnailWidth               int
 }
 
 type ByteSize float64
@@ -33,17 +33,31 @@ const (
 	maxFileSize = 10 * MB
 )
 
-//const maxFileSize = 10*MB
-
-// DefaultUploadOptions returns a the default configuration options for uploading
+// DefaultUploadOptions returns the default configuration options for uploading
 func DefaultUploadOptions(config *Config) UploadOptions {
 	return UploadOptions{
-		MaxHeight:          3000,
-		MaxWidth:           6000,
-		ThumbnailHeight:    150,
-		ThumbnailWidth:     150,
-		StorePath:          config.StorePath,
-		ThumbnailStorePath: config.ThumbnailStorePath,
+		MaxHeight:             3000,
+		MaxWidth:              6000,
+		ThumbnailHeight:       150,
+		ThumbnailWidth:        150,
+		StorePath:             config.StorePath,
+		ThumbnailStorePath:    config.ThumbnailStorePath,
+		WebStorePath:          config.WebStorePath,
+		WebThumbnailStorePath: config.WebThumbnailStorePath,
+	}
+}
+
+// ProfileUploadOptions returns the default configuration options for uploading profile pictures
+func ProfileUploadOptions(config *Config) UploadOptions {
+	return UploadOptions{
+		MaxHeight:             500,
+		MaxWidth:              500,
+		ThumbnailHeight:       150,
+		ThumbnailWidth:        150,
+		StorePath:             config.StorePath,
+		ThumbnailStorePath:    config.ThumbnailStorePath,
+		WebStorePath:          config.WebStorePath,
+		WebThumbnailStorePath: config.WebThumbnailStorePath,
 	}
 }
 
@@ -79,7 +93,8 @@ func StoreImage(file io.ReadCloser, options UploadOptions) (string, string, erro
 		return "", "", errors.New("file dimensions are too large")
 	}
 
-	imagePath := options.StorePath + NewFileName(format)
+	iName := NewFileName(format)
+	imagePath := options.StorePath + iName
 	dst, err := os.Create(imagePath)
 	defer dst.Close()
 	if err != nil {
@@ -95,7 +110,8 @@ func StoreImage(file io.ReadCloser, options UploadOptions) (string, string, erro
 		return "", "", err
 	}
 
-	thumbnailPath := options.ThumbnailStorePath + NewFileName(format)
+	tName := NewFileName(format)
+	thumbnailPath := options.ThumbnailStorePath + tName
 	thumbDst, err := os.Create(thumbnailPath)
 	if err != nil {
 		return "", "", err
@@ -107,7 +123,7 @@ func StoreImage(file io.ReadCloser, options UploadOptions) (string, string, erro
 
 	thumbDst.Close()
 
-	return imagePath, thumbnailPath, nil
+	return options.WebStorePath + iName, options.WebThumbnailStorePath + tName, nil
 }
 
 // CodeAndMessageForUploadError returns a code and an error message for the given error

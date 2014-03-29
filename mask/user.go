@@ -44,21 +44,23 @@ const (
 
 // User represents an application user
 type User struct {
-	ID                bson.ObjectId `json:"id,omitempty" bson:"_id"`
-	Username          string        `json:"username" bson:"username"`
-	UsernameLower     string        `json:"username_lower,omitempty" bson:"username_lower"`
-	Password          string        `json:"-" bson:"password"`
-	EMail             string        `json:"-" bson:"email,omitempty"`
-	PublicName        string        `json:"public_name,omitempty" bson:"public_name,omitempty"`
-	PrivateName       string        `json:"private_name,omitempty" bson:"private_name,omitempty"`
-	Role              UserRole      `json:"role,omitempty" bson:"role"`
-	PreferredLanguage string        `json:"preferred_lang,omitempty" bson:"preferred_lang,omitempty"`
-	Timezone          int           `json:"timezone,omitempty" bson:"timezone,omitempty"`
-	Avatar            string        `json:"avatar,omitempty" bson:"avatar,omitempty"`
-	PublicAvatar      string        `json:"public_avatar,omitempty" bson:"public_avatar,omitempty"`
-	Active            bool          `json:"active,omitempty" bson:"active"`
-	Info              UserInfo      `json:"info,omitempty" bson:"info"`
-	Settings          UserSettings  `json:"settings,omitempty" bson:"settings"`
+	ID                    bson.ObjectId `json:"id,omitempty" bson:"_id"`
+	Username              string        `json:"username" bson:"username"`
+	UsernameLower         string        `json:"username_lower,omitempty" bson:"username_lower"`
+	Password              string        `json:"-" bson:"password"`
+	EMail                 string        `json:"-" bson:"email,omitempty"`
+	PublicName            string        `json:"public_name,omitempty" bson:"public_name,omitempty"`
+	PrivateName           string        `json:"private_name,omitempty" bson:"private_name,omitempty"`
+	Role                  UserRole      `json:"role,omitempty" bson:"role"`
+	PreferredLanguage     string        `json:"preferred_lang,omitempty" bson:"preferred_lang,omitempty"`
+	Timezone              int           `json:"timezone,omitempty" bson:"timezone,omitempty"`
+	Avatar                string        `json:"avatar,omitempty" bson:"avatar,omitempty"`
+	AvatarThumbnail       string        `json:"avatar_thumbnail,omitempty" bson:"avatar_thumbnail,omitempty"`
+	PublicAvatar          string        `json:"public_avatar,omitempty" bson:"public_avatar,omitempty"`
+	PublicAvatarThumbnail string        `json:"public_avatar_thumbnail,omitempty" bson:"public_avatar_thumbnail,omitempty"`
+	Active                bool          `json:"active,omitempty" bson:"active"`
+	Info                  UserInfo      `json:"info,omitempty" bson:"info"`
+	Settings              UserSettings  `json:"settings,omitempty" bson:"settings"`
 }
 
 // UserInfo stores all personal information about the user
@@ -244,14 +246,16 @@ func GetUsersData(ids []bson.ObjectId, privateAccess bool, conn *Connection) map
 	for cursor.Next(&u) {
 		if !u.Settings.Invisible || privateAccess {
 			user := User{
-				ID:           u.ID,
-				Username:     u.Username,
-				PublicAvatar: u.PublicAvatar,
-				PublicName:   u.PublicName,
+				ID:                    u.ID,
+				Username:              u.Username,
+				PublicAvatar:          u.PublicAvatar,
+				PublicAvatarThumbnail: u.PublicAvatarThumbnail,
+				PublicName:            u.PublicName,
 			}
 
 			if u.Settings.DisplayAvatarBeforeApproval || privateAccess {
 				user.Avatar = u.Avatar
+				user.AvatarThumbnail = u.AvatarThumbnail
 				user.PrivateName = u.PrivateName
 			}
 

@@ -150,3 +150,11 @@ func isValidLink(URL string) (bool, string, string) {
 
 	return true, URL, title
 }
+
+func toLocalImagePath(url string, config *Config) string {
+	return strings.Replace(url, config.WebStorePath, config.StorePath, -1)
+}
+
+func toLocalThumbnailPath(url string, config *Config) string {
+	return strings.Replace(url, config.WebThumbnailStorePath, config.ThumbnailStorePath, -1)
+}

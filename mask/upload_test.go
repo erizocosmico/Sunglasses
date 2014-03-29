@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -21,6 +22,13 @@ func loadFile(path string) (io.ReadCloser, error) {
 }
 
 func TestStoreImage(t *testing.T) {
+	defer filepath.Walk("../test_assets/", func(path string, _ os.FileInfo, _ error) error {
+		if path[strlen(path)-4:] == "jpeg" {
+			os.Remove(path)
+		}
+		return nil
+	})
+
 	Convey("Testing the image storage", t, func() {
 		Convey("When an invalid file format is given", func() {
 			f, err := loadFile("../test_assets/file.md")
@@ -80,9 +88,6 @@ func TestStoreImage(t *testing.T) {
 			So(err, ShouldEqual, nil)
 			So(img, ShouldNotEqual, "")
 			So(thumb, ShouldNotEqual, "")
-
-			os.Remove(img)
-			os.Remove(thumb)
 		})
 	})
 }
@@ -113,7 +118,6 @@ func TestRetrieveUploadedImage(t *testing.T) {
 
 				So(err, ShouldNotEqual, nil)
 				So(f, ShouldEqual, nil)
-				//So(err.Error(), ShouldEqual, "file too large")
 			}, nil, nil, nil)
 
 			os.Remove("../test_assets/large_file.txt")

@@ -7,6 +7,7 @@ import (
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"net/mail"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -263,7 +264,13 @@ func UpdateAccountSettings(r *http.Request, conn *Connection, res render.Render,
 					uids = append(uids, bson.ObjectIdHex(u))
 				}
 
-				// TODO check if users are followed by the user
+				count, err := conn.Db.C("follows").Find(bson.M{"user_from": user.ID, "user_to": bson.M{"$in": uids}}).Count()
+				if err != nil || count != len(p.Users) {
+					count2, err := conn.Db.C("follows").Find(bson.M{"user_to": user.ID, "user_from": bson.M{"$in": uids}}).Count()
+					if err != nil || count+count2 != len(uids) {
+						return p, errors.New("invalid user list provided")
+					}
+				}
 
 				p.Users = uids
 			} else if p.Type > PrivacyNone {
@@ -347,6 +354,65 @@ func UpdateAccountSettings(r *http.Request, conn *Connection, res render.Render,
 		if err := user.Save(conn); err != nil {
 			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
 			return
+		}
+
+		res.JSON(200, map[string]interface{}{
+			"error":   false,
+			"message": "User settings updated successfully",
+		})
+		return
+	}
+
+	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+}
+
+// UpldateProfilePicture updates the current profile picture of the user
+func UpdateProfilePicture(r *http.Request, conn *Connection, res render.Render, s sessions.Session, config *Config) {
+	user := GetRequestUser(r, conn, s)
+
+	if user != nil {
+		file, err := RetrieveUploadedImage(r, "account_picture")
+		if err != nil {
+			code, msg := CodeAndMessageForUploadError(err)
+			RenderError(res, code, 400, msg)
+			return
+		}
+
+		imagePath, thumbnailPath, err := StoreImage(file, ProfileUploadOptions(config))
+		if err != nil {
+			code, msg := CodeAndMessageForUploadError(err)
+			RenderError(res, code, 400, msg)
+			return
+		}
+
+		var prevAvatar, prevThumbnail string
+
+		if r.PostFormValue("picture_type") == "public" {
+			prevAvatar = user.PublicAvatar
+			user.PublicAvatar = imagePath
+			prevThumbnail = user.PublicAvatarThumbnail
+			user.PublicAvatarThumbnail = thumbnailPath
+		} else {
+			prevAvatar = user.Avatar
+			user.Avatar = imagePath
+			prevThumbnail = user.AvatarThumbnail
+			user.AvatarThumbnail = thumbnailPath
+		}
+
+		if user.Save(conn); err != nil {
+			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+
+			os.Remove(toLocalImagePath(imagePath, config))
+			os.Remove(toLocalThumbnailPath(thumbnailPath, config))
+			return
+		} else {
+			if prevAvatar != "" {
+				os.Remove(toLocalImagePath(prevAvatar, config))
+			}
+
+			if prevThumbnail != "" {
+				os.Remove(toLocalThumbnailPath(prevThumbnail, config))
+			}
 		}
 
 		res.JSON(200, map[string]interface{}{
