@@ -1,6 +1,7 @@
 package mask
 
 import (
+	"errors"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/sessions"
 	"labix.org/v2/mgo/bson"
@@ -9,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"errors"
 )
 
 type ObjectType int
@@ -138,9 +138,9 @@ func LikePost(r *http.Request, conn *Connection, res render.Render, s sessions.S
 			return
 		}
 		res.JSON(200, map[string]interface{}{
-				"error": false,
-				"liked": false,
-				"message": "Post unliked successfully",
+			"error":   false,
+			"liked":   false,
+			"message": "Post unliked successfully",
 		})
 		return
 	}
@@ -153,8 +153,8 @@ func LikePost(r *http.Request, conn *Connection, res render.Render, s sessions.S
 	}
 
 	res.JSON(200, map[string]interface{}{
-		"error": false,
-		"liked": true,
+		"error":   false,
+		"liked":   true,
 		"message": "Post liked successfully",
 	})
 }

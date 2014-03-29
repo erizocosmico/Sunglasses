@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"sync"
+	//	"sync"
 )
 
 func TestPostStatus(t *testing.T) {
