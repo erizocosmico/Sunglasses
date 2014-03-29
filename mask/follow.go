@@ -1,10 +1,7 @@
 package mask
 
 import (
-	"github.com/martini-contrib/render"
-	"github.com/martini-contrib/sessions"
 	"labix.org/v2/mgo/bson"
-	"net/http"
 	"time"
 )
 
@@ -96,180 +93,170 @@ func (fr *FollowRequest) Remove(conn *Connection) error {
 }
 
 // SendFollowRequests sends a follow request from an user to another user
-func SendFollowRequest(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+func SendFollowRequest(c Context) {
 	var toUser *User
 	var blankID bson.ObjectId
 
-	userFrom := GetRequestUser(r, conn, s)
+	userFrom := c.User
 
 	if userFrom != nil {
-		userTo := r.PostFormValue("user_to")
+		userTo := c.Form("user_to")
 
 		if userTo != "" && bson.IsObjectIdHex(userTo) {
 			userToID := bson.ObjectIdHex(userTo)
 
-			if toUser = UserExists(conn, userToID); toUser != nil {
+			if toUser = UserExists(c.Conn, userToID); toUser != nil {
 
-				if !userFrom.Follows(userToID, conn) {
+				if !userFrom.Follows(userToID, c.Conn) {
 					// If the user we want to follow already follows us, skip privacy settings
-					if toUser.Follows(userFrom.ID, conn) || !toUser.Settings.FollowApprovalRequired {
-						if err := FollowUser(userFrom.ID, userToID, conn); err == nil {
-							SendNotification(NotificationFollowed, toUser, blankID, userFrom.ID, conn)
+					if toUser.Follows(userFrom.ID, c.Conn) || !toUser.Settings.FollowApprovalRequired {
+						if err := FollowUser(userFrom.ID, userToID, c.Conn); err == nil {
+							SendNotification(NotificationFollowed, toUser, blankID, userFrom.ID, c.Conn)
 						} else {
-							RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+							c.Error(500, CodeUnexpected, MsgUnexpected)
 							return
 						}
 
-						res.JSON(200, map[string]interface{}{
-							"error":   false,
+						c.Success(200, map[string]interface{}{
 							"message": "User followed successfully",
 						})
 						return
 					} else {
-						if !toUser.Settings.CanReceiveRequests || UserIsBlocked(userFrom.ID, userToID, conn) {
-							RenderError(res, CodeUserCantBeRequested, 403, MsgUserCantBeRequested)
+						if !toUser.Settings.CanReceiveRequests || UserIsBlocked(userFrom.ID, userToID, c.Conn) {
+							c.Error(403, CodeUserCantBeRequested, MsgUserCantBeRequested)
 							return
 						}
 
 						fr := new(FollowRequest)
 						fr.From = userFrom.ID
 						fr.To = userToID
-						fr.Msg = r.PostFormValue("request_message")
+						fr.Msg = c.Form("request_message")
 						fr.Time = float64(time.Now().Unix())
 
-						if err := fr.Save(conn); err == nil {
-							SendNotification(NotificationFollowRequest, toUser, blankID, userFrom.ID, conn)
+						if err := fr.Save(c.Conn); err == nil {
+							SendNotification(NotificationFollowRequest, toUser, blankID, userFrom.ID, c.Conn)
 
-							res.JSON(200, map[string]interface{}{
-								"error":   false,
+							c.Success(200, map[string]interface{}{
 								"message": "Follow request sent successfully",
 							})
 							return
 						}
 
-						RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+						c.Error(500, CodeUnexpected, MsgUnexpected)
 						return
 					}
 				}
 
-				res.JSON(200, map[string]interface{}{
-					"error":   false,
+				c.Success(200, map[string]interface{}{
 					"message": "You already follow that user",
 				})
 				return
 			}
 
-			RenderError(res, CodeUserDoesNotExist, 404, MsgUserDoesNotExist)
+			c.Error(404, CodeUserDoesNotExist, MsgUserDoesNotExist)
 			return
 		}
 	}
 
-	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	c.Error(400, CodeInvalidData, MsgInvalidData)
 }
 
 // ReplyFollowRequests replies a follow request
-func ReplyFollowRequest(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+func ReplyFollowRequest(c Context) {
 	var blankID bson.ObjectId
-	user := GetRequestUser(r, conn, s)
 
-	if user != nil {
-		reqIDStr := r.PostFormValue("request_id")
+	if c.User != nil {
+		reqIDStr := c.Form("request_id")
 
 		if reqIDStr != "" && bson.IsObjectIdHex(reqIDStr) {
 			reqID := bson.ObjectIdHex(reqIDStr)
 			var fr FollowRequest
 
-			if err := conn.Db.C("requests").FindId(reqID).One(&fr); err == nil {
-				if fr.To.Hex() == user.ID.Hex() {
-					if err := (&fr).Remove(conn); err == nil {
-						if r.PostFormValue("accept") == "yes" {
-							if err := FollowUser(fr.From, user.ID, conn); err == nil {
-								SendNotification(NotificationFollowRequestAccepted, user, blankID, fr.To, conn)
+			if err := c.Query("requests").FindId(reqID).One(&fr); err == nil {
+				if fr.To.Hex() == c.User.ID.Hex() {
+					if err := (&fr).Remove(c.Conn); err == nil {
+						if c.Form("accept") == "yes" {
+							if err := FollowUser(fr.From, c.User.ID, c.Conn); err == nil {
+								SendNotification(NotificationFollowRequestAccepted, c.User, blankID, fr.To, c.Conn)
 							} else {
-								RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+								c.Error(500, CodeUnexpected, MsgUnexpected)
 								return
 							}
 						}
 
-						res.JSON(200, map[string]interface{}{
-							"error":   false,
+						c.Success(200, map[string]interface{}{
 							"message": "Successfully replied to follow request",
 						})
 						return
 					}
 
-					RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+					c.Error(500, CodeUnexpected, MsgUnexpected)
 					return
 				}
 
-				RenderError(res, CodeUnauthorized, 404, MsgUnauthorized)
+				c.Error(404, CodeUnauthorized, MsgUnauthorized)
 				return
 			}
 
-			RenderError(res, CodeFollowRequestDoesNotExist, 404, MsgFollowRequestDoesNotExist)
+			c.Error(404, CodeFollowRequestDoesNotExist, MsgFollowRequestDoesNotExist)
 			return
 		}
 	}
 
-	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	c.Error(400, CodeInvalidData, MsgInvalidData)
 }
 
 // Unfollow unfollows an user
-func Unfollow(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	user := GetRequestUser(r, conn, s)
-
-	if user != nil {
-		userTo := r.PostFormValue("user_to")
+func Unfollow(c Context) {
+	if c.User != nil {
+		userTo := c.Form("user_to")
 
 		if userTo != "" && bson.IsObjectIdHex(userTo) {
 			userToID := bson.ObjectIdHex(userTo)
 
-			if toUser := UserExists(conn, userToID); toUser != nil {
-				if user.Follows(userToID, conn) {
-					if err := UnfollowUser(user.ID, userToID, conn); err != nil {
-						RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			if toUser := UserExists(c.Conn, userToID); toUser != nil {
+				if c.User.Follows(userToID, c.Conn) {
+					if err := UnfollowUser(c.User.ID, userToID, c.Conn); err != nil {
+						c.Error(500, CodeUnexpected, MsgUnexpected)
 						return
 					}
 
-					res.JSON(200, map[string]interface{}{
-						"error":   false,
+					c.Success(200, map[string]interface{}{
 						"message": "User unfollowed successfully",
 					})
 					return
 				}
 
-				res.JSON(200, map[string]interface{}{
-					"error":   false,
+				c.Success(200, map[string]interface{}{
 					"message": "You can't unfollow that user",
 				})
 				return
 			}
 
-			RenderError(res, CodeUserDoesNotExist, 404, MsgUserDoesNotExist)
+			c.Error(404, CodeUserDoesNotExist, MsgUserDoesNotExist)
 			return
 		}
 	}
 
-	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	c.Error(400, CodeInvalidData, MsgInvalidData)
 }
 
 // ListFollowers retrieves a list with the user's followers
-func ListFollowers(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	listFollows(r, conn, res, s, true)
+func ListFollowers(c Context) {
+	listFollows(c, true)
 }
 
 // ListFollowing retrieves a list with the users followed by the user
-func ListFollowing(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	listFollows(r, conn, res, s, false)
+func ListFollowing(c Context) {
+	listFollows(c, false)
 }
 
-func listFollows(r *http.Request, conn *Connection, res render.Render, s sessions.Session, listFollowers bool) {
-	user := GetRequestUser(r, conn, s)
-	count, offset := ListCountParams(r)
+func listFollows(c Context, listFollowers bool) {
+	count, offset := c.ListCountParams()
 	var result Follow
 	follows := make([]Follow, 0, count)
 
-	if user != nil {
+	if c.User != nil {
 		var key, outputKey string
 		if listFollowers {
 			key = "user_to"
@@ -279,13 +266,13 @@ func listFollows(r *http.Request, conn *Connection, res render.Render, s session
 			outputKey = "followings"
 		}
 
-		cursor := conn.Db.C("follows").Find(bson.M{key: user.ID}).Limit(count).Skip(offset).Iter()
+		cursor := c.Query("follows").Find(bson.M{key: c.User.ID}).Limit(count).Skip(offset).Iter()
 		for cursor.Next(&result) {
 			follows = append(follows, result)
 		}
 
 		if err := cursor.Close(); err != nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
@@ -303,9 +290,9 @@ func listFollows(r *http.Request, conn *Connection, res render.Render, s session
 
 		}
 
-		usersData := GetUsersData(users, false, conn)
+		usersData := GetUsersData(users, false, c.Conn)
 		if usersData == nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
@@ -326,32 +313,30 @@ func listFollows(r *http.Request, conn *Connection, res render.Render, s session
 			}
 		}
 
-		res.JSON(200, map[string]interface{}{
-			"error":   false,
+		c.Success(200, map[string]interface{}{
 			outputKey: followsResponse,
 			"count":   len(followsResponse),
 		})
 		return
 	}
 
-	RenderError(res, CodeUnauthorized, 403, MsgUnauthorized)
+	c.Error(403, CodeUnauthorized, MsgUnauthorized)
 }
 
 // ListFollowRequests returns all the user's follow requests
-func ListFollowRequests(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	user := GetRequestUser(r, conn, s)
-	count, offset := ListCountParams(r)
+func ListFollowRequests(c Context) {
+	count, offset := c.ListCountParams()
 	var result FollowRequest
 	requests := make([]FollowRequest, 0)
 
-	if user != nil {
-		cursor := conn.Db.C("requests").Find(bson.M{"user_to": user.ID}).Limit(count).Skip(offset).Iter()
+	if c.User != nil {
+		cursor := c.Query("requests").Find(bson.M{"user_to": c.User.ID}).Limit(count).Skip(offset).Iter()
 		for cursor.Next(&result) {
 			requests = append(requests, result)
 		}
 
 		if err := cursor.Close(); err != nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
@@ -362,9 +347,9 @@ func ListFollowRequests(r *http.Request, conn *Connection, res render.Render, s 
 			}
 		}
 
-		usersData := GetUsersData(users, false, conn)
+		usersData := GetUsersData(users, false, c.Conn)
 		if usersData == nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
@@ -379,13 +364,12 @@ func ListFollowRequests(r *http.Request, conn *Connection, res render.Render, s 
 			}
 		}
 
-		res.JSON(200, map[string]interface{}{
-			"error":           false,
+		c.Success(200, map[string]interface{}{
 			"follow_requests": requestsResponse,
 			"count":           len(requestsResponse),
 		})
 		return
 	}
 
-	RenderError(res, CodeUnauthorized, 403, MsgUnauthorized)
+	c.Error(403, CodeUnauthorized, MsgUnauthorized)
 }

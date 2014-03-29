@@ -110,11 +110,12 @@ func testUploadFileHandler(file, key, url string, handler martini.Handler, conn 
 		HttpOnly: true,
 	})
 	m.Use(sessions.Sessions("my_session", store))
-	m.Post(url, handler)
-	response := httptest.NewRecorder()
 	if middleware != nil {
 		m.Use(middleware)
 	}
+	m.Use(CreateContext)
+	m.Post(url, handler)
+	response := httptest.NewRecorder()
 	m.ServeHTTP(response, req)
 	if testFunc != nil {
 		testFunc(response)
@@ -140,11 +141,12 @@ func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.H
 		HttpOnly: true,
 	})
 	m.Use(sessions.Sessions("my_session", store))
-	methHandler(m)
-	response := httptest.NewRecorder()
 	if middleware != nil {
 		m.Use(middleware)
 	}
+	m.Use(CreateContext)
+	methHandler(m)
+	response := httptest.NewRecorder()
 	m.ServeHTTP(response, req)
 	testFunc(response)
 }

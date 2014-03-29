@@ -36,6 +36,7 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 		HttpOnly: true,
 	})
 	m.Use(sessions.Sessions(config.SessionName, store))
+	m.Use(CreateContext)
 
 	// Add routes
 

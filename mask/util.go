@@ -6,57 +6,13 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"fmt"
-	"github.com/martini-contrib/render"
 	"io/ioutil"
 	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 )
-
-// RenderError renders an error message
-func RenderError(resp render.Render, code, status int, message string) {
-	resp.JSON(status, map[string]interface{}{
-		"error":   true,
-		"single":  true,
-		"code":    code,
-		"message": message,
-	})
-}
-
-// RenderErrors renders a json response with an array of errors
-func RenderErrors(resp render.Render, status int, codes []int, messages []string) {
-	resp.JSON(status, map[string]interface{}{
-		"error":    true,
-		"single":   false,
-		"messages": messages,
-		"codes":    codes,
-	})
-}
-
-// ListCountParams returns the count and offset parameters from the request
-func ListCountParams(r *http.Request) (int, int) {
-	var (
-		count, offset int64
-		err           error
-	)
-
-	if count, err = strconv.ParseInt(r.FormValue("count"), 10, 8); err != nil {
-		count = 25
-	}
-
-	if count > 100 || count < 5 {
-		count = 25
-	}
-
-	if offset, err = strconv.ParseInt(r.FormValue("offset"), 10, 8); err != nil {
-		offset = 0
-	}
-
-	return int(count), int(offset)
-}
 
 func crypt(str string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(str), 10)
@@ -102,16 +58,6 @@ func Hash(h string) string {
 
 func strlen(s string) int {
 	return utf8.RuneCountInString(s)
-}
-
-func getBoolean(r *http.Request, key string) bool {
-	if v := r.FormValue(key); v != "" {
-		if strings.ToLower(v) == "true" || v == "1" {
-			return true
-		}
-	}
-
-	return false
 }
 
 func isValidURL(URL string) bool {

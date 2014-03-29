@@ -2,8 +2,6 @@ package mask
 
 import (
 	"errors"
-	"github.com/martini-contrib/render"
-	"github.com/martini-contrib/sessions"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"os"
@@ -62,83 +60,73 @@ func NewPost(t ObjectType, user *User, r *http.Request) *Post {
 }
 
 // CreatePost creates a new post
-func CreatePost(r *http.Request, conn *Connection, res render.Render, s sessions.Session, config *Config) {
-	var (
-		postType     = r.PostFormValue("post_type")
-		status   int = 200
-		response     = make(map[string]interface{})
-		user         = GetRequestUser(r, conn, s)
-	)
+func CreatePost(c Context) {
+	postType := c.Form("post_type")
 
-	if user == nil {
-		RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	if c.User == nil {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return
 	}
 
 	switch postType {
 	case "photo":
-		status, response = postPhoto(user, conn, r, config)
+		postPhoto(c)
 		break
 	case "video":
-		status, response = postVideo(user, conn, r)
+		postVideo(c)
 		break
 	case "link":
-		status, response = postLink(user, conn, r)
+		postLink(c)
 		break
 	default:
 		// Default post type is status
-		status, response = postStatus(user, conn, r)
+		postStatus(c)
 	}
-
-	res.JSON(status, response)
 }
 
 // LikePost likes a post (or unlikes it if the post has already been liked)
-func LikePost(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+func LikePost(c Context) {
 	var post *Post
 
-	user := GetRequestUser(r, conn, s)
-
-	if user == nil {
-		RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	if c.User == nil {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return
 	}
 
-	postID := r.PostFormValue("post_id")
+	postID := c.Form("post_id")
 	if !bson.IsObjectIdHex(postID) {
-		RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return
 	}
 
-	if err := conn.Db.C("posts").FindId(bson.ObjectIdHex(postID)).One(post); err != nil {
-		RenderError(res, CodeNotFound, 404, MsgNotFound)
+	if err := c.Query("posts").FindId(bson.ObjectIdHex(postID)).One(post); err != nil {
+		c.Error(404, CodeNotFound, MsgNotFound)
 		return
 	}
 
-	if !post.CanBeAccessedBy(user, conn) {
-		RenderError(res, CodeUnauthorized, 403, MsgUnauthorized)
+	if !post.CanBeAccessedBy(c.User, c.Conn) {
+		c.Error(403, CodeUnauthorized, MsgUnauthorized)
 		return
 	}
 
-	count, _ := conn.Db.C("likes").Find(bson.M{"post_id": post.ID, "user_id": user.ID}).Count()
+	count, _ := c.Query("likes").Find(bson.M{"post_id": post.ID, "user_id": c.User.ID}).Count()
 
 	// Post was already liked by the user, unlike it
 	if count > 0 {
 		post.Likes--
-		if err := post.Save(conn); err != nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+		if err := post.Save(c.Conn); err != nil {
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
-		if _, err := conn.Db.C("likes").RemoveAll(bson.M{"post_id": post.ID, "user_id": user.ID}); err != nil {
+		if _, err := c.Query("likes").RemoveAll(bson.M{"post_id": post.ID, "user_id": c.User.ID}); err != nil {
 			post.Likes++
-			post.Save(conn)
+			post.Save(c.Conn)
 
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
-		res.JSON(200, map[string]interface{}{
-			"error":   false,
+		c.Success(200, map[string]interface{}{
 			"liked":   false,
 			"message": "Post unliked successfully",
 		})
@@ -147,228 +135,170 @@ func LikePost(r *http.Request, conn *Connection, res render.Render, s sessions.S
 
 	// Like post
 	post.Likes++
-	if err := post.Save(conn); err != nil {
-		RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+	if err := post.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
 	}
 
-	res.JSON(200, map[string]interface{}{
-		"error":   false,
+	c.Success(200, map[string]interface{}{
 		"liked":   true,
 		"message": "Post liked successfully",
 	})
 }
 
-func postPhoto(user *User, conn *Connection, r *http.Request, config *Config) (int, map[string]interface{}) {
-	var (
-		responseCode int = 400
-		response         = make(map[string]interface{})
-	)
-
-	response["error"] = true
-	file, err := RetrieveUploadedImage(r, "post_picture")
+func postPhoto(c Context) {
+	file, err := RetrieveUploadedImage(c.Request, "post_picture")
 	if err != nil {
 		code, msg := CodeAndMessageForUploadError(err)
-		response["code"] = code
-		response["message"] = msg
-	} else {
-		imagePath, thumbnailPath, err := StoreImage(file, DefaultUploadOptions(config))
-		if err != nil {
-			code, msg := CodeAndMessageForUploadError(err)
-			response["code"] = code
-			response["message"] = msg
-		} else {
-			p := NewPost(PostPhoto, user, r)
-			p.PhotoURL = imagePath
-			p.Thumbnail = thumbnailPath
-			p.Caption = strings.TrimSpace(r.FormValue("caption"))
-			p.Text = strings.TrimSpace(r.PostFormValue("post_text"))
-			privacy, err := getPostPrivacy(PostPhoto, r, user, conn)
-			if err != nil {
-				responseCode = 400
-				response["error"] = true
-				response["single"] = true
-				response["code"] = CodeInvalidUserList
-				response["message"] = MsgInvalidUserList
-			} else {
-				p.Privacy = privacy
-
-				if strlen(p.Text) <= 1500 {
-					if strlen(p.Caption) <= 255 {
-						if err := p.Save(conn); err != nil {
-							responseCode = 500
-							response["message"] = MsgUnexpected
-							response["code"] = CodeUnexpected
-
-							os.Remove(p.PhotoURL)
-							os.Remove(p.Thumbnail)
-						} else {
-							responseCode = 200
-							response["error"] = false
-							response["message"] = "Photo posted successfully"
-						}
-					} else {
-						response["code"] = CodeInvalidCaption
-						response["message"] = MsgInvalidCaption
-					}
-				} else {
-					response["code"] = CodeInvalidStatusText
-					response["message"] = MsgInvalidStatusText
-				}
-			}
-		}
+		c.Error(400, code, msg)
+		return
 	}
 
-	if response["error"].(bool) {
-		response["single"] = true
+	imagePath, thumbnailPath, err := StoreImage(file, DefaultUploadOptions(c.Config))
+	if err != nil {
+		code, msg := CodeAndMessageForUploadError(err)
+		c.Error(400, code, msg)
+		return
 	}
 
-	return responseCode, response
+	p := NewPost(PostPhoto, c.User, c.Request)
+	p.PhotoURL = imagePath
+	p.Thumbnail = thumbnailPath
+	p.Caption = strings.TrimSpace(c.Form("caption"))
+	p.Text = strings.TrimSpace(c.Form("post_text"))
+	privacy, err := getPostPrivacy(PostPhoto, c)
+	if err != nil {
+		c.Error(400, CodeInvalidUserList, MsgInvalidUserList)
+		return
+	}
+
+	p.Privacy = privacy
+
+	if strlen(p.Text) > 1500 {
+		c.Error(400, CodeInvalidStatusText, MsgInvalidStatusText)
+		return
+	}
+
+	if strlen(p.Caption) > 255 {
+		c.Error(400, CodeInvalidCaption, MsgInvalidCaption)
+		return
+	}
+
+	if err := p.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+
+		os.Remove(p.PhotoURL)
+		os.Remove(p.Thumbnail)
+		return
+	}
+
+	c.Success(201, map[string]interface{}{
+		"message": "Photo posted successfully",
+	})
 }
 
-func postVideo(user *User, conn *Connection, r *http.Request) (int, map[string]interface{}) {
-	var (
-		responseCode int = 400
-		statusText       = strings.TrimSpace(r.PostFormValue("post_text"))
-		response         = make(map[string]interface{})
-	)
+func postVideo(c Context) {
+	statusText := strings.TrimSpace(c.Form("post_text"))
 
-	if strlen(statusText) <= 1500 {
-		post := NewPost(PostVideo, user, r)
-		post.Text = statusText
-		privacy, err := getPostPrivacy(PostVideo, r, user, conn)
-		if err != nil {
-			responseCode = 400
-			response["error"] = true
-			response["single"] = true
-			response["code"] = CodeInvalidUserList
-			response["message"] = MsgInvalidUserList
-		} else {
-			post.Privacy = privacy
-
-			valid, videoID, service, title := isValidVideo(strings.TrimSpace(r.PostFormValue("video_url")))
-
-			if !valid {
-				response["error"] = true
-				response["single"] = true
-				response["message"] = MsgInvalidVideoURL
-				response["code"] = CodeInvalidVideoURL
-			} else {
-				post.VideoID = videoID
-				post.Service = service
-				post.Title = title
-
-				if err := post.Save(conn); err != nil {
-					responseCode = 500
-					response["error"] = true
-					response["single"] = true
-					response["message"] = MsgUnexpected
-					response["code"] = CodeUnexpected
-				} else {
-					responseCode = 200
-					response["error"] = false
-					response["message"] = "Video posted successfully"
-				}
-			}
-		}
-	} else {
-		response["code"] = CodeInvalidStatusText
-		response["message"] = MsgInvalidStatusText
+	if strlen(statusText) > 1500 {
+		c.Error(400, CodeInvalidStatusText, MsgInvalidStatusText)
+		return
 	}
 
-	return responseCode, response
+	post := NewPost(PostVideo, c.User, c.Request)
+	post.Text = statusText
+	privacy, err := getPostPrivacy(PostVideo, c)
+	if err != nil {
+		c.Error(400, CodeInvalidUserList, MsgInvalidUserList)
+		return
+	}
+
+	post.Privacy = privacy
+
+	valid, videoID, service, title := isValidVideo(strings.TrimSpace(c.Form("video_url")))
+
+	if !valid {
+		c.Error(400, CodeInvalidVideoURL, MsgInvalidVideoURL)
+		return
+	}
+
+	post.VideoID = videoID
+	post.Service = service
+	post.Title = title
+
+	if err := post.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+		return
+	}
+
+	c.Success(201, map[string]interface{}{
+		"message": "Video posted successfully",
+	})
 }
 
-func postLink(user *User, conn *Connection, r *http.Request) (int, map[string]interface{}) {
-	var (
-		responseCode int = 400
-		statusText       = strings.TrimSpace(r.PostFormValue("post_text"))
-		response         = make(map[string]interface{})
-	)
+func postLink(c Context) {
+	statusText := strings.TrimSpace(c.Form("post_text"))
 
-	if strlen(statusText) <= 1500 {
-		post := NewPost(PostVideo, user, r)
-		post.Text = statusText
-		privacy, err := getPostPrivacy(PostLink, r, user, conn)
-		if err != nil {
-			responseCode = 400
-			response["error"] = true
-			response["single"] = true
-			response["code"] = CodeInvalidUserList
-			response["message"] = MsgInvalidUserList
-		} else {
-			post.Privacy = privacy
-
-			valid, link, title := isValidLink(strings.TrimSpace(r.PostFormValue("link_url")))
-
-			if !valid {
-				response["error"] = true
-				response["single"] = true
-				response["message"] = MsgInvalidLinkURL
-				response["code"] = CodeInvalidLinkURL
-			} else {
-				post.URL = link
-				post.Title = title
-
-				if err := post.Save(conn); err != nil {
-					responseCode = 500
-					response["error"] = true
-					response["single"] = true
-					response["message"] = MsgUnexpected
-					response["code"] = CodeUnexpected
-				} else {
-					responseCode = 200
-					response["error"] = false
-					response["message"] = "Link posted successfully"
-				}
-			}
-		}
-	} else {
-		response["code"] = CodeInvalidStatusText
-		response["message"] = MsgInvalidStatusText
+	if strlen(statusText) > 1500 {
+		c.Error(400, CodeInvalidStatusText, MsgInvalidStatusText)
+		return
 	}
 
-	return responseCode, response
+	post := NewPost(PostVideo, c.User, c.Request)
+	post.Text = statusText
+	privacy, err := getPostPrivacy(PostLink, c)
+	if err != nil {
+		c.Error(400, CodeInvalidUserList, MsgInvalidUserList)
+		return
+	}
+
+	post.Privacy = privacy
+
+	valid, link, title := isValidLink(strings.TrimSpace(c.Form("link_url")))
+
+	if !valid {
+		c.Error(400, CodeInvalidLinkURL, MsgInvalidLinkURL)
+		return
+	}
+
+	post.URL = link
+	post.Title = title
+
+	if err := post.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+		return
+	}
+
+	c.Success(201, map[string]interface{}{
+		"message": "Link posted successfully",
+	})
 }
 
-func postStatus(user *User, conn *Connection, r *http.Request) (int, map[string]interface{}) {
-	var (
-		responseCode int = 200
-		statusText       = strings.TrimSpace(r.PostFormValue("post_text"))
-		response         = make(map[string]interface{})
-	)
+func postStatus(c Context) {
+	statusText := strings.TrimSpace(c.Form("post_text"))
 
-	if strlen(statusText) > 0 && strlen(statusText) <= 1500 {
-		post := NewPost(PostStatus, user, r)
-		post.Text = statusText
-		privacy, err := getPostPrivacy(PostStatus, r, user, conn)
-		if err != nil {
-			responseCode = 400
-			response["error"] = true
-			response["single"] = true
-			response["code"] = CodeInvalidUserList
-			response["message"] = MsgInvalidUserList
-		} else {
-			post.Privacy = privacy
-			if err := post.Save(conn); err != nil {
-				responseCode = 500
-				response["error"] = true
-				response["code"] = CodeUnexpected
-				response["message"] = MsgUnexpected
-				response["single"] = true
-			} else {
-				response["message"] = "Status posted successfully"
-			}
-		}
-	} else {
-		responseCode = 400
-		response["error"] = true
-		response["code"] = CodeInvalidStatusText
-		response["message"] = MsgInvalidStatusText
-		response["single"] = true
+	if strlen(statusText) < 1 || strlen(statusText) > 1500 {
+		c.Error(400, CodeInvalidStatusText, MsgInvalidStatusText)
+		return
 	}
 
-	return responseCode, response
+	post := NewPost(PostStatus, c.User, c.Request)
+	post.Text = statusText
+	privacy, err := getPostPrivacy(PostStatus, c)
+	if err != nil {
+		c.Error(400, CodeInvalidUserList, MsgInvalidUserList)
+		return
+	}
+
+	post.Privacy = privacy
+	if err := post.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+		return
+	}
+
+	c.Success(201, map[string]interface{}{
+		"message": "Status posted successfully",
+	})
 }
 
 // Save inserts the Post instance if it hasn't been created yet or updates it if it has
@@ -422,17 +352,17 @@ func (p *Post) CanBeAccessedBy(user *User, conn *Connection) bool {
 	return false
 }
 
-func getPostPrivacy(postType ObjectType, r *http.Request, u *User, conn *Connection) (PrivacySettings, error) {
+func getPostPrivacy(postType ObjectType, c Context) (PrivacySettings, error) {
 	p := PrivacySettings{}
 	var pType int64
 	var err error
 
-	if pType, err = strconv.ParseInt(r.PostFormValue("privacy_type"), 10, 8); err != nil {
+	if pType, err = strconv.ParseInt(c.Form("privacy_type"), 10, 8); err != nil {
 		pType = 0
 	}
 
 	privacyType := PrivacyType(pType)
-	defaultSettings := u.Settings.GetPrivacySettings(postType)
+	defaultSettings := c.User.Settings.GetPrivacySettings(postType)
 	if privacyType == 0 {
 		p.Type = defaultSettings.Type
 	} else {
@@ -447,7 +377,7 @@ func getPostPrivacy(postType ObjectType, r *http.Request, u *User, conn *Connect
 		if privacyType == 0 {
 			p.Users = defaultSettings.Users
 		} else {
-			us, ok := r.PostForm["privacy_users"]
+			us, ok := c.Request.PostForm["privacy_users"]
 			if ok && len(us) > 0 {
 				p.Users = make([]bson.ObjectId, 0, len(us))
 				for _, u := range us {
@@ -456,9 +386,9 @@ func getPostPrivacy(postType ObjectType, r *http.Request, u *User, conn *Connect
 					}
 				}
 
-				count, err := conn.Db.C("follows").Find(bson.M{"user_from": u.ID, "user_to": bson.M{"$in": p.Users}}).Count()
+				count, err := c.Query("follows").Find(bson.M{"user_from": c.User.ID, "user_to": bson.M{"$in": p.Users}}).Count()
 				if err != nil || count != len(p.Users) {
-					count2, err := conn.Db.C("follows").Find(bson.M{"user_to": u.ID, "user_from": bson.M{"$in": p.Users}}).Count()
+					count2, err := c.Query("follows").Find(bson.M{"user_to": c.User.ID, "user_from": bson.M{"$in": p.Users}}).Count()
 					if err != nil || count+count2 != len(p.Users) {
 						return p, errors.New("invalid user list provided")
 					}

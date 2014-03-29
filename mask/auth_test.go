@@ -3,7 +3,6 @@ package mask
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/sessions"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
@@ -467,9 +466,9 @@ func TestLogin(t *testing.T) {
 
 		Convey("When we provide valid data the user will be logged in", func() {
 			var sess sessions.Session
-			testPostHandler(func(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
-				sess = s
-				Login(req, conn, resp, s)
+			testPostHandler(func(c Context) {
+				sess = c.Session
+				Login(c)
 			}, func(req *http.Request) {
 				if req.PostForm == nil {
 					req.PostForm = make(url.Values)
@@ -485,9 +484,9 @@ func TestLogin(t *testing.T) {
 
 		Convey("When we request an user token with invalid data the response code will be 400", func() {
 			var sess sessions.Session
-			testPostHandler(func(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
-				sess = s
-				Login(req, conn, resp, s)
+			testPostHandler(func(c Context) {
+				sess = c.Session
+				Login(c)
 			}, func(req *http.Request) {
 				if req.PostForm == nil {
 					req.PostForm = make(url.Values)

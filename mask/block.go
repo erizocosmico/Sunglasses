@@ -1,10 +1,7 @@
 package mask
 
 import (
-	"github.com/martini-contrib/render"
-	"github.com/martini-contrib/sessions"
 	"labix.org/v2/mgo/bson"
-	"net/http"
 	"time"
 )
 
@@ -51,98 +48,92 @@ func UserIsBlocked(from, to bson.ObjectId, conn *Connection) bool {
 }
 
 // Block blocks an user
-func BlockHandler(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	user := GetRequestUser(r, conn, s)
-
-	if user != nil {
-		userTo := r.PostFormValue("user_to")
+func BlockHandler(c Context) {
+	if c.User != nil {
+		userTo := c.Form("user_to")
 
 		if userTo != "" && bson.IsObjectIdHex(userTo) {
 			userToID := bson.ObjectIdHex(userTo)
 
-			if toUser := UserExists(conn, userToID); toUser != nil {
-				if UserIsBlocked(user.ID, userToID, conn) {
-					res.JSON(200, map[string]interface{}{
+			if toUser := UserExists(c.Conn, userToID); toUser != nil {
+				if UserIsBlocked(c.User.ID, userToID, c.Conn) {
+					c.Success(200, map[string]interface{}{
 						"error":   false,
 						"message": "User was already blocked",
 					})
 					return
 				}
 
-				if err := BlockUser(user.ID, userToID, conn); err != nil {
-					RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+				if err := BlockUser(c.User.ID, userToID, c.Conn); err != nil {
+					c.Error(500, CodeUnexpected, MsgUnexpected)
 					return
 				}
 
-				res.JSON(200, map[string]interface{}{
+				c.Success(200, map[string]interface{}{
 					"error":   false,
 					"message": "User blocked successfully",
 				})
 				return
 			} else {
-				RenderError(res, CodeUserDoesNotExist, 404, MsgUserDoesNotExist)
+				c.Error(404, CodeUserDoesNotExist, MsgUserDoesNotExist)
 				return
 			}
 		}
 	}
 
-	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	c.Error(400, CodeInvalidData, MsgInvalidData)
 }
 
 // Unblock unblocks an user
-func Unblock(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	user := GetRequestUser(r, conn, s)
-
-	if user != nil {
-		userTo := r.PostFormValue("user_to")
+func Unblock(c Context) {
+	if c.User != nil {
+		userTo := c.Form("user_to")
 
 		if userTo != "" && bson.IsObjectIdHex(userTo) {
 			userToID := bson.ObjectIdHex(userTo)
 
-			if toUser := UserExists(conn, userToID); toUser != nil {
-				if !UserIsBlocked(user.ID, userToID, conn) {
-					res.JSON(200, map[string]interface{}{
+			if toUser := UserExists(c.Conn, userToID); toUser != nil {
+				if !UserIsBlocked(c.User.ID, userToID, c.Conn) {
+					c.Success(200, map[string]interface{}{
 						"error":   false,
 						"message": "User was not blocked",
 					})
 					return
 				}
 
-				if err := UnblockUser(user.ID, userToID, conn); err != nil {
-					RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+				if err := UnblockUser(c.User.ID, userToID, c.Conn); err != nil {
+					c.Error(500, CodeUnexpected, MsgUnexpected)
 					return
 				}
 
-				res.JSON(200, map[string]interface{}{
-					"error":   false,
+				c.Success(200, map[string]interface{}{
 					"message": "User unblocked successfully",
 				})
 				return
 			}
 
-			RenderError(res, CodeUserDoesNotExist, 404, MsgUserDoesNotExist)
+			c.Error(404, CodeUserDoesNotExist, MsgUserDoesNotExist)
 			return
 		}
 	}
 
-	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	c.Error(400, CodeInvalidData, MsgInvalidData)
 }
 
 // ListBlocks retrieves a list with the users the user has blocked
-func ListBlocks(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	user := GetRequestUser(r, conn, s)
-	count, offset := ListCountParams(r)
+func ListBlocks(c Context) {
+	count, offset := c.ListCountParams()
 	var result Block
 	blocks := make([]Block, 0, count)
 
-	if user != nil {
-		cursor := conn.Db.C("blocks").Find(bson.M{"user_from": user.ID}).Limit(count).Skip(offset).Iter()
+	if c.User != nil {
+		cursor := c.Query("blocks").Find(bson.M{"user_from": c.User.ID}).Limit(count).Skip(offset).Iter()
 		for cursor.Next(&result) {
 			blocks = append(blocks, result)
 		}
 
 		if err := cursor.Close(); err != nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
@@ -153,9 +144,9 @@ func ListBlocks(r *http.Request, conn *Connection, res render.Render, s sessions
 			}
 		}
 
-		usersData := GetUsersData(users, false, conn)
+		usersData := GetUsersData(users, false, c.Conn)
 		if usersData == nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
@@ -169,13 +160,12 @@ func ListBlocks(r *http.Request, conn *Connection, res render.Render, s sessions
 			}
 		}
 
-		res.JSON(200, map[string]interface{}{
-			"error":  false,
+		c.Success(200, map[string]interface{}{
 			"blocks": blocksResponse,
 			"count":  len(blocksResponse),
 		})
 		return
 	}
 
-	RenderError(res, CodeUnauthorized, 403, MsgUnauthorized)
+	c.Error(403, CodeUnauthorized, MsgUnauthorized)
 }

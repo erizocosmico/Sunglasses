@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	//	"sync"
 )
 
 func TestPostStatus(t *testing.T) {
@@ -65,7 +64,7 @@ func TestPostStatus(t *testing.T) {
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
 				}
-				So(res.Code, ShouldEqual, 200)
+				So(res.Code, ShouldEqual, 201)
 				So(errResp.Message, ShouldEqual, "Status posted successfully")
 			})
 		})
@@ -206,7 +205,7 @@ func TestPostVideo(t *testing.T) {
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
 				}
-				So(res.Code, ShouldEqual, 200)
+				So(res.Code, ShouldEqual, 201)
 				So(errResp.Message, ShouldEqual, "Video posted successfully")
 			})
 		})
@@ -224,7 +223,7 @@ func TestPostVideo(t *testing.T) {
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
 				}
-				So(res.Code, ShouldEqual, 200)
+				So(res.Code, ShouldEqual, 201)
 				So(errResp.Message, ShouldEqual, "Video posted successfully")
 			})
 		})
@@ -305,7 +304,7 @@ func TestPostLink(t *testing.T) {
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
 				}
-				So(res.Code, ShouldEqual, 200)
+				So(res.Code, ShouldEqual, 201)
 				So(errResp.Message, ShouldEqual, "Link posted successfully")
 			})
 		})
@@ -363,7 +362,7 @@ func TestPostPhoto(t *testing.T) {
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
-				r.PostForm.Add("post_type", "link")
+				r.PostForm.Add("post_type", "photo")
 				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
@@ -387,7 +386,7 @@ func TestPostPhoto(t *testing.T) {
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
 				}
-				So(res.Code, ShouldEqual, 200)
+				So(res.Code, ShouldEqual, 201)
 			})
 		})
 	})

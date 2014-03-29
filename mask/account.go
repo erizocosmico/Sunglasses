@@ -2,8 +2,6 @@ package mask
 
 import (
 	"errors"
-	"github.com/martini-contrib/render"
-	"github.com/martini-contrib/sessions"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"net/mail"
@@ -14,18 +12,18 @@ import (
 )
 
 // CreateAccount creates a new user account
-func CreateAccount(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
+func CreateAccount(c Context) {
 	var (
-		username                = r.PostFormValue("username")
-		password                = r.PostFormValue("password")
-		passwordRepeat          = r.PostFormValue("password_repeat")
+		username                = c.Form("username")
+		password                = c.Form("password")
+		passwordRepeat          = c.Form("password_repeat")
 		question, answer, email string
 		errorList               = make([]string, 0)
 		codeList                = make([]int, 0)
 		responseStatus          = 400
 	)
 
-	recoveryMethod, err := strconv.ParseInt(r.PostFormValue("recovery_method"), 10, 0)
+	recoveryMethod, err := strconv.ParseInt(c.Form("recovery_method"), 10, 0)
 	if err != nil {
 		recoveryMethod = RecoveryNone
 	}
@@ -34,7 +32,7 @@ func CreateAccount(r *http.Request, conn *Connection, res render.Render, s sessi
 	case RecoveryNone:
 		break
 	case RecoverByEMail:
-		email = r.PostFormValue("email")
+		email = c.Form("email")
 
 		if _, err := mail.ParseAddress(email); err != nil {
 			errorList = append(errorList, MsgInvalidEmail)
@@ -42,8 +40,8 @@ func CreateAccount(r *http.Request, conn *Connection, res render.Render, s sessi
 		}
 		break
 	case RecoverByQuestion:
-		question = r.PostFormValue("recovery_question")
-		answer = r.PostFormValue("recovery_answer")
+		question = c.Form("recovery_question")
+		answer = c.Form("recovery_answer")
 
 		if question == "" || answer == "" {
 			errorList = append(errorList, MsgInvalidRecoveryQuestion)
@@ -94,11 +92,11 @@ func CreateAccount(r *http.Request, conn *Connection, res render.Render, s sessi
 			break
 		}
 
-		if err = user.Save(conn); err == nil {
-			r.PostForm.Add("token_type", "session")
-			r.PostForm.Add("username", user.Username)
-			r.PostForm.Add("password", password)
-			GetUserToken(r, conn, res, s)
+		if err = user.Save(c.Conn); err == nil {
+			c.Request.PostForm.Add("token_type", "session")
+			c.Request.PostForm.Add("username", user.Username)
+			c.Request.PostForm.Add("password", password)
+			GetUserToken(c)
 			return
 		} else {
 			if err.Error() == "username already in use" {
@@ -112,41 +110,37 @@ func CreateAccount(r *http.Request, conn *Connection, res render.Render, s sessi
 		}
 	}
 
-	RenderErrors(res, responseStatus, codeList, errorList)
+	c.Errors(responseStatus, codeList, errorList)
 }
 
 // GetAccountInfo retrieves the info of the user
-func GetAccountInfo(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	user := GetRequestUser(r, conn, s)
-
-	if user != nil {
-		res.JSON(200, map[string]interface{}{
+func GetAccountInfo(c Context) {
+	if c.User != nil {
+		c.Success(200, map[string]interface{}{
 			"error":        false,
-			"account_info": user.Info,
+			"account_info": c.User.Info,
 		})
 		return
 	}
 
-	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	c.Error(400, CodeInvalidData, MsgInvalidData)
 }
 
 // UpdateAccountInfo updates the user's information
-func UpdateAccountInfo(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	user := GetRequestUser(r, conn, s)
-
-	if user != nil {
+func UpdateAccountInfo(c Context) {
+	if c.User != nil {
 		info := UserInfo{}
 
-		for _, v := range r.PostForm {
+		for _, v := range c.Request.PostForm {
 			for _, f := range v {
 				if strlen(f) > 500 {
-					RenderError(res, CodeInvalidInfoLength, 400, MsgInvalidInfoLength)
+					c.Error(400, CodeInvalidInfoLength, MsgInvalidInfoLength)
 					return
 				}
 			}
 		}
 
-		if v, ok := r.PostForm["websites"]; ok {
+		if v, ok := c.Request.PostForm["websites"]; ok {
 			sites := make([]string, 0, len(v))
 
 			for _, site := range v {
@@ -155,7 +149,7 @@ func UpdateAccountInfo(r *http.Request, conn *Connection, res render.Render, s s
 				}
 
 				if !isValidURL(site) {
-					RenderError(res, CodeInvalidWebsites, 400, MsgInvalidWebsites)
+					c.Error(400, CodeInvalidWebsites, MsgInvalidWebsites)
 					return
 				}
 
@@ -164,7 +158,7 @@ func UpdateAccountInfo(r *http.Request, conn *Connection, res render.Render, s s
 			info.Websites = sites
 		}
 
-		if gender := r.PostFormValue("gender"); gender != "" {
+		if gender := c.Form("gender"); gender != "" {
 			gender, err := strconv.ParseInt(gender, 10, 8)
 			if err == nil {
 				if gender == Male || gender == Female || gender == Other {
@@ -175,12 +169,12 @@ func UpdateAccountInfo(r *http.Request, conn *Connection, res render.Render, s s
 			}
 
 			if err != nil {
-				RenderError(res, CodeInvalidGender, 400, MsgInvalidGender)
+				c.Error(400, CodeInvalidGender, MsgInvalidGender)
 				return
 			}
 		}
 
-		if status := r.PostFormValue("status"); status != "" {
+		if status := c.Form("status"); status != "" {
 			status, err := strconv.ParseInt(status, 10, 8)
 			if err == nil {
 				if status >= 0 && status <= 4 {
@@ -191,60 +185,54 @@ func UpdateAccountInfo(r *http.Request, conn *Connection, res render.Render, s s
 			}
 
 			if err != nil {
-				RenderError(res, CodeInvalidStatus, 400, MsgInvalidStatus)
+				c.Error(400, CodeInvalidStatus, MsgInvalidStatus)
 				return
 			}
 		}
 
-		info.Work = strings.TrimSpace(r.PostFormValue("work"))
-		info.Education = strings.TrimSpace(r.PostFormValue("education"))
-		info.Hobbies = strings.TrimSpace(r.PostFormValue("hobbies"))
-		info.Books = strings.TrimSpace(r.PostFormValue("books"))
-		info.Movies = strings.TrimSpace(r.PostFormValue("movies"))
-		info.TV = strings.TrimSpace(r.PostFormValue("tv"))
-		info.About = strings.TrimSpace(r.PostFormValue("about"))
+		info.Work = strings.TrimSpace(c.Form("work"))
+		info.Education = strings.TrimSpace(c.Form("education"))
+		info.Hobbies = strings.TrimSpace(c.Form("hobbies"))
+		info.Books = strings.TrimSpace(c.Form("books"))
+		info.Movies = strings.TrimSpace(c.Form("movies"))
+		info.TV = strings.TrimSpace(c.Form("tv"))
+		info.About = strings.TrimSpace(c.Form("about"))
 
-		user.Info = info
-		if err := user.Save(conn); err != nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+		c.User.Info = info
+		if err := c.User.Save(c.Conn); err != nil {
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
-		res.JSON(200, map[string]interface{}{
-			"error":   false,
+		c.Success(200, map[string]interface{}{
 			"message": "User info updated successfully",
 		})
 		return
 	}
 
-	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	c.Error(400, CodeInvalidData, MsgInvalidData)
 }
 
 // GetAccountSettings retrieves the settings of the user
-func GetAccountSettings(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	user := GetRequestUser(r, conn, s)
-
-	if user != nil {
-		res.JSON(200, map[string]interface{}{
-			"error":            false,
-			"account_settings": user.Settings,
+func GetAccountSettings(c Context) {
+	if c.User != nil {
+		c.Success(200, map[string]interface{}{
+			"account_settings": c.User.Settings,
 		})
 		return
 	}
 
-	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	c.Error(400, CodeInvalidData, MsgInvalidData)
 }
 
 // UpdateAccountSettings updates the user's settings
-func UpdateAccountSettings(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	user := GetRequestUser(r, conn, s)
-
-	if user != nil {
+func UpdateAccountSettings(c Context) {
+	if c.User != nil {
 		s := UserSettings{}
 		getPrivacy := func(r *http.Request, kind string) (PrivacySettings, error) {
 			p := PrivacySettings{}
 
-			if privacyType := r.PostFormValue("privacy_" + kind + "_type"); privacyType != "" {
+			if privacyType := c.Form("privacy_" + kind + "_type"); privacyType != "" {
 				pType, err := strconv.ParseInt(privacyType, 10, 8)
 				if !isValidPrivacyType(PrivacyType(pType)) || err != nil {
 					return p, errors.New("invalid data provided")
@@ -264,9 +252,9 @@ func UpdateAccountSettings(r *http.Request, conn *Connection, res render.Render,
 					uids = append(uids, bson.ObjectIdHex(u))
 				}
 
-				count, err := conn.Db.C("follows").Find(bson.M{"user_from": user.ID, "user_to": bson.M{"$in": uids}}).Count()
+				count, err := c.Query("follows").Find(bson.M{"user_from": c.User.ID, "user_to": bson.M{"$in": uids}}).Count()
 				if err != nil || count != len(p.Users) {
-					count2, err := conn.Db.C("follows").Find(bson.M{"user_to": user.ID, "user_from": bson.M{"$in": uids}}).Count()
+					count2, err := c.Query("follows").Find(bson.M{"user_to": c.User.ID, "user_from": bson.M{"$in": uids}}).Count()
 					if err != nil || count+count2 != len(uids) {
 						return p, errors.New("invalid user list provided")
 					}
@@ -280,20 +268,20 @@ func UpdateAccountSettings(r *http.Request, conn *Connection, res render.Render,
 			return p, nil
 		}
 
-		s.OverrideDefaultPrivacy = getBoolean(r, "override_default_privacy")
+		s.OverrideDefaultPrivacy = c.GetBoolean("override_default_privacy")
 		if s.OverrideDefaultPrivacy {
-			p, err := getPrivacy(r, "status")
+			p, err := getPrivacy(c.Request, "status")
 			if err != nil {
-				RenderError(res, CodeInvalidPrivacySettings, 400, MsgInvalidPrivacySettings)
+				c.Error(400, CodeInvalidPrivacySettings, MsgInvalidPrivacySettings)
 				return
 			}
 
 			s.DefaultStatusPrivacy = p
 		} else {
 			for _, k := range []string{"status", "video", "photo", "link", "album"} {
-				p, err := getPrivacy(r, k)
+				p, err := getPrivacy(c.Request, k)
 				if err != nil {
-					RenderError(res, CodeInvalidPrivacySettings, 400, MsgInvalidPrivacySettings)
+					c.Error(400, CodeInvalidPrivacySettings, MsgInvalidPrivacySettings)
 					return
 				}
 
@@ -317,20 +305,20 @@ func UpdateAccountSettings(r *http.Request, conn *Connection, res render.Render,
 			}
 		}
 
-		s.Invisible = getBoolean(r, "invisible")
-		s.CanReceiveRequests = getBoolean(r, "can_receive_requests")
-		s.FollowApprovalRequired = getBoolean(r, "follow_approval_required")
-		s.DisplayAvatarBeforeApproval = getBoolean(r, "display_avatar_before_approval")
-		s.NotifyNewComment = getBoolean(r, "notify_new_comment")
-		s.NotifyNewCommentOthers = getBoolean(r, "notify_new_comment_others")
-		s.NotifyPostsInMyProfile = getBoolean(r, "notify_new_posts_in_my_profile")
-		s.NotifyLikes = getBoolean(r, "notify_likes")
-		s.AllowPostsInMyProfile = getBoolean(r, "allow_posts_in_my_profile")
-		s.AllowCommentsInPosts = getBoolean(r, "allow_comments_in_posts")
-		s.DisplayEmail = getBoolean(r, "display_email")
-		s.DisplayInfoFollowersOnly = getBoolean(r, "display_info_followers_only")
+		s.Invisible = c.GetBoolean("invisible")
+		s.CanReceiveRequests = c.GetBoolean("can_receive_requests")
+		s.FollowApprovalRequired = c.GetBoolean("follow_approval_required")
+		s.DisplayAvatarBeforeApproval = c.GetBoolean("display_avatar_before_approval")
+		s.NotifyNewComment = c.GetBoolean("notify_new_comment")
+		s.NotifyNewCommentOthers = c.GetBoolean("notify_new_comment_others")
+		s.NotifyPostsInMyProfile = c.GetBoolean("notify_new_posts_in_my_profile")
+		s.NotifyLikes = c.GetBoolean("notify_likes")
+		s.AllowPostsInMyProfile = c.GetBoolean("allow_posts_in_my_profile")
+		s.AllowCommentsInPosts = c.GetBoolean("allow_comments_in_posts")
+		s.DisplayEmail = c.GetBoolean("display_email")
+		s.DisplayInfoFollowersOnly = c.GetBoolean("display_info_followers_only")
 
-		if recoveryMethod := r.PostFormValue("recovery_method"); recoveryMethod != "" {
+		if recoveryMethod := c.Form("recovery_method"); recoveryMethod != "" {
 			method, err := strconv.ParseInt(recoveryMethod, 10, 8)
 			if err != nil || (method != RecoveryNone && method != RecoverByQuestion && method != RecoverByEMail) {
 				s.PasswordRecoveryMethod = RecoveryNone
@@ -338,11 +326,11 @@ func UpdateAccountSettings(r *http.Request, conn *Connection, res render.Render,
 
 			s.PasswordRecoveryMethod = RecoveryMethod(method)
 			if s.PasswordRecoveryMethod == RecoverByQuestion {
-				s.RecoveryQuestion = r.PostFormValue("recovery_question")
-				s.RecoveryAnswer = r.PostFormValue("recovery_answer")
+				s.RecoveryQuestion = c.Form("recovery_question")
+				s.RecoveryAnswer = c.Form("recovery_answer")
 
 				if s.RecoveryAnswer == "" || s.RecoveryQuestion == "" {
-					RenderError(res, CodeInvalidRecoveryQuestion, 400, MsgInvalidRecoveryQuestion)
+					c.Error(400, CodeInvalidRecoveryQuestion, MsgInvalidRecoveryQuestion)
 					return
 				}
 			}
@@ -350,57 +338,54 @@ func UpdateAccountSettings(r *http.Request, conn *Connection, res render.Render,
 			s.PasswordRecoveryMethod = RecoveryNone
 		}
 
-		user.Settings = s
-		if err := user.Save(conn); err != nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+		c.User.Settings = s
+		if err := c.User.Save(c.Conn); err != nil {
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
-		res.JSON(200, map[string]interface{}{
-			"error":   false,
+		c.Success(200, map[string]interface{}{
 			"message": "User settings updated successfully",
 		})
 		return
 	}
 
-	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	c.Error(400, CodeInvalidData, MsgInvalidData)
 }
 
 // UpldateProfilePicture updates the current profile picture of the user
-func UpdateProfilePicture(r *http.Request, conn *Connection, res render.Render, s sessions.Session, config *Config) {
-	user := GetRequestUser(r, conn, s)
-
-	if user != nil {
-		file, err := RetrieveUploadedImage(r, "account_picture")
+func UpdateProfilePicture(c Context, config *Config) {
+	if c.User != nil {
+		file, err := RetrieveUploadedImage(c.Request, "account_picture")
 		if err != nil {
 			code, msg := CodeAndMessageForUploadError(err)
-			RenderError(res, code, 400, msg)
+			c.Error(400, code, msg)
 			return
 		}
 
 		imagePath, thumbnailPath, err := StoreImage(file, ProfileUploadOptions(config))
 		if err != nil {
 			code, msg := CodeAndMessageForUploadError(err)
-			RenderError(res, code, 400, msg)
+			c.Error(400, code, msg)
 			return
 		}
 
 		var prevAvatar, prevThumbnail string
 
-		if r.PostFormValue("picture_type") == "public" {
-			prevAvatar = user.PublicAvatar
-			user.PublicAvatar = imagePath
-			prevThumbnail = user.PublicAvatarThumbnail
-			user.PublicAvatarThumbnail = thumbnailPath
+		if c.Form("picture_type") == "public" {
+			prevAvatar = c.User.PublicAvatar
+			c.User.PublicAvatar = imagePath
+			prevThumbnail = c.User.PublicAvatarThumbnail
+			c.User.PublicAvatarThumbnail = thumbnailPath
 		} else {
-			prevAvatar = user.Avatar
-			user.Avatar = imagePath
-			prevThumbnail = user.AvatarThumbnail
-			user.AvatarThumbnail = thumbnailPath
+			prevAvatar = c.User.Avatar
+			c.User.Avatar = imagePath
+			prevThumbnail = c.User.AvatarThumbnail
+			c.User.AvatarThumbnail = thumbnailPath
 		}
 
-		if user.Save(conn); err != nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+		if c.User.Save(c.Conn); err != nil {
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 
 			os.Remove(toLocalImagePath(imagePath, config))
 			os.Remove(toLocalThumbnailPath(thumbnailPath, config))
@@ -415,12 +400,11 @@ func UpdateProfilePicture(r *http.Request, conn *Connection, res render.Render, 
 			}
 		}
 
-		res.JSON(200, map[string]interface{}{
-			"error":   false,
+		c.Success(200, map[string]interface{}{
 			"message": "User settings updated successfully",
 		})
 		return
 	}
 
-	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	c.Error(400, CodeInvalidData, MsgInvalidData)
 }

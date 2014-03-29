@@ -93,7 +93,7 @@ func TestStoreImage(t *testing.T) {
 }
 
 func TestRetrieveUploadedImage(t *testing.T) {
-	Convey("Retrievng uploaded images", t, func() {
+	Convey("Retrieving uploaded images", t, func() {
 		Convey("When no file was sent", func() {
 			testUploadFileHandler("", "image", "/", func(r *http.Request) {
 				f, err := RetrieveUploadedImage(r, "image")

@@ -1,13 +1,9 @@
 package mask
 
 import (
-	"fmt"
-	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/sessions"
 	"labix.org/v2/mgo/bson"
 	"net/http"
-	"net/url"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -36,41 +32,41 @@ type Token struct {
 }
 
 // ValidateAccessToken validates the supplied access token
-func ValidateAccessToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
-	if !RequestIsValid(req, conn, s, true) {
-		RenderError(resp, CodeInvalidSignature, 400, MsgInvalidSignature)
+func ValidateAccessToken(c Context) {
+	if !c.RequestIsValid(true) {
+		c.Error(400, CodeInvalidSignature, MsgInvalidSignature)
 		return
 	}
 
-	tokenID, _ := GetRequestToken(req, true, s)
+	tokenID, _ := GetRequestToken(c.Request, true, c.Session)
 
 	var token Token
-	if err := conn.Db.C("tokens").Find(bson.M{"hash": tokenID}).One(&token); err != nil {
-		RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
+	if err := c.Query("tokens").Find(bson.M{"hash": tokenID}).One(&token); err != nil {
+		c.Error(403, CodeInvalidAccessToken, MsgInvalidAccessToken)
 	} else {
 		if token.ID.Hex() == "" || token.Type != AccessToken || token.Expires < float64(time.Now().Unix()) {
-			RenderError(resp, CodeInvalidAccessToken, 403, MsgInvalidAccessToken)
+			c.Error(403, CodeInvalidAccessToken, MsgInvalidAccessToken)
 		}
 	}
 
-	_ = eraseExpiredTokens(conn)
+	_ = eraseExpiredTokens(c.Conn)
 }
 
 // ValidateUserToken validates the supplied user token
-func ValidateUserToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
-	if !RequestIsValid(req, conn, s, false) {
-		RenderError(resp, CodeInvalidSignature, 400, MsgInvalidSignature)
+func ValidateUserToken(c Context) {
+	if !c.RequestIsValid(false) {
+		c.Error(400, CodeInvalidSignature, MsgInvalidSignature)
 		return
 	}
 
-	tokenID, tokenType := GetRequestToken(req, false, s)
+	tokenID, tokenType := GetRequestToken(c.Request, false, c.Session)
 
 	var token Token
-	if err := conn.Db.C("tokens").Find(bson.M{"hash": tokenID}).One(&token); err != nil {
-		RenderError(resp, CodeInvalidUserToken, 403, MsgInvalidUserToken)
+	if err := c.Query("tokens").Find(bson.M{"hash": tokenID}).One(&token); err != nil {
+		c.Error(403, CodeInvalidUserToken, MsgInvalidUserToken)
 	} else {
 		if token.ID.Hex() == "" || token.Type != tokenType || token.Expires < float64(time.Now().Unix()) {
-			RenderError(resp, CodeInvalidUserToken, 403, MsgInvalidUserToken)
+			c.Error(403, CodeInvalidUserToken, MsgInvalidUserToken)
 		}
 	}
 }
@@ -85,38 +81,37 @@ func eraseExpiredTokens(conn *Connection) error {
 }
 
 // GetAccessToken is a handler to retrieve an access token
-func GetAccessToken(conn *Connection, resp render.Render) {
+func GetAccessToken(c Context) {
 	token := new(Token)
 	token.Expires = float64(time.Now().Add(AccessTokenExpirationHours * time.Hour).Unix())
 	token.Hash = NewRandomHash()
 	token.Type = AccessToken
 
-	if err := token.Save(conn); err == nil {
-		resp.JSON(200, map[string]interface{}{
-			"error":        false,
+	if err := token.Save(c.Conn); err == nil {
+		c.Success(200, map[string]interface{}{
 			"access_token": token.Hash,
 			"expires":      token.Expires,
 		})
 	} else {
-		RenderError(resp, CodeUnexpected, 500, MsgUnexpected)
+		c.Error(500, CodeUnexpected, MsgUnexpected)
 	}
 }
 
 // Login is a handler to log the user in
-func Login(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
-	req.PostForm.Add("token_type", "session")
-	GetUserToken(req, conn, resp, s)
+func Login(c Context) {
+	c.Request.PostForm.Add("token_type", "session")
+	GetUserToken(c)
 }
 
 // GetUserToken is a handler to retrieve an user token
-func GetUserToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
-	username := strings.ToLower(req.PostFormValue("username"))
-	password := req.PostFormValue("password")
+func GetUserToken(c Context) {
+	username := strings.ToLower(c.Form("username"))
+	password := c.Form("password")
 
 	user := new(User)
 
-	if err := conn.Db.C("users").Find((bson.M{"username_lower": username})).One(user); err != nil {
-		RenderError(resp, CodeInvalidUsernameOrPassword, 400, MsgInvalidUsernameOrPassword)
+	if err := c.Query("users").Find((bson.M{"username_lower": username})).One(user); err != nil {
+		c.Error(400, CodeInvalidUsernameOrPassword, MsgInvalidUsernameOrPassword)
 		return
 	}
 
@@ -125,56 +120,53 @@ func GetUserToken(req *http.Request, conn *Connection, resp render.Render, s ses
 		token.Hash = NewRandomHash()
 		token.Expires = float64(time.Now().AddDate(0, 0, UserTokenExpirationDays).Unix())
 		token.UserID = user.ID
-		if req.PostFormValue("token_type") == "session" {
+		if c.Form("token_type") == "session" {
 			token.Type = SessionToken
 		} else {
 			token.Type = UserToken
 		}
 
-		if err := token.Save(conn); err != nil {
-			RenderError(resp, CodeUnexpected, 500, MsgUnexpected)
+		if err := token.Save(c.Conn); err != nil {
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 		} else {
-			if req.PostFormValue("token_type") == "session" {
-				s.Set("user_token", token.Hash)
+			if c.Form("token_type") == "session" {
+				c.Session.Set("user_token", token.Hash)
 
-				resp.JSON(200, map[string]interface{}{
-					"error":   false,
+				c.Success(200, map[string]interface{}{
 					"expires": token.Expires,
 				})
 			} else {
-				resp.JSON(200, map[string]interface{}{
-					"error":      false,
+				c.Success(200, map[string]interface{}{
 					"user_token": token.Hash,
 					"expires":    token.Expires,
 				})
 			}
 		}
 	} else {
-		RenderError(resp, CodeInvalidUsernameOrPassword, 400, MsgInvalidUsernameOrPassword)
+		c.Error(400, CodeInvalidUsernameOrPassword, MsgInvalidUsernameOrPassword)
 	}
 }
 
 // DestroyUserToken destroys the current user token
-func DestroyUserToken(req *http.Request, conn *Connection, resp render.Render, s sessions.Session) {
-	tokenID, tokenType := GetRequestToken(req, false, s)
-	if valid, _ := IsTokenValid(tokenID, tokenType, conn); valid {
-		if err := conn.Db.C("tokens").Remove(bson.M{"hash": tokenID}); err != nil {
-			RenderError(resp, CodeTokenNotFound, 404, MsgTokenNotFound)
+func DestroyUserToken(c Context) {
+	tokenID, tokenType := GetRequestToken(c.Request, false, c.Session)
+	if valid, _ := IsTokenValid(tokenID, tokenType, c.Conn); valid {
+		if err := c.Query("tokens").Remove(bson.M{"hash": tokenID}); err != nil {
+			c.Error(404, CodeTokenNotFound, MsgTokenNotFound)
 			return
 		} else {
 			if tokenType == SessionToken {
-				s.Delete("user_token")
-				s.Delete("csrf_key")
+				c.Session.Delete("user_token")
+				c.Session.Delete("csrf_key")
 			}
 
-			resp.JSON(200, map[string]interface{}{
-				"error":   false,
+			c.Success(200, map[string]interface{}{
 				"deleted": true,
 				"message": "Token destroyed successfully",
 			})
 		}
 	} else {
-		RenderError(resp, CodeInvalidUserToken, 403, MsgInvalidUserToken)
+		c.Error(403, CodeInvalidUserToken, MsgInvalidUserToken)
 	}
 }
 
@@ -234,56 +226,6 @@ func GetRequestUser(r *http.Request, conn *Connection, s sessions.Session) *User
 	}
 
 	return nil
-}
-
-// RequestIsValid returns if the current request signature is valid and thus is a valid request
-func RequestIsValid(r *http.Request, conn *Connection, s sessions.Session, isAccessKey bool) bool {
-	signature := r.FormValue("signature")
-	URL := r.URL
-
-	if signature != "" {
-		timestamp, err := strconv.ParseInt(r.FormValue("timestamp"), 10, 64)
-		if err != nil || time.Now().Unix()-timestamp > 300 {
-			return false
-		}
-
-		isAPIRequest := r.Header.Get("X-User-Token") != "" || isAccessKey
-		key := r.FormValue("api_key")
-
-		if isAPIRequest {
-			return validateAPISignature(conn, signature, timestamp, key, URL)
-		} else {
-			var csrfKey string
-			if s.Get("csrf_key") == nil {
-				csrfKey = ""
-			} else {
-				csrfKey = s.Get("csrf_key").(string)
-			}
-
-			if csrfKey == "" {
-				return false
-			}
-
-			return validateWebSignature(signature, timestamp, csrfKey, URL)
-		}
-	}
-
-	return false
-}
-
-func validateAPISignature(conn *Connection, signature string, timestamp int64, key string, URL *url.URL) bool {
-	/* TODO Application not implemented yet
-	var app Application
-	if err := conn.Db.C("applications").Find(bson.M{"public_key":Hash(key), "active":true}).One(&app); err != nil {
-		return false
-	}
-	privateKey := app.PrivateKey*/
-	privateKey := ""
-	return signature == Hash(URL.Path+privateKey+fmt.Sprint(timestamp))
-}
-
-func validateWebSignature(signature string, timestamp int64, csrfKey string, URL *url.URL) bool {
-	return signature == Hash(URL.Path+csrfKey+fmt.Sprint(timestamp))
 }
 
 // Save inserts the Token instance if it hasn't been created yet or updates it if it has

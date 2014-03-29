@@ -1,10 +1,7 @@
 package mask
 
 import (
-	"github.com/martini-contrib/render"
-	"github.com/martini-contrib/sessions"
 	"labix.org/v2/mgo/bson"
-	"net/http"
 	"time"
 )
 
@@ -77,61 +74,58 @@ func SendNotification(notificationType NotificationType, user *User, postID, use
 }
 
 // MarkNotificationRead marks a notification as read
-func MarkNotificationRead(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	user := GetRequestUser(r, conn, s)
+func MarkNotificationRead(c Context) {
 	var n Notification
 
-	if user != nil {
-		nid := r.PostFormValue("notification_id")
+	if c.User != nil {
+		nid := c.Form("notification_id")
 
 		if nid != "" && bson.IsObjectIdHex(nid) {
 			notificationID := bson.ObjectIdHex(nid)
 
-			if err := conn.Db.C("notifications").FindId(notificationID).One(&n); err != nil {
-				RenderError(res, CodeNotFound, 404, MsgNotFound)
+			if err := c.Query("notifications").FindId(notificationID).One(&n); err != nil {
+				c.Error(404, CodeNotFound, MsgNotFound)
 				return
 			}
 
-			if n.User != user.ID {
-				RenderError(res, CodeUnauthorized, 403, MsgUnauthorized)
+			if n.User != c.User.ID {
+				c.Error(403, CodeUnauthorized, MsgUnauthorized)
 				return
 			}
 
 			if !n.Read {
 				n.Read = true
 
-				if _, err := conn.Db.C("notifications").UpsertId(n.ID, n); err != nil {
-					RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+				if _, err := c.Query("notifications").UpsertId(n.ID, n); err != nil {
+					c.Error(500, CodeUnexpected, MsgUnexpected)
 					return
 				}
 			}
 
-			res.JSON(200, map[string]interface{}{
-				"error":   false,
+			c.Success(200, map[string]interface{}{
 				"message": "Notification marked successfully as read",
 			})
 			return
 		}
 	}
 
-	RenderError(res, CodeInvalidData, 400, MsgInvalidData)
+	c.Error(400, CodeInvalidData, MsgInvalidData)
 }
 
 // ListNotifications list all the user's notifications
-func ListNotifications(r *http.Request, conn *Connection, res render.Render, s sessions.Session) {
-	user := GetRequestUser(r, conn, s)
-	count, offset := ListCountParams(r)
+func ListNotifications(c Context) {
+	count, offset := c.ListCountParams()
 	var result Notification
 	notifications := make([]Notification, 0, count)
 
-	if user != nil {
-		cursor := conn.Db.C("notifications").Find(bson.M{"user_id": user.ID}).Limit(count).Skip(offset).Iter()
+	if c.User != nil {
+		cursor := c.Query("notifications").Find(bson.M{"user_id": c.User.ID}).Limit(count).Skip(offset).Iter()
 		for cursor.Next(&result) {
 			notifications = append(notifications, result)
 		}
 
 		if err := cursor.Close(); err != nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
@@ -142,9 +136,9 @@ func ListNotifications(r *http.Request, conn *Connection, res render.Render, s s
 			}
 		}
 
-		usersData := GetUsersData(users, false, conn)
+		usersData := GetUsersData(users, false, c.Conn)
 		if usersData == nil {
-			RenderError(res, CodeUnexpected, 500, MsgUnexpected)
+			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
@@ -154,13 +148,12 @@ func ListNotifications(r *http.Request, conn *Connection, res render.Render, s s
 			}
 		}
 
-		res.JSON(200, map[string]interface{}{
-			"error":         false,
+		c.Success(200, map[string]interface{}{
 			"notifications": notifications,
 			"count":         len(notifications),
 		})
 		return
 	}
 
-	RenderError(res, CodeUnauthorized, 403, MsgUnauthorized)
+	c.Error(403, CodeUnauthorized, MsgUnauthorized)
 }
