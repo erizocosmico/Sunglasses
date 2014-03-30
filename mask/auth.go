@@ -41,7 +41,7 @@ func ValidateAccessToken(c Context) {
 	tokenID, _ := GetRequestToken(c.Request, true, c.Session)
 
 	var token Token
-	if err := c.Query("tokens").Find(bson.M{"hash": tokenID}).One(&token); err != nil {
+	if err := c.Find("tokens", bson.M{"hash": tokenID}).One(&token); err != nil {
 		c.Error(403, CodeInvalidAccessToken, MsgInvalidAccessToken)
 	} else {
 		if token.ID.Hex() == "" || token.Type != AccessToken || token.Expires < float64(time.Now().Unix()) {
@@ -62,7 +62,7 @@ func ValidateUserToken(c Context) {
 	tokenID, tokenType := GetRequestToken(c.Request, false, c.Session)
 
 	var token Token
-	if err := c.Query("tokens").Find(bson.M{"hash": tokenID}).One(&token); err != nil {
+	if err := c.Find("tokens", bson.M{"hash": tokenID}).One(&token); err != nil {
 		c.Error(403, CodeInvalidUserToken, MsgInvalidUserToken)
 	} else {
 		if token.ID.Hex() == "" || token.Type != tokenType || token.Expires < float64(time.Now().Unix()) {
@@ -110,7 +110,7 @@ func GetUserToken(c Context) {
 
 	user := new(User)
 
-	if err := c.Query("users").Find((bson.M{"username_lower": username})).One(user); err != nil {
+	if err := c.Find("users", (bson.M{"username_lower": username})).One(user); err != nil {
 		c.Error(400, CodeInvalidUsernameOrPassword, MsgInvalidUsernameOrPassword)
 		return
 	}
@@ -151,7 +151,7 @@ func GetUserToken(c Context) {
 func DestroyUserToken(c Context) {
 	tokenID, tokenType := GetRequestToken(c.Request, false, c.Session)
 	if valid, _ := IsTokenValid(tokenID, tokenType, c.Conn); valid {
-		if err := c.Query("tokens").Remove(bson.M{"hash": tokenID}); err != nil {
+		if err := c.Remove("tokens", bson.M{"hash": tokenID}); err != nil {
 			c.Error(404, CodeTokenNotFound, MsgTokenNotFound)
 			return
 		} else {

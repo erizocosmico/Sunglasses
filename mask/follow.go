@@ -266,7 +266,7 @@ func listFollows(c Context, listFollowers bool) {
 			outputKey = "followings"
 		}
 
-		cursor := c.Query("follows").Find(bson.M{key: c.User.ID}).Limit(count).Skip(offset).Iter()
+		cursor := c.Find("follows", bson.M{key: c.User.ID}).Limit(count).Skip(offset).Iter()
 		for cursor.Next(&result) {
 			follows = append(follows, result)
 		}
@@ -330,7 +330,7 @@ func ListFollowRequests(c Context) {
 	requests := make([]FollowRequest, 0)
 
 	if c.User != nil {
-		cursor := c.Query("requests").Find(bson.M{"user_to": c.User.ID}).Limit(count).Skip(offset).Iter()
+		cursor := c.Find("requests", bson.M{"user_to": c.User.ID}).Limit(count).Skip(offset).Iter()
 		for cursor.Next(&result) {
 			requests = append(requests, result)
 		}

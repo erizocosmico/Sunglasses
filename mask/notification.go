@@ -83,7 +83,7 @@ func MarkNotificationRead(c Context) {
 		if nid != "" && bson.IsObjectIdHex(nid) {
 			notificationID := bson.ObjectIdHex(nid)
 
-			if err := c.Query("notifications").FindId(notificationID).One(&n); err != nil {
+			if err := c.FindId("notifications", notificationID).One(&n); err != nil {
 				c.Error(404, CodeNotFound, MsgNotFound)
 				return
 			}
@@ -119,7 +119,7 @@ func ListNotifications(c Context) {
 	notifications := make([]Notification, 0, count)
 
 	if c.User != nil {
-		cursor := c.Query("notifications").Find(bson.M{"user_id": c.User.ID}).Limit(count).Skip(offset).Iter()
+		cursor := c.Find("notifications", bson.M{"user_id": c.User.ID}).Limit(count).Skip(offset).Iter()
 		for cursor.Next(&result) {
 			notifications = append(notifications, result)
 		}

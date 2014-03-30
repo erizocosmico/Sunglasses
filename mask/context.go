@@ -101,6 +101,34 @@ func (c Context) Query(colName string) *mgo.Collection {
 	return c.Conn.Db.C(colName)
 }
 
+func (c Context) Find(colName string, where interface{}) *mgo.Query {
+	return c.Query(colName).Find(where)
+}
+
+func (c Context) FindId(colName string, id interface{}) *mgo.Query {
+	return c.Query(colName).FindId(id)
+}
+
+func (c Context) Remove(colName string, selector interface{}) error {
+	return c.Query(colName).Remove(selector)
+}
+
+func (c Context) RemoveAll(colName string, selector interface{}) (*mgo.ChangeInfo, error) {
+	return c.Query(colName).RemoveAll(selector)
+}
+
+func (c Context) Count(colName string, query interface{}) (int, error) {
+	return c.Find(colName, query).Count()
+}
+
+func (c Context) AsyncQuery(fn func(*Connection)) {
+	conn := new(Connection)
+	conn.Session = c.Conn.Session.Copy()
+	conn.Db = conn.Session.DB(c.Config.DatabaseName)
+
+	fn(conn)
+}
+
 // RequestIsValid returns if the current request signature is valid and thus is a valid request
 func (c Context) RequestIsValid(isAccessKey bool) bool {
 	signature := c.Form("signature")

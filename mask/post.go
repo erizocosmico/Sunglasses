@@ -109,7 +109,7 @@ func LikePost(c Context) {
 		return
 	}
 
-	count, _ := c.Query("likes").Find(bson.M{"post_id": post.ID, "user_id": c.User.ID}).Count()
+	count, _ := c.Find("likes", bson.M{"post_id": post.ID, "user_id": c.User.ID}).Count()
 
 	// Post was already liked by the user, unlike it
 	if count > 0 {
@@ -119,7 +119,7 @@ func LikePost(c Context) {
 			return
 		}
 
-		if _, err := c.Query("likes").RemoveAll(bson.M{"post_id": post.ID, "user_id": c.User.ID}); err != nil {
+		if _, err := c.RemoveAll("likes", bson.M{"post_id": post.ID, "user_id": c.User.ID}); err != nil {
 			post.Likes++
 			post.Save(c.Conn)
 
@@ -386,9 +386,9 @@ func getPostPrivacy(postType ObjectType, c Context) (PrivacySettings, error) {
 					}
 				}
 
-				count, err := c.Query("follows").Find(bson.M{"user_from": c.User.ID, "user_to": bson.M{"$in": p.Users}}).Count()
+				count, err := c.Count("follows", bson.M{"user_from": c.User.ID, "user_to": bson.M{"$in": p.Users}})
 				if err != nil || count != len(p.Users) {
-					count2, err := c.Query("follows").Find(bson.M{"user_to": c.User.ID, "user_from": bson.M{"$in": p.Users}}).Count()
+					count2, err := c.Count("follows", bson.M{"user_to": c.User.ID, "user_from": bson.M{"$in": p.Users}})
 					if err != nil || count+count2 != len(p.Users) {
 						return p, errors.New("invalid user list provided")
 					}

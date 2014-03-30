@@ -252,9 +252,9 @@ func UpdateAccountSettings(c Context) {
 					uids = append(uids, bson.ObjectIdHex(u))
 				}
 
-				count, err := c.Query("follows").Find(bson.M{"user_from": c.User.ID, "user_to": bson.M{"$in": uids}}).Count()
+				count, err := c.Count("follows", bson.M{"user_from": c.User.ID, "user_to": bson.M{"$in": uids}})
 				if err != nil || count != len(p.Users) {
-					count2, err := c.Query("follows").Find(bson.M{"user_to": c.User.ID, "user_from": bson.M{"$in": uids}}).Count()
+					count2, err := c.Count("follows", bson.M{"user_to": c.User.ID, "user_from": bson.M{"$in": uids}})
 					if err != nil || count+count2 != len(uids) {
 						return p, errors.New("invalid user list provided")
 					}

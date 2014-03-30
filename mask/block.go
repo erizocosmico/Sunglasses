@@ -127,7 +127,7 @@ func ListBlocks(c Context) {
 	blocks := make([]Block, 0, count)
 
 	if c.User != nil {
-		cursor := c.Query("blocks").Find(bson.M{"user_from": c.User.ID}).Limit(count).Skip(offset).Iter()
+		cursor := c.Find("blocks", bson.M{"user_from": c.User.ID}).Limit(count).Skip(offset).Iter()
 		for cursor.Next(&result) {
 			blocks = append(blocks, result)
 		}
