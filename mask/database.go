@@ -63,6 +63,8 @@ func createIndexes(conn *Connection) error {
 		"follows":       []string{"user_to", "user_from"},
 		"reports":       []string{"user_id", "post_id"},
 		"blocks":        []string{"user_to", "user_from"},
+		"likes":         []string{"user_id", "post_id"},
+		"comments":      []string{"user_id", "post_id"},
 	}
 
 	for col, colIndexes := range indexes {

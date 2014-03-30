@@ -42,6 +42,7 @@ const (
 	CodeInvalidVideoURL       = 57
 	CodeInvalidLinkURL        = 58
 	CodeInvalidUserList       = 59
+	CodeInvalidCommentText    = 60
 
 	// Misc messages
 	MsgUnexpected       = "Unexpected error occurred"
@@ -84,4 +85,5 @@ const (
 	MsgInvalidVideoURL       = "Invalid video URL"
 	MsgInvalidLinkURL        = "Invalid link URL"
 	MsgInvalidUserList       = "Invalid user list provided"
+	MsgInvalidCommentText    = "Comment text must not be more than 500 characters long or be empty"
 )
