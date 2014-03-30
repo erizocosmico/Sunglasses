@@ -3,7 +3,6 @@ package mask
 import (
 	"errors"
 	"labix.org/v2/mgo/bson"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -23,15 +22,17 @@ const (
 
 // Post model
 type Post struct {
-	ID       bson.ObjectId   `json:"id" bson:"_id"`
-	UserID   bson.ObjectId   `json:"user_id" bson:"user_id"`
-	Created  float64         `json:"created" bson:"created"`
-	Type     ObjectType      `json:"post_type" bson:"post_type"`
-	Likes    float64         `json:"likes" bson:"likes"`
-	Comments float64         `json:"comments" bson:"comments"`
-	Reported float64         `json:"reported" bson:"reported"`
-	Privacy  PrivacySettings `json:"privacy" bson:"privacy"`
-	Text     string          `json:"text,omitempty" bson:"text,omitempty"`
+	ID          bson.ObjectId   `json:"id" bson:"_id"`
+	User        User            `json:"user" bson:"-"`
+	UserID      bson.ObjectId   `json:"-" bson:"user_id"`
+	Created     float64         `json:"created" bson:"created"`
+	Type        ObjectType      `json:"post_type" bson:"post_type"`
+	Likes       float64         `json:"likes" bson:"likes"`
+	CommentsNum float64         `json:"comments_num" bson:"comments_num"`
+	Comments    []Comment       `json:"comments" bson:"-"`
+	Reported    float64         `json:"reported" bson:"reported"`
+	Privacy     PrivacySettings `json:"privacy" bson:"privacy"`
+	Text        string          `json:"text,omitempty" bson:"text,omitempty"`
 
 	// Video specific fields
 	Service VideoService `json:"video_service,omitempty" bson:"video_service,omitempty"`
@@ -49,14 +50,34 @@ type Post struct {
 	URL string `json:"link_url,omitempty" bson:"link_url,omitempty"`
 }
 
+// PostLike model
+type PostLike struct {
+	ID     bson.ObjectId `json:"id" bson:"_id"`
+	UserID bson.ObjectId `json:"user_id" bson:"user_id"`
+	PostID bson.ObjectId `json:"post_id" bson:"post_id"`
+}
+
 // NewPost returns a new post instance
-func NewPost(t ObjectType, user *User, r *http.Request) *Post {
+func NewPost(t ObjectType, user *User) *Post {
 	p := new(Post)
 	p.Type = t
 	p.Created = float64(time.Now().Unix())
 	p.UserID = user.ID
 
 	return p
+}
+
+// Save inserts the Post instance if it hasn't been created yet or updates it if it has
+func (p *Post) Save(conn *Connection) error {
+	if p.ID.Hex() == "" {
+		p.ID = bson.NewObjectId()
+	}
+
+	if err := conn.Save("posts", p.ID, p); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // CreatePost creates a new post
@@ -84,6 +105,106 @@ func CreatePost(c Context) {
 	}
 }
 
+// ShowPost returns all data about a post including comments and likes
+func ShowPost(c Context) {
+	var post *Post
+
+	if c.User == nil {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
+		return
+	}
+
+	postID := c.Form("post_id")
+	if !bson.IsObjectIdHex(postID) {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
+		return
+	}
+
+	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(post); err != nil {
+		c.Error(404, CodeNotFound, MsgNotFound)
+		return
+	}
+
+	if !post.CanBeAccessedBy(c.User, c.Conn) {
+		c.Error(403, CodeUnauthorized, MsgUnauthorized)
+		return
+	}
+
+	uids := make([]bson.ObjectId, 0, 11)
+
+	count, _ := c.Count("comments", bson.M{"post_id": post.ID})
+	if count > 0 {
+		var comments []Comment
+		iter := c.Find("comments", bson.M{"post_id": post.ID}).Limit(10).Sort("-created").Iter()
+		err := iter.All(&comments)
+		if err == nil {
+			post.Comments = comments
+		}
+
+		for _, v := range comments {
+			uids = append(uids, v.UserID)
+		}
+	}
+
+	uids = append(uids, post.UserID)
+
+	data := GetUsersData(uids, true, c.Conn)
+	if len(data) == 0 {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+		return
+	}
+
+	for i, _ := range post.Comments {
+		post.Comments[i].User = data[post.Comments[i].UserID]
+	}
+
+	post.User = data[post.UserID]
+
+	c.Success(200, map[string]interface{}{
+		"post": post,
+	})
+}
+
+// DeletePost deletes a post owned by the user making the request
+func DeletePost(c Context) {
+	var post *Post
+
+	if c.User == nil {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
+		return
+	}
+
+	postID := c.Form("post_id")
+	if !bson.IsObjectIdHex(postID) {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
+		return
+	}
+
+	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(post); err != nil {
+		c.Error(404, CodeNotFound, MsgNotFound)
+		return
+	}
+
+	if c.User.ID.Hex() != post.UserID.Hex() {
+		c.Error(403, CodeUnauthorized, MsgUnauthorized)
+		return
+	}
+
+	if err := c.Query("posts").RemoveId(post.ID); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+		return
+	}
+
+	c.RemoveAll("comments", bson.M{"post_id": post.ID})
+	c.RemoveAll("likes", bson.M{"post_id": post.ID})
+	c.RemoveAll("notifications", bson.M{"post_id": post.ID})
+
+	c.Success(200, map[string]interface{}{
+		"deleted": true,
+		"message": "Post deleted successfully",
+	})
+}
+
 // LikePost likes a post (or unlikes it if the post has already been liked)
 func LikePost(c Context) {
 	var post *Post
@@ -99,7 +220,7 @@ func LikePost(c Context) {
 		return
 	}
 
-	if err := c.Query("posts").FindId(bson.ObjectIdHex(postID)).One(post); err != nil {
+	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(post); err != nil {
 		c.Error(404, CodeNotFound, MsgNotFound)
 		return
 	}
@@ -140,6 +261,15 @@ func LikePost(c Context) {
 		return
 	}
 
+	like := PostLike{bson.NewObjectId(), c.User.ID, post.ID}
+	if err := c.Query("likes").Insert(like); err != nil {
+		post.Likes--
+		post.Save(c.Conn)
+
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+		return
+	}
+
 	c.Success(200, map[string]interface{}{
 		"liked":   true,
 		"message": "Post liked successfully",
@@ -161,7 +291,7 @@ func postPhoto(c Context) {
 		return
 	}
 
-	p := NewPost(PostPhoto, c.User, c.Request)
+	p := NewPost(PostPhoto, c.User)
 	p.PhotoURL = imagePath
 	p.Thumbnail = thumbnailPath
 	p.Caption = strings.TrimSpace(c.Form("caption"))
@@ -205,7 +335,7 @@ func postVideo(c Context) {
 		return
 	}
 
-	post := NewPost(PostVideo, c.User, c.Request)
+	post := NewPost(PostVideo, c.User)
 	post.Text = statusText
 	privacy, err := getPostPrivacy(PostVideo, c)
 	if err != nil {
@@ -244,7 +374,7 @@ func postLink(c Context) {
 		return
 	}
 
-	post := NewPost(PostVideo, c.User, c.Request)
+	post := NewPost(PostVideo, c.User)
 	post.Text = statusText
 	privacy, err := getPostPrivacy(PostLink, c)
 	if err != nil {
@@ -282,7 +412,7 @@ func postStatus(c Context) {
 		return
 	}
 
-	post := NewPost(PostStatus, c.User, c.Request)
+	post := NewPost(PostStatus, c.User)
 	post.Text = statusText
 	privacy, err := getPostPrivacy(PostStatus, c)
 	if err != nil {
@@ -299,19 +429,6 @@ func postStatus(c Context) {
 	c.Success(201, map[string]interface{}{
 		"message": "Status posted successfully",
 	})
-}
-
-// Save inserts the Post instance if it hasn't been created yet or updates it if it has
-func (p *Post) Save(conn *Connection) error {
-	if p.ID.Hex() == "" {
-		p.ID = bson.NewObjectId()
-	}
-
-	if err := conn.Save("posts", p.ID, p); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // CanBeAccessedBy determines if the current post can be accessed by the given user
