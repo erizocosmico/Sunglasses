@@ -20,6 +20,16 @@ type errorResponse struct {
 	Message string `json:"message"`
 }
 
+func testMartini() *martini.ClassicMartini {
+	r := martini.NewRouter()
+	m := martini.New()
+	m.Use(martini.Recovery())
+	m.Use(martini.Static("public"))
+	m.MapTo(r, (*martini.Routes)(nil))
+	m.Action(r.Handle)
+	return &martini.ClassicMartini{m, r}
+}
+
 func testGetHandler(handler, middleware martini.Handler, conn *Connection, reqUrl, handlerUrl string, testFunc func(*httptest.ResponseRecorder)) {
 	testHandler(func(m *martini.ClassicMartini) {
 		m.Get(handlerUrl, handler)
@@ -99,7 +109,7 @@ func testUploadFileHandler(file, key, url string, handler martini.Handler, conn 
 	config.StorePath = "../test_assets/"
 	config.ThumbnailStorePath = "../test_assets/"
 
-	m := martini.Classic()
+	m := testMartini()
 	m.Map(conn)
 	m.Map(config)
 	m.Use(render.Renderer())
@@ -130,7 +140,7 @@ func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.H
 	}
 
 	req, _ := http.NewRequest(method, reqUrl, nil)
-	m := martini.Classic()
+	m := testMartini()
 	m.Map(conn)
 	m.Map(config)
 	m.Use(render.Renderer())
