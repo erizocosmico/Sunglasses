@@ -3,7 +3,7 @@ package mask
 import (
 	"bytes"
 	"fmt"
-	"github.com/codegangsta/martini"
+	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/sessions"
 	"io"
