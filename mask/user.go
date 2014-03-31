@@ -238,13 +238,33 @@ func (us UserSettings) GetPrivacySettings(objectType ObjectType) PrivacySettings
 }
 
 // GetUserData retrieves basic data from users for responses
-func GetUsersData(ids []bson.ObjectId, privateAccess bool, conn *Connection) map[bson.ObjectId]User {
+func GetUsersData(ids []bson.ObjectId, user *User, conn *Connection) map[bson.ObjectId]User {
 	var u User
+	var follows []Follow
 	users := make(map[bson.ObjectId]User)
 	cursor := conn.Db.C("users").Find(bson.M{"_id": bson.M{"$in": ids}}).Iter()
 
+	followsIter := conn.Db.C("follows").Find(bson.M{"$or": []bson.M{
+		bson.M{"user_from": user.ID, "user_to": bson.M{"$in": ids}},
+		bson.M{"user_to": user.ID, "user_from": bson.M{"$in": ids}},
+	}}).Iter()
+
+	if err := followsIter.All(&follows); err != nil {
+		return nil
+	}
+
 	for cursor.Next(&u) {
-		if !u.Settings.Invisible || privateAccess {
+		hasAccess := func(id bson.ObjectId) bool {
+			for _, v := range follows {
+				if v.From.Hex() == id.Hex() || v.To.Hex() == id.Hex() {
+					return true
+				}
+			}
+
+			return false
+		}(u.ID)
+
+		if !u.Settings.Invisible || hasAccess {
 			user := User{
 				ID:                    u.ID,
 				Username:              u.Username,
@@ -253,7 +273,7 @@ func GetUsersData(ids []bson.ObjectId, privateAccess bool, conn *Connection) map
 				PublicName:            u.PublicName,
 			}
 
-			if u.Settings.DisplayAvatarBeforeApproval || privateAccess {
+			if u.Settings.DisplayAvatarBeforeApproval || hasAccess {
 				user.Avatar = u.Avatar
 				user.AvatarThumbnail = u.AvatarThumbnail
 				user.PrivateName = u.PrivateName

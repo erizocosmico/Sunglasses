@@ -179,7 +179,7 @@ func CommentsForPost(c Context) {
 		}
 	}
 
-	usersData := GetUsersData(users, true, c.Conn)
+	usersData := GetUsersData(users, c.User, c.Conn)
 	if usersData == nil {
 		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return

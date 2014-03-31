@@ -148,7 +148,7 @@ func ShowPost(c Context) {
 
 	uids = append(uids, post.UserID)
 
-	data := GetUsersData(uids, true, c.Conn)
+	data := GetUsersData(uids, c.User, c.Conn)
 	if len(data) == 0 {
 		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return

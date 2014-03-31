@@ -391,3 +391,15 @@ func TestPostPhoto(t *testing.T) {
 		})
 	})
 }
+
+func TestDeletePost(t *testing.T) {
+
+}
+
+func TestLikePost(t *testing.T) {
+
+}
+
+func TestShowPost(t *testing.T) {
+
+}
