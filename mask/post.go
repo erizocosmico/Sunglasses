@@ -167,7 +167,7 @@ func ShowPost(c Context) {
 
 // DeletePost deletes a post owned by the user making the request
 func DeletePost(c Context) {
-	var post *Post
+	var post Post
 
 	if c.User == nil {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
@@ -180,7 +180,7 @@ func DeletePost(c Context) {
 		return
 	}
 
-	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(post); err != nil {
+	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(&post); err != nil {
 		c.Error(404, CodeNotFound, MsgNotFound)
 		return
 	}
