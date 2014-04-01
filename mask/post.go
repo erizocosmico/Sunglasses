@@ -107,7 +107,7 @@ func CreatePost(c Context) {
 
 // ShowPost returns all data about a post including comments and likes
 func ShowPost(c Context) {
-	var post *Post
+	var post Post
 
 	if c.User == nil {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
@@ -120,7 +120,7 @@ func ShowPost(c Context) {
 		return
 	}
 
-	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(post); err != nil {
+	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(&post); err != nil {
 		c.Error(404, CodeNotFound, MsgNotFound)
 		return
 	}
@@ -207,7 +207,7 @@ func DeletePost(c Context) {
 
 // LikePost likes a post (or unlikes it if the post has already been liked)
 func LikePost(c Context) {
-	var post *Post
+	var post Post
 
 	if c.User == nil {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
@@ -220,7 +220,7 @@ func LikePost(c Context) {
 		return
 	}
 
-	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(post); err != nil {
+	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(&post); err != nil {
 		c.Error(404, CodeNotFound, MsgNotFound)
 		return
 	}
@@ -235,14 +235,14 @@ func LikePost(c Context) {
 	// Post was already liked by the user, unlike it
 	if count > 0 {
 		post.Likes--
-		if err := post.Save(c.Conn); err != nil {
+		if err := (&post).Save(c.Conn); err != nil {
 			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
 
 		if _, err := c.RemoveAll("likes", bson.M{"post_id": post.ID, "user_id": c.User.ID}); err != nil {
 			post.Likes++
-			post.Save(c.Conn)
+			(&post).Save(c.Conn)
 
 			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
@@ -256,7 +256,7 @@ func LikePost(c Context) {
 
 	// Like post
 	post.Likes++
-	if err := post.Save(c.Conn); err != nil {
+	if err := (&post).Save(c.Conn); err != nil {
 		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
 	}
@@ -264,7 +264,7 @@ func LikePost(c Context) {
 	like := PostLike{bson.NewObjectId(), c.User.ID, post.ID}
 	if err := c.Query("likes").Insert(like); err != nil {
 		post.Likes--
-		post.Save(c.Conn)
+		(&post).Save(c.Conn)
 
 		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
