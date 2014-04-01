@@ -6,7 +6,7 @@ type PrivacyType int
 
 // PrivacySettings model
 type PrivacySettings struct {
-	Type  PrivacyType     `json:"privacy_type" bson:"privacy_type"`
+	Type  PrivacyType     `json:"privacy_type,omitempty" bson:"privacy_type"`
 	Users []bson.ObjectId `json:"users,omitempty" bson:"users,omitempty"`
 }
 

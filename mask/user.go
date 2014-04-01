@@ -49,15 +49,15 @@ type User struct {
 	UsernameLower         string        `json:"username_lower,omitempty" bson:"username_lower"`
 	Password              string        `json:"-" bson:"password"`
 	EMail                 string        `json:"-" bson:"email,omitempty"`
-	PublicName            string        `json:"public_name,omitempty" bson:"public_name,omitempty"`
-	PrivateName           string        `json:"private_name,omitempty" bson:"private_name,omitempty"`
+	PublicName            string        `json:"public_name" bson:"public_name,omitempty"`
+	PrivateName           string        `json:"private_name" bson:"private_name,omitempty"`
 	Role                  UserRole      `json:"role,omitempty" bson:"role"`
 	PreferredLanguage     string        `json:"preferred_lang,omitempty" bson:"preferred_lang,omitempty"`
 	Timezone              int           `json:"timezone,omitempty" bson:"timezone,omitempty"`
-	Avatar                string        `json:"avatar,omitempty" bson:"avatar,omitempty"`
-	AvatarThumbnail       string        `json:"avatar_thumbnail,omitempty" bson:"avatar_thumbnail,omitempty"`
-	PublicAvatar          string        `json:"public_avatar,omitempty" bson:"public_avatar,omitempty"`
-	PublicAvatarThumbnail string        `json:"public_avatar_thumbnail,omitempty" bson:"public_avatar_thumbnail,omitempty"`
+	Avatar                string        `json:"avatar" bson:"avatar,omitempty"`
+	AvatarThumbnail       string        `json:"avatar_thumbnail" bson:"avatar_thumbnail,omitempty"`
+	PublicAvatar          string        `json:"public_avatar" bson:"public_avatar,omitempty"`
+	PublicAvatarThumbnail string        `json:"public_avatar_thumbnail" bson:"public_avatar_thumbnail,omitempty"`
 	Active                bool          `json:"active,omitempty" bson:"active"`
 	Info                  UserInfo      `json:"info,omitempty" bson:"info"`
 	Settings              UserSettings  `json:"settings,omitempty" bson:"settings"`
@@ -79,19 +79,19 @@ type UserInfo struct {
 
 // UserSettings stores the user preferences
 type UserSettings struct {
-	Invisible                   bool           `json:"invisible" bson:"invisible"`
-	CanReceiveRequests          bool           `json:"can_receive_requests" bson:"can_receive_requests"`
-	FollowApprovalRequired      bool           `json:"follow_approval_required" bson:"follow_approval_required"`
-	DisplayAvatarBeforeApproval bool           `json:"display_avatar_before_approval" bson:"display_avatar_before_approval"`
-	NotifyNewComment            bool           `json:"notify_new_comment" bson:"notify_new_comment"`
-	NotifyNewCommentOthers      bool           `json:"notify_new_comment_others" bson:"notify_new_comment_others"`
-	NotifyPostsInMyProfile      bool           `json:"notify_posts_in_my_profile" bson:"notify_posts_in_my_profile"`
-	NotifyLikes                 bool           `json:"notify_likes" bson:"notify_likes"`
-	AllowPostsInMyProfile       bool           `json:"allow_posts_in_my_profile" bson:"allow_posts_in_my_profile"`
-	AllowCommentsInPosts        bool           `json:"allow_comments_in_posts" bson:"allow_comments_in_posts"`
-	DisplayEmail                bool           `json:"display_email" bson:"display_email"`
-	DisplayInfoFollowersOnly    bool           `json:"display_info_followers_only" bson:"display_info_followers_only"`
-	PasswordRecoveryMethod      RecoveryMethod `json:"recovery_method" bson:"recovery_method"`
+	Invisible                   bool           `json:"invisible,omitempty" bson:"invisible"`
+	CanReceiveRequests          bool           `json:"can_receive_requests,omitempty" bson:"can_receive_requests"`
+	FollowApprovalRequired      bool           `json:"follow_approval_required,omitempty" bson:"follow_approval_required"`
+	DisplayAvatarBeforeApproval bool           `json:"display_avatar_before_approval,omitempty" bson:"display_avatar_before_approval"`
+	NotifyNewComment            bool           `json:"notify_new_comment,omitempty" bson:"notify_new_comment"`
+	NotifyNewCommentOthers      bool           `json:"notify_new_comment_others,omitempty" bson:"notify_new_comment_others"`
+	NotifyPostsInMyProfile      bool           `json:"notify_posts_in_my_profile,omitempty" bson:"notify_posts_in_my_profile"`
+	NotifyLikes                 bool           `json:"notify_likes,omitempty" bson:"notify_likes"`
+	AllowPostsInMyProfile       bool           `json:"allow_posts_in_my_profile,omitempty" bson:"allow_posts_in_my_profile"`
+	AllowCommentsInPosts        bool           `json:"allow_comments_in_posts,omitempty" bson:"allow_comments_in_posts"`
+	DisplayEmail                bool           `json:"display_email,omitempty" bson:"display_email"`
+	DisplayInfoFollowersOnly    bool           `json:"display_info_followers_only,omitempty" bson:"display_info_followers_only"`
+	PasswordRecoveryMethod      RecoveryMethod `json:"recovery_method,omitempty" bson:"recovery_method"`
 	RecoveryQuestion            string         `json:"recovery_question,omitempty" bson:"recovery_question,omitempty"`
 	RecoveryAnswer              string         `json:"recovery_answer,omitempty" bson:"recovery_answer,omitempty"`
 	// If this is true DefaultStatusPrivacy will override all the other settings
@@ -238,10 +238,10 @@ func (us UserSettings) GetPrivacySettings(objectType ObjectType) PrivacySettings
 }
 
 // GetUserData retrieves basic data from users for responses
-func GetUsersData(ids []bson.ObjectId, user *User, conn *Connection) map[bson.ObjectId]User {
+func GetUsersData(ids []bson.ObjectId, user *User, conn *Connection) map[bson.ObjectId]map[string]interface{} {
 	var u User
 	var follows []Follow
-	users := make(map[bson.ObjectId]User)
+	users := make(map[bson.ObjectId]map[string]interface{})
 	cursor := conn.Db.C("users").Find(bson.M{"_id": bson.M{"$in": ids}}).Iter()
 
 	followsIter := conn.Db.C("follows").Find(bson.M{"$or": []bson.M{
@@ -254,29 +254,44 @@ func GetUsersData(ids []bson.ObjectId, user *User, conn *Connection) map[bson.Ob
 	}
 
 	for cursor.Next(&u) {
-		hasAccess := func(id bson.ObjectId) bool {
-			for _, v := range follows {
-				if v.From.Hex() == id.Hex() || v.To.Hex() == id.Hex() {
-					return true
+		hasAccess := false
+		for _, v := range follows {
+			if v.From.Hex() == u.ID.Hex() || v.To.Hex() == u.ID.Hex() {
+				hasAccess = true
+				break
+			}
+		}
+
+		if _, ok := users[u.ID]; !ok {
+			var user map[string]interface{}
+
+			if !u.Settings.Invisible || hasAccess {
+				user = map[string]interface{}{
+					"id":                      u.ID,
+					"username":                u.Username,
+					"public_avatar":           u.PublicAvatar,
+					"public_avatar_thumbnail": u.PublicAvatarThumbnail,
+					"public_name":             u.PublicName,
+					"avatar":                  "",
+					"avatar_thumbnail":        "",
+					"private_name":            "",
 				}
-			}
 
-			return false
-		}(u.ID)
-
-		if !u.Settings.Invisible || hasAccess {
-			user := User{
-				ID:                    u.ID,
-				Username:              u.Username,
-				PublicAvatar:          u.PublicAvatar,
-				PublicAvatarThumbnail: u.PublicAvatarThumbnail,
-				PublicName:            u.PublicName,
-			}
-
-			if u.Settings.DisplayAvatarBeforeApproval || hasAccess {
-				user.Avatar = u.Avatar
-				user.AvatarThumbnail = u.AvatarThumbnail
-				user.PrivateName = u.PrivateName
+				if u.Settings.DisplayAvatarBeforeApproval || hasAccess {
+					user["avatar"] = u.Avatar
+					user["avatar_thumbnail"] = u.AvatarThumbnail
+					user["private_name"] = u.PrivateName
+				}
+			} else {
+				user = map[string]interface{}{
+					"username":                "Protected",
+					"public_avatar":           "",
+					"public_avatar_thumbnail": "",
+					"public_name":             "",
+					"avatar":                  "",
+					"avatar_thumbnail":        "",
+					"private_name":            "",
+				}
 			}
 
 			users[u.ID] = user

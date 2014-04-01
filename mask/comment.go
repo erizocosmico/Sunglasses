@@ -6,12 +6,12 @@ import (
 )
 
 type Comment struct {
-	ID      bson.ObjectId `json:"id" bson:"_id"`
-	UserID  bson.ObjectId `json:"-" bson:"user_id"`
-	User    User          `json:"user" bson:"-"`
-	PostID  bson.ObjectId `json:"post_id" bson:"post_id"`
-	Created float64       `json:"created" bson:"created"`
-	Message string        `json:"message" bson:"message"`
+	ID      bson.ObjectId          `json:"id" bson:"_id"`
+	UserID  bson.ObjectId          `json:"-" bson:"user_id"`
+	User    map[string]interface{} `json:"user" bson:"-"`
+	PostID  bson.ObjectId          `json:"post_id" bson:"post_id"`
+	Created float64                `json:"created" bson:"created"`
+	Message string                 `json:"message" bson:"message"`
 }
 
 // NewComment returns a new instance of Comment

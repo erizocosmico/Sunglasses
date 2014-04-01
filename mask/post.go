@@ -22,17 +22,17 @@ const (
 
 // Post model
 type Post struct {
-	ID          bson.ObjectId   `json:"id" bson:"_id"`
-	User        User            `json:"user" bson:"-"`
-	UserID      bson.ObjectId   `json:"-" bson:"user_id"`
-	Created     float64         `json:"created" bson:"created"`
-	Type        ObjectType      `json:"post_type" bson:"post_type"`
-	Likes       float64         `json:"likes" bson:"likes"`
-	CommentsNum float64         `json:"comments_num" bson:"comments_num"`
-	Comments    []Comment       `json:"comments" bson:"-"`
-	Reported    float64         `json:"reported" bson:"reported"`
-	Privacy     PrivacySettings `json:"privacy" bson:"privacy"`
-	Text        string          `json:"text,omitempty" bson:"text,omitempty"`
+	ID          bson.ObjectId          `json:"id" bson:"_id"`
+	User        map[string]interface{} `json:"user" bson:"-"`
+	UserID      bson.ObjectId          `json:"-" bson:"user_id"`
+	Created     float64                `json:"created" bson:"created"`
+	Type        ObjectType             `json:"post_type" bson:"post_type"`
+	Likes       float64                `json:"likes" bson:"likes"`
+	CommentsNum float64                `json:"comments_num" bson:"comments_num"`
+	Comments    []Comment              `json:"comments" bson:"-"`
+	Reported    float64                `json:"reported" bson:"reported"`
+	Privacy     PrivacySettings        `json:"privacy" bson:"privacy"`
+	Text        string                 `json:"text,omitempty" bson:"text,omitempty"`
 
 	// Video specific fields
 	Service VideoService `json:"video_service,omitempty" bson:"video_service,omitempty"`

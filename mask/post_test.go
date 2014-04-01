@@ -2,6 +2,7 @@ package mask
 
 import (
 	"encoding/json"
+	"fmt"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"net/http"
@@ -544,7 +545,7 @@ func TestLikePost(t *testing.T) {
 		conn.Session.Close()
 	}()
 
-	Convey("Deleting a post", t, func() {
+	Convey("Liking a post", t, func() {
 		Convey("When no user is passed", func() {
 			testPostHandler(LikePost, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
@@ -648,5 +649,153 @@ func TestLikePost(t *testing.T) {
 }
 
 func TestShowPost(t *testing.T) {
+	conn := getConnection()
+	user, token := createRequestUser(conn)
 
+	userTmp := NewUser()
+	userTmp.Username = "testing_very_hard"
+	if err := userTmp.Save(conn); err != nil {
+		panic(err)
+	}
+
+	tokenTmp := new(Token)
+	tokenTmp.Type = UserToken
+	tokenTmp.Expires = float64(time.Now().Unix() + int64(3600*time.Second))
+	tokenTmp.UserID = userTmp.ID
+	if err := tokenTmp.Save(conn); err != nil {
+		panic(err)
+	}
+
+	uids := make([]bson.ObjectId, 0, 10)
+	for i := 0; i < 10; i++ {
+		u := NewUser()
+		u.Username = "testing_user_" + fmt.Sprint(i)
+		u.PrivateName = "Super secret"
+		if err := u.Save(conn); err != nil {
+			panic(err)
+		}
+
+		uids = append(uids, u.ID)
+	}
+
+	for i := 0; i < 6; i++ {
+		FollowUser(user.ID, uids[i], conn)
+	}
+
+	post := NewPost(PostStatus, user)
+	post.Text = "A fancy post"
+	post.Privacy = PrivacySettings{}
+	if err := post.Save(conn); err != nil {
+		panic(err)
+	}
+
+	for i := 0; i < 10; i++ {
+		c := NewComment(uids[i], post.ID)
+		c.Message = "Fancy comment"
+		if err := c.Save(conn); err != nil {
+			panic(err)
+		}
+	}
+
+	defer func() {
+		conn.Db.C("posts").RemoveAll(nil)
+		conn.Db.C("comments").RemoveAll(nil)
+		conn.Db.C("users").RemoveAll(nil)
+		conn.Db.C("tokens").RemoveAll(nil)
+		conn.Session.Close()
+	}()
+
+	Convey("Showing a post", t, func() {
+		Convey("When no user is passed", func() {
+			testGetHandler(ShowPost, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidData)
+				So(errResp.Message, ShouldEqual, MsgInvalidData)
+			})
+		})
+
+		Convey("When an invalid post id is passed", func() {
+			testGetHandler(ShowPost, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("post_id", "")
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidData)
+				So(errResp.Message, ShouldEqual, MsgInvalidData)
+			})
+		})
+
+		Convey("When a post id that doesn't exist is passed", func() {
+			testGetHandler(ShowPost, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("post_id", bson.NewObjectId().Hex())
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 404)
+				So(errResp.Code, ShouldEqual, CodeNotFound)
+				So(errResp.Message, ShouldEqual, MsgNotFound)
+			})
+		})
+
+		Convey("When the post can't be accessed by the user", func() {
+			testGetHandler(ShowPost, func(r *http.Request) {
+				r.Header.Add("X-User-Token", tokenTmp.Hash)
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("post_id", post.ID.Hex())
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 403)
+				So(errResp.Code, ShouldEqual, CodeUnauthorized)
+				So(errResp.Message, ShouldEqual, MsgUnauthorized)
+			})
+		})
+
+		Convey("When everything is OK", func() {
+			testGetHandler(ShowPost, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("post_id", post.ID.Hex())
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp map[string]interface{}
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 200)
+				So(len(errResp["post"].(map[string]interface{})["comments"].([]interface{})), ShouldEqual, 10)
+
+				count := 0
+				for _, v := range errResp["post"].(map[string]interface{})["comments"].([]interface{}) {
+					if v.(map[string]interface{})["user"].(map[string]interface{})["private_name"] != "" {
+						count++
+					}
+				}
+
+				So(count, ShouldEqual, 6)
+			})
+		})
+	})
 }

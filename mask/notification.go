@@ -10,14 +10,14 @@ type NotificationType int
 
 // Notification model
 type Notification struct {
-	ID           bson.ObjectId    `json:"id" bson:"_id"`
-	Type         NotificationType `json:"notification_type" bson:"notification_type"`
-	PostID       bson.ObjectId    `json:"post_id" bson:"post_id,omitempty"`
-	User         bson.ObjectId    `json:"user_id" bson:"user_id"`
-	UserActionID bson.ObjectId    `json:"-" bson:"user_action_id,omitempty"`
-	UserAction   User             `json:"user_action" bson:"-"`
-	Time         float64          `json:"time" bson:"time"`
-	Read         bool             `json:"read" bson:"read"`
+	ID           bson.ObjectId          `json:"id" bson:"_id"`
+	Type         NotificationType       `json:"notification_type" bson:"notification_type"`
+	PostID       bson.ObjectId          `json:"post_id" bson:"post_id,omitempty"`
+	User         bson.ObjectId          `json:"user_id" bson:"user_id"`
+	UserActionID bson.ObjectId          `json:"-" bson:"user_action_id,omitempty"`
+	UserAction   map[string]interface{} `json:"user_action" bson:"-"`
+	Time         float64                `json:"time" bson:"time"`
+	Read         bool                   `json:"read" bson:"read"`
 }
 
 const (
