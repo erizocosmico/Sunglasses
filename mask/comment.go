@@ -1,6 +1,7 @@
 package mask
 
 import (
+	"fmt"
 	"labix.org/v2/mgo/bson"
 	"time"
 )
@@ -39,7 +40,7 @@ func (c *Comment) Save(conn *Connection) error {
 
 // CreateComment adds a comment to a post
 func CreateComment(c Context) {
-	var post *Post
+	var post Post
 
 	if c.User == nil {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
@@ -52,12 +53,13 @@ func CreateComment(c Context) {
 		return
 	}
 
-	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(post); err != nil {
+	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(&post); err != nil {
+		fmt.Println(err.Error())
 		c.Error(404, CodeNotFound, MsgNotFound)
 		return
 	}
 
-	if !post.CanBeAccessedBy(c.User, c.Conn) {
+	if !(&post).CanBeAccessedBy(c.User, c.Conn) {
 		c.Error(403, CodeUnauthorized, MsgUnauthorized)
 		return
 	}
@@ -77,7 +79,7 @@ func CreateComment(c Context) {
 	}
 
 	post.CommentsNum++
-	post.Save(c.Conn)
+	(&post).Save(c.Conn)
 
 	c.Success(201, map[string]interface{}{
 		"created": true,
