@@ -1,7 +1,6 @@
 package mask
 
 import (
-	"fmt"
 	"labix.org/v2/mgo/bson"
 	"time"
 )
@@ -54,7 +53,6 @@ func CreateComment(c Context) {
 	}
 
 	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(&post); err != nil {
-		fmt.Println(err.Error())
 		c.Error(404, CodeNotFound, MsgNotFound)
 		return
 	}
@@ -90,8 +88,8 @@ func CreateComment(c Context) {
 // DeleteComment removes a comment from a post
 func RemoveComment(c Context) {
 	var (
-		post    *Post
-		comment *Comment
+		post    Post
+		comment Comment
 	)
 
 	if c.User == nil {
@@ -105,12 +103,7 @@ func RemoveComment(c Context) {
 		return
 	}
 
-	if err := c.FindId("comments", bson.ObjectIdHex(commentID)).One(comment); err != nil {
-		c.Error(404, CodeNotFound, MsgNotFound)
-		return
-	}
-
-	if err := c.FindId("posts", comment.PostID).One(post); err != nil {
+	if err := c.FindId("comments", bson.ObjectIdHex(commentID)).One(&comment); err != nil {
 		c.Error(404, CodeNotFound, MsgNotFound)
 		return
 	}
@@ -120,13 +113,18 @@ func RemoveComment(c Context) {
 		return
 	}
 
+	if err := c.FindId("posts", comment.PostID).One(&post); err != nil {
+		c.Error(404, CodeNotFound, MsgNotFound)
+		return
+	}
+
 	if err := c.Query("comments").RemoveId(comment.ID); err != nil {
 		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
 	}
 
 	post.CommentsNum--
-	post.Save(c.Conn)
+	(&post).Save(c.Conn)
 
 	c.Success(200, map[string]interface{}{
 		"deleted": true,

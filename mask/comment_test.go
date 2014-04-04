@@ -145,3 +145,148 @@ func TestCreateComment(t *testing.T) {
 		})
 	})
 }
+
+func TestRemoveComment(t *testing.T) {
+	conn := getConnection()
+	user, token := createRequestUser(conn)
+
+	userTmp := NewUser()
+	userTmp.Username = "testing_very_hard"
+	if err := userTmp.Save(conn); err != nil {
+		panic(err)
+	}
+
+	tokenTmp := new(Token)
+	tokenTmp.Type = UserToken
+	tokenTmp.Expires = float64(time.Now().Unix() + int64(3600*time.Second))
+	tokenTmp.UserID = userTmp.ID
+	if err := tokenTmp.Save(conn); err != nil {
+		panic(err)
+	}
+
+	post := NewPost(PostStatus, user)
+	post.Text = "A fancy post"
+	post.Privacy = PrivacySettings{}
+	if err := post.Save(conn); err != nil {
+		panic(err)
+	}
+
+	c := NewComment(user.ID, bson.NewObjectId())
+	c.Message = "A fancy comment"
+	if err := c.Save(conn); err != nil {
+		panic(err)
+	}
+
+	c2 := NewComment(user.ID, post.ID)
+	c2.Message = "A fancy comment"
+	if err := c2.Save(conn); err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		conn.Db.C("posts").RemoveAll(nil)
+		user.Remove(conn)
+		token.Remove(conn)
+		userTmp.Remove(conn)
+		tokenTmp.Remove(conn)
+		conn.Session.Close()
+	}()
+
+	Convey("Removing comments", t, func() {
+		Convey("When no user is passed", func() {
+			testDeleteHandler(RemoveComment, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidData)
+				So(errResp.Message, ShouldEqual, MsgInvalidData)
+			})
+		})
+
+		Convey("When an invalid post id is passed", func() {
+			testDeleteHandler(RemoveComment, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("comment_id", "")
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidData)
+				So(errResp.Message, ShouldEqual, MsgInvalidData)
+			})
+		})
+
+		Convey("When a comment id that doesn't exist is passed", func() {
+			testDeleteHandler(RemoveComment, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("comment_id", bson.NewObjectId().Hex())
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 404)
+				So(errResp.Code, ShouldEqual, CodeNotFound)
+				So(errResp.Message, ShouldEqual, MsgNotFound)
+			})
+		})
+
+		Convey("When the comment does not belong to the user", func() {
+			testDeleteHandler(RemoveComment, func(r *http.Request) {
+				r.Header.Add("X-User-Token", tokenTmp.Hash)
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("comment_id", c.ID.Hex())
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 403)
+				So(errResp.Code, ShouldEqual, CodeUnauthorized)
+				So(errResp.Message, ShouldEqual, MsgUnauthorized)
+			})
+		})
+
+		Convey("When the post does not exist", func() {
+			testDeleteHandler(RemoveComment, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("comment_id", c.ID.Hex())
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 404)
+				So(errResp.Code, ShouldEqual, CodeNotFound)
+				So(errResp.Message, ShouldEqual, MsgNotFound)
+			})
+		})
+
+		Convey("When everything is OK", func() {
+			testDeleteHandler(RemoveComment, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.PostForm == nil {
+					r.PostForm = make(url.Values)
+				}
+				r.PostForm.Add("comment_id", c2.ID.Hex())
+			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+				So(res.Code, ShouldEqual, 200)
+			})
+		})
+	})
+}
