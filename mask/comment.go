@@ -135,7 +135,7 @@ func RemoveComment(c Context) {
 // CommentsForPost returns a list with the comments for a post
 func CommentsForPost(c Context) {
 	var (
-		post   *Post
+		post   Post
 		result Comment
 	)
 	count, offset := c.ListCountParams()
@@ -151,12 +151,12 @@ func CommentsForPost(c Context) {
 		return
 	}
 
-	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(post); err != nil {
+	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(&post); err != nil {
 		c.Error(404, CodeNotFound, MsgNotFound)
 		return
 	}
 
-	if !post.CanBeAccessedBy(c.User, c.Conn) {
+	if !(&post).CanBeAccessedBy(c.User, c.Conn) {
 		c.Error(403, CodeUnauthorized, MsgUnauthorized)
 		return
 	}

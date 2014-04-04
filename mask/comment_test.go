@@ -290,3 +290,180 @@ func TestRemoveComment(t *testing.T) {
 		})
 	})
 }
+
+func TestCommentsForPost(t *testing.T) {
+	conn := getConnection()
+	user, token := createRequestUser(conn)
+
+	userTmp := NewUser()
+	userTmp.Username = "testing_very_hard"
+	if err := userTmp.Save(conn); err != nil {
+		panic(err)
+	}
+
+	tokenTmp := new(Token)
+	tokenTmp.Type = UserToken
+	tokenTmp.Expires = float64(time.Now().Unix() + int64(3600*time.Second))
+	tokenTmp.UserID = userTmp.ID
+	if err := tokenTmp.Save(conn); err != nil {
+		panic(err)
+	}
+
+	post := NewPost(PostStatus, user)
+	post.Text = "A fancy post"
+	post.Privacy = PrivacySettings{}
+	if err := post.Save(conn); err != nil {
+		panic(err)
+	}
+
+	for i := 0; i < 24; i++ {
+		c := NewComment(user.ID, post.ID)
+		c.Message = "A fancy comment"
+		if err := c.Save(conn); err != nil {
+			panic(err)
+		}
+	}
+
+	defer func() {
+		conn.Db.C("posts").RemoveAll(nil)
+		conn.Db.C("comments").RemoveAll(nil)
+		user.Remove(conn)
+		token.Remove(conn)
+		userTmp.Remove(conn)
+		tokenTmp.Remove(conn)
+		conn.Session.Close()
+	}()
+
+	Convey("Listing comments for post", t, func() {
+		Convey("When invalid user is provided", func() {
+			testGetHandler(CommentsForPost, func(r *http.Request) {}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 400)
+					So(errResp.Code, ShouldEqual, CodeInvalidData)
+					So(errResp.Message, ShouldEqual, MsgInvalidData)
+				})
+		})
+
+		Convey("When post does not exist", func() {
+			testGetHandler(CommentsForPost, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("post_id", bson.NewObjectId().Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 404)
+					So(errResp.Code, ShouldEqual, CodeNotFound)
+					So(errResp.Message, ShouldEqual, MsgNotFound)
+				})
+		})
+
+		Convey("When post can't be acessed by the user", func() {
+			testGetHandler(CommentsForPost, func(r *http.Request) {
+				r.Header.Add("X-User-Token", tokenTmp.Hash)
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("post_id", post.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp errorResponse
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 403)
+					So(errResp.Code, ShouldEqual, CodeUnauthorized)
+					So(errResp.Message, ShouldEqual, MsgUnauthorized)
+				})
+		})
+
+		Convey("When no count params are passed", func() {
+			testGetHandler(CommentsForPost, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("post_id", post.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(24))
+					So(len(errResp["comments"].([]interface{})), ShouldEqual, 24)
+				})
+		})
+
+		Convey("When count param is passed", func() {
+			testGetHandler(CommentsForPost, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "10")
+				r.Form.Add("post_id", post.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(10))
+					So(len(errResp["comments"].([]interface{})), ShouldEqual, 10)
+				})
+		})
+
+		Convey("When count param and offset are passed", func() {
+			testGetHandler(CommentsForPost, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "10")
+				r.Form.Add("offset", "15")
+				r.Form.Add("post_id", post.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(9))
+					So(len(errResp["comments"].([]interface{})), ShouldEqual, 9)
+				})
+		})
+
+		Convey("When invalid count params are passed", func() {
+			testGetHandler(CommentsForPost, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+				if r.Form == nil {
+					r.Form = make(url.Values)
+				}
+				r.Form.Add("count", "2")
+				r.Form.Add("post_id", post.ID.Hex())
+			}, conn, "/", "/",
+				func(resp *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(resp.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(24))
+					So(len(errResp["comments"].([]interface{})), ShouldEqual, 24)
+				})
+		})
+	})
+}
