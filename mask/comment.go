@@ -79,6 +79,8 @@ func CreateComment(c Context) {
 	post.CommentsNum++
 	(&post).Save(c.Conn)
 
+	go PropagatePostOnNewComment(c, post.ID, comment.ID)
+
 	c.Success(201, map[string]interface{}{
 		"created": true,
 		"message": "Comment posted successfully",
@@ -125,6 +127,8 @@ func RemoveComment(c Context) {
 
 	post.CommentsNum--
 	(&post).Save(c.Conn)
+
+	go PropagatePostOnCommentDeleted(c, post.ID, comment.ID)
 
 	c.Success(200, map[string]interface{}{
 		"deleted": true,

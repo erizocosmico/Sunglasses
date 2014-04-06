@@ -49,6 +49,7 @@ func UserIsBlocked(from, to bson.ObjectId, conn *Connection) bool {
 
 // Block blocks an user
 func BlockHandler(c Context) {
+	// TODO: If the user follows the user we are going to block, unfollow it
 	if c.User != nil {
 		userTo := c.Form("user_to")
 
@@ -68,6 +69,9 @@ func BlockHandler(c Context) {
 					c.Error(500, CodeUnexpected, MsgUnexpected)
 					return
 				}
+
+				UnfollowUser(c.User.ID, userToID, c.Conn)
+				go PropagatePostsOnUserUnfollow(c, userToID)
 
 				c.Success(200, map[string]interface{}{
 					"error":   false,

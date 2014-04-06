@@ -3,10 +3,10 @@ package mask
 import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"errors"
-	"labix.org/v2/mgo/bson"
-	"strings"
 	"fmt"
 	"labix.org/v2/mgo"
+	"labix.org/v2/mgo/bson"
+	"strings"
 )
 
 // UserRole represents an user role
@@ -252,7 +252,7 @@ func Search(c Context) {
 
 	justFollowings := c.GetBoolean("just_followings")
 
-	getUserIter := func(count, offset int) mgo.Iter {
+	getUserIter := func(count, offset int) *mgo.Iter {
 		regex := bson.M{"$regex": fmt.Sprintf(`(?i)%s`, search)}
 
 		iter := c.Find("users", bson.M{"$and": []bson.M{
@@ -263,7 +263,7 @@ func Search(c Context) {
 			}},
 			bson.M{"active": true},
 			bson.M{"settings.invisible": false},
-		}}).Limit(count).Offset(offset).Iter()
+		}}).Limit(count).Skip(offset).Iter()
 
 		return iter
 	}
@@ -315,9 +315,9 @@ func Search(c Context) {
 		}
 	}
 
-	c.Success(200, map[string]interface{
-			"count": len(users),
-			"users": users,
+	c.Success(200, map[string]interface{}{
+		"count": len(users),
+		"users": users,
 	})
 }
 

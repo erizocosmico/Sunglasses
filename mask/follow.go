@@ -111,6 +111,7 @@ func SendFollowRequest(c Context) {
 					// If the user we want to follow already follows us, skip privacy settings
 					if toUser.Follows(userFrom.ID, c.Conn) || !toUser.Settings.FollowApprovalRequired {
 						if err := FollowUser(userFrom.ID, userToID, c.Conn); err == nil {
+							go PropagatePostsOnUserFollow(c, userToID)
 							SendNotification(NotificationFollowed, toUser, blankID, userFrom.ID, c.Conn)
 						} else {
 							c.Error(500, CodeUnexpected, MsgUnexpected)
@@ -220,6 +221,8 @@ func Unfollow(c Context) {
 						c.Error(500, CodeUnexpected, MsgUnexpected)
 						return
 					}
+
+					go PropagatePostsOnUserUnfollow(c, userToID)
 
 					c.Success(200, map[string]interface{}{
 						"message": "User unfollowed successfully",

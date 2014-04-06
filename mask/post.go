@@ -33,6 +33,7 @@ type Post struct {
 	Reported    float64                `json:"reported" bson:"reported"`
 	Privacy     PrivacySettings        `json:"privacy" bson:"privacy"`
 	Text        string                 `json:"text,omitempty" bson:"text,omitempty"`
+	Liked       bool                   `json:"liked,omitempty" bson:"-"`
 
 	// Video specific fields
 	Service VideoService `json:"video_service,omitempty" bson:"video_service,omitempty"`
@@ -109,6 +110,8 @@ func CreatePost(c Context) {
 func ShowPost(c Context) {
 	var post Post
 
+	// TODO post is liked?
+
 	if c.User == nil {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return
@@ -124,6 +127,10 @@ func ShowPost(c Context) {
 		c.Error(404, CodeNotFound, MsgNotFound)
 		return
 	}
+
+	var like PostLike
+	err := c.Find("likes", bson.M{"post_id": post.ID, "user_id": c.User.ID}).One(&like)
+	post.Liked = err == nil
 
 	if !post.CanBeAccessedBy(c.User, c.Conn) {
 		c.Error(403, CodeUnauthorized, MsgUnauthorized)
@@ -199,6 +206,8 @@ func DeletePost(c Context) {
 	c.RemoveAll("likes", bson.M{"post_id": post.ID})
 	c.RemoveAll("notifications", bson.M{"post_id": post.ID})
 
+	go PropagatePostsOnDeletion(c, post.ID)
+
 	c.Success(200, map[string]interface{}{
 		"deleted": true,
 		"message": "Post deleted successfully",
@@ -247,6 +256,9 @@ func LikePost(c Context) {
 			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
 		}
+
+		go PropagatePostOnLike(c, post.ID, false)
+
 		c.Success(200, map[string]interface{}{
 			"liked":   false,
 			"message": "Post unliked successfully",
@@ -269,6 +281,8 @@ func LikePost(c Context) {
 		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
 	}
+
+	go PropagatePostOnLike(c, post.ID, true)
 
 	c.Success(200, map[string]interface{}{
 		"liked":   true,
@@ -322,6 +336,8 @@ func postPhoto(c Context) {
 		return
 	}
 
+	go PropagatePostOnCreation(c, p)
+
 	c.Success(201, map[string]interface{}{
 		"message": "Photo posted successfully",
 	})
@@ -361,6 +377,8 @@ func postVideo(c Context) {
 		return
 	}
 
+	go PropagatePostOnCreation(c, post)
+
 	c.Success(201, map[string]interface{}{
 		"message": "Video posted successfully",
 	})
@@ -399,6 +417,8 @@ func postLink(c Context) {
 		return
 	}
 
+	go PropagatePostOnCreation(c, post)
+
 	c.Success(201, map[string]interface{}{
 		"message": "Link posted successfully",
 	})
@@ -425,6 +445,8 @@ func postStatus(c Context) {
 		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
 	}
+
+	go PropagatePostOnCreation(c, post)
 
 	c.Success(201, map[string]interface{}{
 		"message": "Status posted successfully",
