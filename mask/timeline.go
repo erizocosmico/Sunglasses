@@ -44,8 +44,10 @@ func PropagatePostOnCreation(c Context, post *Post) {
 	}
 }
 
+// PropagatePostOnPrivacyChange propagates the privacy changes across all timelines, removing and adding the post
+// according to the new privacy settings.
 func PropagatePostOnPrivacyChange(c Context, post *Post) {
-
+	// TODO: Implement, requires handler for changing posts privacy
 }
 
 // PropagatePostsOnUserFollow propagates the posts to the timeline when a new user is followed
