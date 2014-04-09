@@ -23,20 +23,36 @@ func PropagatePostOnCreation(c Context, post *Post) {
 			Time:     post.Created,
 		}
 
-		// TODO: Retry errors
+		c.Conn.PushTask("create_post", post)
 
 		c.AsyncQuery(func(conn *Connection) {
 			var f Follow
+			allCompleted := true
 			iter := conn.Db.C("follows").Find(bson.M{"user_to": c.User.ID}).Iter()
 			for iter.Next(&f) {
 				var u User
-				conn.Db.C("users").FindId(f.From).One(&u)
-				if post.CanBeAccessedBy(&u, conn) {
-					t.ID = bson.NewObjectId()
-					t.User = u.ID
+				if err := conn.Db.C("users").FindId(f.From).One(&u); err == nil {
+					if post.CanBeAccessedBy(&u, conn) {
+						t.ID = bson.NewObjectId()
+						t.User = u.ID
 
-					conn.Db.C("timelines").UpsertId(t.ID, t)
+						if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
+							allCompleted = false
+							c.Conn.PushFail("create_post", post, u.ID)
+						} else {
+							c.Conn.PushSuccess("create_post", post, u.ID)
+						}
+					}
+				} else {
+					allCompleted = false
+					break
 				}
+			}
+
+			if allCompleted {
+				c.Conn.TaskDone("create_post", post)
+			} else {
+				c.Conn.TaskFailed("create_post", post)
 			}
 
 			iter.Close()
@@ -53,9 +69,13 @@ func PropagatePostOnPrivacyChange(c Context, post *Post) {
 // PropagatePostsOnUserFollow propagates the posts to the timeline when a new user is followed
 func PropagatePostsOnUserFollow(c Context, userID bson.ObjectId) {
 	if !c.Config.Debug {
-		// TODO: Retry errors
+
+		c.Conn.PushTask("follow_user", userID, c.User.ID)
+
 		c.AsyncQuery(func(conn *Connection) {
 			var p Post
+
+			allCompleted := true
 			iter := conn.Db.C("posts").Find(bson.M{"user_id": userID}).Iter()
 			for iter.Next(&p) {
 				t := TimelineEntry{
@@ -70,8 +90,19 @@ func PropagatePostsOnUserFollow(c Context, userID bson.ObjectId) {
 					t.ID = bson.NewObjectId()
 					t.User = c.User.ID
 
-					conn.Db.C("timelines").UpsertId(t.ID, t)
+					if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
+						allCompleted = false
+						c.Conn.PushFail("follow_user", userID, c.User.ID, p.ID)
+					} else {
+						c.Conn.PushSuccess("follow_user", userID, c.User.ID, p.ID)
+					}
 				}
+			}
+
+			if allCompleted {
+				c.Conn.TaskDone("follow_user", userID, c.User.ID)
+			} else {
+				c.Conn.TaskFailed("follow_user", userID, c.User.ID)
 			}
 
 			iter.Close()
@@ -82,9 +113,15 @@ func PropagatePostsOnUserFollow(c Context, userID bson.ObjectId) {
 // PropagatePostsOnUserFollow propagates the posts to the timeline when a new user is followed
 func PropagatePostsOnUserUnfollow(c Context, userID bson.ObjectId) {
 	if !c.Config.Debug {
-		// TODO: Retry errors
+		c.Conn.PushTask("user_unfollow", userID, c.User.ID)
+
 		c.AsyncQuery(func(conn *Connection) {
-			conn.Db.C("timelines").RemoveAll(bson.M{"user_id": c.User.ID, "post_user_id": userID})
+			_, err := conn.Db.C("timelines").RemoveAll(bson.M{"user_id": c.User.ID, "post_user_id": userID})
+			if err != nil {
+				c.Conn.TaskFailed("user_unfollow", userID, c.User.ID)
+			} else {
+				c.Conn.TaskDone("user_unfollow", userID, c.User.ID)
+			}
 		})
 	}
 }
@@ -92,9 +129,14 @@ func PropagatePostsOnUserUnfollow(c Context, userID bson.ObjectId) {
 // PropagatePostsOnDeletion erases a deleted post from all timelines
 func PropagatePostsOnDeletion(c Context, postID bson.ObjectId) {
 	if !c.Config.Debug {
-		// TODO: retry errors
+		c.Conn.PushTask("post_delete", postID)
+
 		c.AsyncQuery(func(conn *Connection) {
-			conn.Db.C("timelines").RemoveAll(bson.M{"post_id": postID})
+			if _, err := conn.Db.C("timelines").RemoveAll(bson.M{"post_id": postID}); err != nil {
+				c.Conn.TaskFailed("post_delete", postID)
+			} else {
+				c.Conn.TaskDone("post_delete", postID)
+			}
 		})
 	}
 }
@@ -102,12 +144,22 @@ func PropagatePostsOnDeletion(c Context, postID bson.ObjectId) {
 // PropagatePostOnLike sets the new like value for the user's timeline
 func PropagatePostOnLike(c Context, postID bson.ObjectId, liked bool) {
 	if !c.Config.Debug {
-		// TODO: Retry errors
+
+		c.Conn.TaskDone("post_like", c.User.ID, postID, liked)
 		c.AsyncQuery(func(conn *Connection) {
 			var t TimelineEntry
-			conn.Db.C("timelines").Find(bson.M{"post_id": postID, "user_id": c.User.ID}).One(&t)
-			t.Liked = liked
-			conn.Db.C("timelines").UpsertId(t.ID, t)
+
+			err := conn.Db.C("timelines").Find(bson.M{"post_id": postID, "user_id": c.User.ID}).One(&t)
+			if err != nil {
+				c.Conn.TaskFailed("post_like", c.User.ID, postID, liked)
+			} else {
+				t.Liked = liked
+				if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
+					c.Conn.TaskFailed("post_like", c.User.ID, postID, liked)
+				} else {
+					c.Conn.TaskDone("post_like", c.User.ID, postID, liked)
+				}
+			}
 		})
 	}
 }
@@ -115,15 +167,28 @@ func PropagatePostOnLike(c Context, postID bson.ObjectId, liked bool) {
 // PropagatePostOnNewComment adds a reference to the new comment on all user timelines
 func PropagatePostOnNewComment(c Context, postID, commentID bson.ObjectId) {
 	if !c.Config.Debug {
-		// TODO: Retry errors
+		c.Conn.PushTask("create_comment", postID, commentID)
+
 		c.AsyncQuery(func(conn *Connection) {
 			var t TimelineEntry
 
+			allCompleted := true
 			iter := conn.Db.C("timelines").Find(bson.M{"post_id": postID}).Iter()
 			for iter.Next(&t) {
 				t.Comments = append(t.Comments, commentID)
 
-				conn.Db.C("timelines").UpsertId(t.ID, t)
+				if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
+					allCompleted = false
+					c.Conn.PushFail("create_comment", postID, commentID, t.ID)
+				} else {
+					c.Conn.PushSuccess("create_comment", postID, commentID, t.ID)
+				}
+			}
+
+			if allCompleted {
+				c.Conn.TaskDone("create_comment", postID, commentID)
+			} else {
+				c.Conn.TaskFailed("create_comment", postID, commentID)
 			}
 
 			iter.Close()
@@ -134,10 +199,12 @@ func PropagatePostOnNewComment(c Context, postID, commentID bson.ObjectId) {
 // PropagatePostOnNewComment deletes a reference to the new comment on all user timelines
 func PropagatePostOnCommentDeleted(c Context, postID, commentID bson.ObjectId) {
 	if !c.Config.Debug {
-		// TODO: Retry errors
+		c.Conn.PushTask("delete_comment", postID, commentID)
+
 		c.AsyncQuery(func(conn *Connection) {
 			var t TimelineEntry
 
+			allCompleted := true
 			iter := conn.Db.C("timelines").Find(bson.M{"post_id": postID}).Iter()
 			for iter.Next(&t) {
 				cmts := make([]bson.ObjectId, 0, len(t.Comments)-1)
@@ -148,7 +215,18 @@ func PropagatePostOnCommentDeleted(c Context, postID, commentID bson.ObjectId) {
 				}
 				t.Comments = cmts
 
-				conn.Db.C("timelines").UpsertId(t.ID, t)
+				if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
+					allCompleted = false
+					c.Conn.PushFail("delete_comment", postID, commentID, t.ID)
+				} else {
+					c.Conn.PushSuccess("delete_comment", postID, commentID, t.ID)
+				}
+			}
+
+			if allCompleted {
+				c.Conn.TaskDone("create_comment", postID, commentID)
+			} else {
+				c.Conn.TaskFailed("create_comment", postID, commentID)
 			}
 
 			iter.Close()
@@ -159,9 +237,14 @@ func PropagatePostOnCommentDeleted(c Context, postID, commentID bson.ObjectId) {
 // PropagatePostOnUserDeleted erases all posts owned by the deleted user from all timelines
 func PropagatePostOnUserDeleted(c Context, userID bson.ObjectId) {
 	if !c.Config.Debug {
-		// TODO: retry errors
+		c.Conn.PushTask("user_delete", userID)
+
 		c.AsyncQuery(func(conn *Connection) {
-			conn.Db.C("timelines").RemoveAll(bson.M{"post_user_id": userID})
+			if _, err := conn.Db.C("timelines").RemoveAll(bson.M{"post_user_id": userID}); err != nil {
+				c.Conn.TaskFailed("user_unfollow", userID)
+			} else {
+				c.Conn.TaskDone("user_unfollow", userID)
+			}
 		})
 	}
 }

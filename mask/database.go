@@ -95,3 +95,34 @@ func createIndexes(conn *Connection) error {
 
 	return nil
 }
+
+// PushTask pushes a task to Redis
+func (c *Connection) PushTask(task string, args ...interface{}) {
+	// TODO implement
+}
+
+// PushFail pushes a failed operation to Redis
+func (c *Connection) PushFail(task string, args ...interface{}) {
+	// TODO implement
+}
+
+// PushSuccess pushes a successful operation to redis
+func (c *Connection) PushSuccess(task string, args ...interface{}) {
+	// TODO implement
+}
+
+// TaskDone clears all data related to a certain task, that means the task has been completed successfully
+func (c *Connection) TaskDone(task string, args ...interface{}) {
+	// TODO implement
+}
+
+// TaskDone clears all the successful operations and leaves the failed ones to be taken care of later
+func (c *Connection) TaskFailed(task string, args ...interface{}) {
+	// TODO implement
+}
+
+// TaskResolver is a process that takes care of the failed operations pushed to redis.
+// The resolver tries to run again the task. If the task can't be completed by the resolver it will get discarded.
+func (c *Connection) TaskResolver() {
+	// TODO implement
+}
