@@ -106,12 +106,18 @@ func testUploadFileHandler(file, key, url string, handler martini.Handler, conn 
 		panic(err)
 	}
 
+	ts, err := NewTaskService(config)
+	if err != nil {
+		panic(err)
+	}
+
 	config.StorePath = "../test_assets/"
 	config.ThumbnailStorePath = "../test_assets/"
 
 	m := testMartini()
 	m.Map(conn)
 	m.Map(config)
+	m.Map(ts)
 	m.Use(render.Renderer())
 	store := sessions.NewCookieStore([]byte("secret123"))
 	store.Options(sessions.Options{
@@ -139,10 +145,16 @@ func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.H
 		panic(err)
 	}
 
+	ts, err := NewTaskService(config)
+	if err != nil {
+		panic(err)
+	}
+
 	req, _ := http.NewRequest(method, reqUrl, nil)
 	m := testMartini()
 	m.Map(conn)
 	m.Map(config)
+	m.Map(ts)
 	m.Use(render.Renderer())
 	store := sessions.NewCookieStore([]byte("secret123"))
 	store.Options(sessions.Options{

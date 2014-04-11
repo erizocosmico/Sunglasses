@@ -23,9 +23,15 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 		return nil, "", err
 	}
 
+	ts, err := NewTaskService(config)
+	if err != nil {
+		return nil, "", err
+	}
+
 	// Map services
 	m.Map(config)
 	m.Map(conn)
+	m.Map(ts)
 	m.Use(render.Renderer())
 	m.Use(martini.Static(config.StorePath))
 	m.Use(martini.Static(config.ThumbnailStorePath))

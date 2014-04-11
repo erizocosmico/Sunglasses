@@ -1,0 +1,184 @@
+package mask
+
+import (
+	"github.com/garyburd/redigo/redis"
+	"labix.org/v2/mgo/bson"
+	"os"
+)
+
+type TaskService struct {
+	redis.Conn
+}
+
+// NewTaskSercice initializes the task service
+func NewTaskService(config *Config) (*TaskService, error) {
+	var (
+		conn redis.Conn
+		err  error
+	)
+
+	if os.Getenv("WERCKER_REDIS_HOST") != "" {
+		config.RedisAddress = os.Getenv("WERCKER_REDIS_HOST")
+	}
+
+	if conn, err = redis.Dial("tcp", config.RedisAddress); err != nil {
+		return nil, err
+	}
+
+	return &TaskService{conn}, nil
+}
+
+// Do performs a Redis commant
+func (ts *TaskService) Do(commandName string, args ...interface{}) (reply interface{}, err error) {
+	return ts.Conn.Do(commandName, args...)
+}
+
+// Close closes mongodb open connection
+func (ts *TaskService) Close() {
+	ts.Conn.Close()
+}
+
+// PushTask pushes a task to Redis
+func (ts *TaskService) PushTask(task string, args ...interface{}) bson.ObjectId {
+	var (
+		empty  bson.ObjectId
+		err    error
+		taskID = bson.NewObjectId()
+	)
+
+	_, err = ts.Do("SADD", "tasks", taskID.Hex())
+	if err != nil {
+		return empty
+	}
+
+	taskName := task + ":" + taskID.Hex()
+
+	switch task {
+	case "create_post":
+		if len(args) < 1 {
+			return empty
+		}
+
+		p := args[0].(*Post)
+
+		_, err = ts.Do("HMSET", taskName, "post_id", p.ID.Hex(), "post_user", p.UserID.Hex(), "created", p.Created, "has_children", true)
+		break
+	case "follow_user":
+		if len(args) < 2 {
+			return empty
+		}
+
+		_, err = ts.Do("HMSET", taskName, "user_followed", args[0], "user", args[1], "has_children", true)
+		break
+	case "unfollow_user":
+		if len(args) < 2 {
+			return empty
+		}
+
+		_, err = ts.Do("HMSET", taskName, "user_unfollowed", args[0], "user", args[0], "has_children", false)
+		break
+	case "post_delete":
+		if len(args) < 1 {
+			return empty
+		}
+
+		_, err = ts.Do("HMSET", taskName, "post_id", args[0], "has_children", false)
+		break
+	case "post_like":
+		if len(args) < 3 {
+			return empty
+		}
+
+		_, err = ts.Do("HMSET", taskName, "user_id", args[0], "post_id", args[1], "liked", args[2], "has_children", false)
+		break
+	case "create_comment":
+		if len(args) < 2 {
+			return empty
+		}
+
+		_, err = ts.Do("HMSET", taskName, "post_id", args[0], "comment_id", args[1], "has_children", true)
+		break
+	case "delete_comment":
+		if len(args) < 2 {
+			return empty
+		}
+
+		_, err = ts.Do("HMSET", taskName, "post_id", args[0], "comment_id", args[1], "has_children", true)
+		break
+	case "delete_user":
+		if len(args) < 1 {
+			return empty
+		}
+
+		_, err = ts.Do("HMSET", taskName, "user_id", args[0], "has_children", false)
+		break
+	default:
+		return empty
+	}
+
+	if err != nil {
+		return empty
+	}
+
+	return taskID
+}
+
+// PushFail pushes a failed operation to Redis
+func (ts *TaskService) PushFail(task string, taskID bson.ObjectId, args ...interface{}) {
+	var name string
+
+	if taskID.Hex() == "" {
+		return
+	}
+
+	ID := bson.NewObjectId()
+	ts.Do("SADD", task+":"+taskID.Hex()+":fail", ID.Hex())
+	name = "task_op_fail:" + ID.Hex()
+
+	if len(args) < 1 {
+		return
+	}
+
+	switch task {
+	case "create_post":
+		ts.Do("HMSET", name, "user", args[0])
+		break
+	case "follow_user":
+		ts.Do("HMSET", name, "post", args[0])
+		break
+	case "create_comment":
+		ts.Do("HMSET", name, "timeline", args[0])
+		break
+	case "delete_comment":
+		ts.Do("HMSET", name, "timeline", args[0])
+		break
+	}
+}
+
+// TaskDone clears all the data for the given task
+func (ts *TaskService) TaskDone(task string, taskID bson.ObjectId) {
+	taskName := task + ":" + taskID.Hex()
+
+	if task == "create_post" || task == "follow_user" || task == "create_comment" || task == "delete_comment" {
+		v, err := ts.Do("SMEMBERS", taskName+":fail")
+		keys, err := redis.Strings(v, err)
+		if err != nil {
+			return
+		}
+
+		for _, k := range keys {
+			ts.Do("DEL", "task_op_fail:"+k)
+		}
+
+		ts.Do("DEL", taskName+":fail")
+	}
+
+	ts.Do("DEL", taskName)
+	ts.Do("SREM", "tasks", taskID.Hex())
+}
+
+// TaskResolver is a process that takes care of the failed operations pushed to redis.
+// The resolver tries to run again the task. If the task can't be completed by the resolver it will get discarded.
+func (ts *TaskService) TaskResolver(conn *Connection) {
+	// TODO implement
+}

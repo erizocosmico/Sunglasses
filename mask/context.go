@@ -20,11 +20,12 @@ type Context struct {
 	Render  render.Render
 	Session sessions.Session
 	User    *User
+	Tasks   *TaskService
 }
 
 // CreateContext initializes the context for a request
-func CreateContext(ctx martini.Context, config *Config, conn *Connection, render render.Render, r *http.Request, s sessions.Session) {
-	c := Context{Config: config, Conn: conn, Request: r, Render: render, Session: s}
+func CreateContext(ctx martini.Context, config *Config, conn *Connection, render render.Render, r *http.Request, s sessions.Session, ts *TaskService) {
+	c := Context{Config: config, Conn: conn, Request: r, Render: render, Session: s, Tasks: ts}
 
 	if r != nil && s != nil && conn != nil {
 		c.User = GetRequestUser(r, conn, s)
