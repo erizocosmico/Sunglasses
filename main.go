@@ -5,6 +5,7 @@ import (
 	. "github.com/mvader/mask/mask"
 	"net/http"
 	"os"
+	"github.com/mvader/mask/app"
 )
 
 func main() {
@@ -12,7 +13,7 @@ func main() {
 	configPath := fs.String("config", "config.json", "Path to config.json")
 	fs.Parse(os.Args[1:])
 
-	app, port, err := NewApp(*configPath)
+	app, port, err := app.NewApp(*configPath)
 	if err != nil {
 		panic(err)
 	}

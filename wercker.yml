@@ -7,17 +7,20 @@ services:
 build:
   steps:
     - add-ssh-key:
-        keyname: LAMP_KEY
+        keyname: MASK_KEY
     - bundle-install
     - setup-go-workspace
+    - script:
+        name: Clone package
+        code: |
+          git clone git@github.com:mvader/mask.git $GOPATH/src/github.com/mvader/mask
     - script:
         name: go get
         code: |
           cd $WERCKER_SOURCE_DIR
-          go version
-          go get -t ./mask
+          go get -t .
     - script:
         name: go test
         code: |
-          cd mask
+          cd tests
           go test -v
