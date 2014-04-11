@@ -27,7 +27,7 @@ func PropagatePostOnCreation(c Context, post *Post) {
 		c.AsyncQuery(func(conn *Connection) {
 			var f Follow
 			allCompleted := true
-			iter := conn.Db.C("follows").Find(bson.M{"user_to": c.User.ID}).Iter()
+			iter := conn.Db.C("follows").Find(bson.M{"user_to": post.UserID}).Iter()
 			for iter.Next(&f) {
 				var u User
 				if err := conn.Db.C("users").FindId(f.From).One(&u); err == nil {
@@ -53,6 +53,29 @@ func PropagatePostOnCreation(c Context, post *Post) {
 			iter.Close()
 		})
 	}
+}
+
+// PropagateSingleOnCreatePost propagates a post to a certain timeline because it failed before
+func PropagateSingleOnCreatePost(conn *Connection, ts *TaskService, p *Post, u, task, op bson.ObjectId) error {
+	t := TimelineEntry{
+		ID:       bson.NewObjectId(),
+		Post:     p.ID,
+		PostUser: p.UserID,
+		Liked:    false,
+		Time:     p.Created,
+		User:     u,
+	}
+
+	if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
+		return err
+	}
+
+	err := ts.FailedOpSolved("create_post", task, op)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // PropagatePostOnPrivacyChange propagates the privacy changes across all timelines, removing and adding the post

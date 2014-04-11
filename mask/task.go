@@ -184,7 +184,10 @@ func (ts *TaskService) TaskDone(task string, taskID bson.ObjectId) error {
 		}
 
 		for _, k := range keys {
-			ts.Do("DEL", "task_op_fail:"+k)
+			_, err = ts.Do("DEL", "task_op_fail:"+k)
+			if err != nil {
+				return err
+			}
 		}
 
 		_, err = ts.Do("DEL", taskName+":fail")
@@ -201,6 +204,31 @@ func (ts *TaskService) TaskDone(task string, taskID bson.ObjectId) error {
 	_, err = ts.Do("SREM", "tasks", taskID.Hex())
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// FailedOpSolved marks a previously failed operation as solved and erases its data
+func (ts *TaskService) FailedOpSolved(task string, taskID, opID bson.ObjectId) error {
+	if _, err := ts.Do("DEL", "task_op_fail:"+opID.Hex()); err != nil {
+		return err
+	}
+
+	if _, err := ts.Do("SREM", task+":"+taskID.Hex()+":fail"); err != nil {
+		return err
+	}
+
+	v, err := ts.Do("SMEMBERS", task+":"+taskID.Hex()+":fail")
+	count, err := redis.Int(v, err)
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		if err := ts.TaskDone(task, taskID); err != nil {
+			return err
+		}
 	}
 
 	return nil
