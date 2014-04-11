@@ -1,6 +1,7 @@
 package mask
 
 import (
+	"github.com/garyburd/redigo/redis"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"testing"
@@ -210,5 +211,58 @@ func TestPushFail(t *testing.T) {
 			ts.Do("DEL", "delete_comment:"+taskID.Hex()+":fail")
 			ts.Do("DEL", "task_op_fail:"+ID.Hex())
 		})
+	})
+}
+
+func TestTaskDone(t *testing.T) {
+	ts := newTaskService()
+
+	defer func() {
+		ts.Do("DEL", "tasks")
+		ts.Close()
+	}()
+
+	Convey("Marking tasks as done", t, func() {
+		ops := make([]bson.ObjectId, 0, 5)
+		ID := ts.PushTask("follow_user", bson.NewObjectId(), bson.NewObjectId())
+		So(ID.Hex(), ShouldNotEqual, "")
+
+		for i := 0; i < 5; i++ {
+			op := ts.PushFail("follow_user", ID, bson.NewObjectId())
+			So(op.Hex(), ShouldNotEqual, "")
+
+			if op.Hex() != "" {
+				ops = append(ops, op)
+			}
+		}
+
+		testExistance := func(n, m int) {
+			v, err := ts.Do("SCARD", "follow_user:"+ID.Hex()+":fail")
+			count, err := redis.Int(v, err)
+			if err != nil {
+				panic(err)
+			}
+
+			So(count, ShouldEqual, n)
+
+			for _, op := range ops {
+				v, err := ts.Do("HLEN", "task_op_fail:"+op.Hex())
+				count, err := redis.Int(v, err)
+				if err != nil {
+					panic(err)
+				}
+
+				So(count, ShouldEqual, m)
+			}
+		}
+
+		testExistance(5, 1)
+
+		err := ts.TaskDone("follow_user", ID)
+		So(err, ShouldEqual, nil)
+
+		testExistance(0, 0)
+
+		ts.Do("DEL", "follow_user:"+ID.Hex())
 	})
 }

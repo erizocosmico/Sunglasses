@@ -172,25 +172,38 @@ func (ts *TaskService) PushFail(task string, taskID bson.ObjectId, args ...inter
 }
 
 // TaskDone clears all the data for the given task
-func (ts *TaskService) TaskDone(task string, taskID bson.ObjectId) {
+func (ts *TaskService) TaskDone(task string, taskID bson.ObjectId) error {
+	var err error
 	taskName := task + ":" + taskID.Hex()
 
 	if task == "create_post" || task == "follow_user" || task == "create_comment" || task == "delete_comment" {
 		v, err := ts.Do("SMEMBERS", taskName+":fail")
 		keys, err := redis.Strings(v, err)
 		if err != nil {
-			return
+			return err
 		}
 
 		for _, k := range keys {
 			ts.Do("DEL", "task_op_fail:"+k)
 		}
 
-		ts.Do("DEL", taskName+":fail")
+		_, err = ts.Do("DEL", taskName+":fail")
+		if err != nil {
+			return err
+		}
 	}
 
-	ts.Do("DEL", taskName)
-	ts.Do("SREM", "tasks", taskID.Hex())
+	_, err = ts.Do("DEL", taskName)
+	if err != nil {
+		return err
+	}
+
+	_, err = ts.Do("SREM", "tasks", taskID.Hex())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // TaskResolver is a process that takes care of the failed operations pushed to redis.
