@@ -67,11 +67,11 @@ func (ts *TaskService) PushTask(task string, args ...interface{}) bson.ObjectId 
 		_, err = ts.Do("HMSET", taskName, "post_id", p.ID.Hex(), "post_user", p.UserID.Hex(), "created", p.Created, "has_children", true)
 		break
 	case "follow_user":
-		if len(args) < 2 {
+		if len(args) < 1 {
 			return empty
 		}
 
-		_, err = ts.Do("HMSET", taskName, "user_followed", args[0], "user", args[1], "has_children", true)
+		_, err = ts.Do("HMSET", taskName, "user", args[0], "has_children", true)
 		break
 	case "unfollow_user":
 		if len(args) < 2 {
@@ -95,18 +95,18 @@ func (ts *TaskService) PushTask(task string, args ...interface{}) bson.ObjectId 
 		_, err = ts.Do("HMSET", taskName, "user_id", args[0], "post_id", args[1], "liked", args[2], "has_children", false)
 		break
 	case "create_comment":
-		if len(args) < 2 {
+		if len(args) < 1 {
 			return empty
 		}
 
-		_, err = ts.Do("HMSET", taskName, "post_id", args[0], "comment_id", args[1], "has_children", true)
+		_, err = ts.Do("HMSET", taskName, "comment_id", args[0], "has_children", true)
 		break
 	case "delete_comment":
-		if len(args) < 2 {
+		if len(args) < 1 {
 			return empty
 		}
 
-		_, err = ts.Do("HMSET", taskName, "post_id", args[0], "comment_id", args[1], "has_children", true)
+		_, err = ts.Do("HMSET", taskName, "comment_id", args[0], "has_children", true)
 		break
 	case "delete_user":
 		if len(args) < 1 {

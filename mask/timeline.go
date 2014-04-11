@@ -70,8 +70,7 @@ func PropagateSinglePostOnCreation(conn *Connection, ts *TaskService, p *Post, u
 		return err
 	}
 
-	err := ts.FailedOpSolved("create_post", task, op)
-	if err != nil {
+	if err := ts.FailedOpSolved("create_post", task, op); err != nil {
 		return err
 	}
 
@@ -88,7 +87,7 @@ func PropagatePostOnPrivacyChange(c Context, post *Post) {
 func PropagatePostsOnUserFollow(c Context, userID bson.ObjectId) {
 	if !c.Config.Debug {
 
-		ID := c.Tasks.PushTask("follow_user", userID, c.User.ID)
+		ID := c.Tasks.PushTask("follow_user", c.User.ID)
 
 		c.AsyncQuery(func(conn *Connection) {
 			var p Post
@@ -122,6 +121,47 @@ func PropagatePostsOnUserFollow(c Context, userID bson.ObjectId) {
 			iter.Close()
 		})
 	}
+}
+
+// PropagateSinglePostOnUserFollow propagates a single post to the timeline when a new user is followed
+func PropagateSinglePostOnUserFollow(conn *Connection, ts *TaskService, user, post, task, op bson.ObjectId) error {
+	var (
+		p Post
+		u User
+	)
+
+	err := conn.Db.C("posts").FindId(post).One(&p)
+	if err != nil {
+		return err
+	}
+
+	err = conn.Db.C("users").FindId(user).One(&u)
+	if err != nil {
+		return err
+	}
+
+	t := TimelineEntry{
+		User:     user,
+		Post:     p.ID,
+		PostUser: p.UserID,
+		Liked:    false,
+		Time:     p.Created,
+	}
+
+	if (&p).CanBeAccessedBy(&u, conn) {
+		t.ID = bson.NewObjectId()
+		t.User = user
+
+		if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
+			return err
+		}
+
+		if err := ts.FailedOpSolved("follow_user", task, op); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // PropagatePostsOnUserFollow propagates the posts to the timeline when a new user is followed
@@ -173,7 +213,7 @@ func PropagatePostOnLike(c Context, postID bson.ObjectId, liked bool) {
 // PropagatePostOnNewComment adds a reference to the new comment on all user timelines
 func PropagatePostOnNewComment(c Context, postID, commentID bson.ObjectId) {
 	if !c.Config.Debug {
-		ID := c.Tasks.PushTask("create_comment", postID.Hex(), commentID.Hex())
+		ID := c.Tasks.PushTask("create_comment", commentID.Hex())
 
 		c.AsyncQuery(func(conn *Connection) {
 			var t TimelineEntry
@@ -198,10 +238,30 @@ func PropagatePostOnNewComment(c Context, postID, commentID bson.ObjectId) {
 	}
 }
 
+// PropagateSinglePostOnNewComment adds a reference to the new comment on a timeline
+func PropagateSinglePostOnNewComment(conn *Connection, ts *TaskService, c, tID, task, op bson.ObjectId) error {
+	var t TimelineEntry
+	if err := conn.Db.C("timelines").FindId(tID).One(&t); err != nil {
+		return err
+	}
+
+	t.Comments = append(t.Comments, c)
+
+	if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
+		return err
+	}
+
+	if err := ts.FailedOpSolved("create_comment", task, op); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // PropagatePostOnNewComment deletes a reference to the new comment on all user timelines
 func PropagatePostOnCommentDeleted(c Context, postID, commentID bson.ObjectId) {
 	if !c.Config.Debug {
-		ID := c.Tasks.PushTask("delete_comment", postID.Hex(), commentID.Hex())
+		ID := c.Tasks.PushTask("delete_comment", commentID.Hex())
 
 		c.AsyncQuery(func(conn *Connection) {
 			var t TimelineEntry
@@ -209,6 +269,7 @@ func PropagatePostOnCommentDeleted(c Context, postID, commentID bson.ObjectId) {
 			allCompleted := true
 			iter := conn.Db.C("timelines").Find(bson.M{"post_id": postID}).Iter()
 			for iter.Next(&t) {
+				// TODO redo
 				cmts := make([]bson.ObjectId, 0, len(t.Comments)-1)
 				for _, v := range t.Comments {
 					if v != commentID {
@@ -230,6 +291,34 @@ func PropagatePostOnCommentDeleted(c Context, postID, commentID bson.ObjectId) {
 			iter.Close()
 		})
 	}
+}
+
+// PropagateSinglePostOnCommentDeleted removes a reference of the comment on a timeline
+func PropagateSinglePostOnCommentDeleted(conn *Connection, ts *TaskService, c, tID, task, op bson.ObjectId) error {
+	var t TimelineEntry
+
+	if err := conn.Db.C("timelines").FindId(tID).One(&t); err != nil {
+		return err
+	}
+
+	// TODO redo
+	cmts := make([]bson.ObjectId, 0, len(t.Comments)-1)
+	for _, v := range t.Comments {
+		if v != c {
+			cmts = append(cmts, v)
+		}
+	}
+	t.Comments = cmts
+
+	if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
+		return err
+	}
+
+	if err := ts.FailedOpSolved("delete_comment", task, op); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // PropagatePostOnUserDeleted erases all posts owned by the deleted user from all timelines

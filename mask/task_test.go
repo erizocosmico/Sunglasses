@@ -48,7 +48,7 @@ func TestPushTask(t *testing.T) {
 
 			So(ID.Hex(), ShouldEqual, "")
 
-			ID = ts.PushTask("follow_user", bson.NewObjectId(), bson.NewObjectId())
+			ID = ts.PushTask("follow_user", bson.NewObjectId())
 
 			So(ID.Hex(), ShouldNotEqual, "")
 
@@ -159,7 +159,7 @@ func TestPushFail(t *testing.T) {
 		})
 
 		Convey("follow_user fail", func() {
-			taskID := ts.PushTask("follow_user", bson.NewObjectId(), bson.NewObjectId())
+			taskID := ts.PushTask("follow_user", bson.NewObjectId())
 
 			So(taskID.Hex(), ShouldNotEqual, "")
 
@@ -224,7 +224,7 @@ func TestTaskDone(t *testing.T) {
 
 	Convey("Marking tasks as done", t, func() {
 		ops := make([]bson.ObjectId, 0, 5)
-		ID := ts.PushTask("follow_user", bson.NewObjectId(), bson.NewObjectId())
+		ID := ts.PushTask("follow_user", bson.NewObjectId())
 		So(ID.Hex(), ShouldNotEqual, "")
 
 		for i := 0; i < 5; i++ {
