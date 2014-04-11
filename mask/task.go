@@ -6,6 +6,10 @@ import (
 	"os"
 )
 
+var (
+	empty bson.ObjectId
+)
+
 type TaskService struct {
 	redis.Conn
 }
@@ -41,7 +45,6 @@ func (ts *TaskService) Close() {
 // PushTask pushes a task to Redis
 func (ts *TaskService) PushTask(task string, args ...interface{}) bson.ObjectId {
 	var (
-		empty  bson.ObjectId
 		err    error
 		taskID = bson.NewObjectId()
 	)
@@ -124,35 +127,48 @@ func (ts *TaskService) PushTask(task string, args ...interface{}) bson.ObjectId 
 }
 
 // PushFail pushes a failed operation to Redis
-func (ts *TaskService) PushFail(task string, taskID bson.ObjectId, args ...interface{}) {
-	var name string
+func (ts *TaskService) PushFail(task string, taskID bson.ObjectId, args ...interface{}) bson.ObjectId {
+	var (
+		name string
+		err  error
+	)
 
 	if taskID.Hex() == "" {
-		return
+		return empty
 	}
 
 	ID := bson.NewObjectId()
-	ts.Do("SADD", task+":"+taskID.Hex()+":fail", ID.Hex())
+	_, err = ts.Do("SADD", task+":"+taskID.Hex()+":fail", ID.Hex())
+	if err != nil {
+		return empty
+	}
+
 	name = "task_op_fail:" + ID.Hex()
 
 	if len(args) < 1 {
-		return
+		return empty
 	}
 
 	switch task {
 	case "create_post":
-		ts.Do("HMSET", name, "user", args[0])
+		_, err = ts.Do("HMSET", name, "user", args[0])
 		break
 	case "follow_user":
-		ts.Do("HMSET", name, "post", args[0])
+		_, err = ts.Do("HMSET", name, "post", args[0])
 		break
 	case "create_comment":
-		ts.Do("HMSET", name, "timeline", args[0])
+		_, err = ts.Do("HMSET", name, "timeline", args[0])
 		break
 	case "delete_comment":
-		ts.Do("HMSET", name, "timeline", args[0])
+		_, err = ts.Do("HMSET", name, "timeline", args[0])
 		break
 	}
+
+	if err != nil {
+		return empty
+	}
+
+	return ID
 }
 
 // TaskDone clears all the data for the given task

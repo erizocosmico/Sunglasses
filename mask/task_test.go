@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestPushTask(t *testing.T) {
+func newTaskService() *TaskService {
 	config, err := NewConfig("../config.sample.json")
 	if err != nil {
 		panic(err)
@@ -16,6 +16,12 @@ func TestPushTask(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+
+	return ts
+}
+
+func TestPushTask(t *testing.T) {
+	ts := newTaskService()
 
 	defer func() {
 		ts.Do("DEL", "tasks")
@@ -118,6 +124,91 @@ func TestPushTask(t *testing.T) {
 			So(ID.Hex(), ShouldNotEqual, "")
 
 			ts.Do("DEL", "delete_user:"+ID.Hex())
+		})
+	})
+}
+
+func TestPushFail(t *testing.T) {
+	ts := newTaskService()
+
+	defer func() {
+		ts.Do("DEL", "tasks")
+		ts.Close()
+	}()
+
+	Convey("Pushing fails", t, func() {
+		Convey("create_post fail", func() {
+			p := &Post{ID: bson.NewObjectId(), UserID: bson.NewObjectId(), Created: 0}
+
+			taskID := ts.PushTask("create_post", p)
+
+			So(taskID.Hex(), ShouldNotEqual, "")
+
+			ID := ts.PushFail("create_post", taskID)
+
+			So(ID.Hex(), ShouldEqual, "")
+
+			ID = ts.PushFail("create_post", taskID, bson.NewObjectId())
+
+			So(ID.Hex(), ShouldNotEqual, "")
+
+			ts.Do("DEL", "create_post:"+taskID.Hex())
+			ts.Do("DEL", "create_post:"+taskID.Hex()+":fail")
+			ts.Do("DEL", "task_op_fail:"+ID.Hex())
+		})
+
+		Convey("follow_user fail", func() {
+			taskID := ts.PushTask("follow_user", bson.NewObjectId(), bson.NewObjectId())
+
+			So(taskID.Hex(), ShouldNotEqual, "")
+
+			ID := ts.PushFail("follow_user", taskID)
+
+			So(ID.Hex(), ShouldEqual, "")
+
+			ID = ts.PushFail("follow_user", taskID, bson.NewObjectId())
+
+			So(ID.Hex(), ShouldNotEqual, "")
+
+			ts.Do("DEL", "follow_user:"+taskID.Hex())
+			ts.Do("DEL", "follow_user:"+taskID.Hex()+":fail")
+			ts.Do("DEL", "task_op_fail:"+ID.Hex())
+		})
+
+		Convey("create_comment fail", func() {
+			taskID := ts.PushTask("create_comment", bson.NewObjectId(), bson.NewObjectId())
+
+			So(taskID.Hex(), ShouldNotEqual, "")
+
+			ID := ts.PushFail("create_comment", taskID)
+
+			So(ID.Hex(), ShouldEqual, "")
+
+			ID = ts.PushFail("create_comment", taskID, bson.NewObjectId())
+
+			So(ID.Hex(), ShouldNotEqual, "")
+
+			ts.Do("DEL", "create_comment:"+taskID.Hex())
+			ts.Do("DEL", "create_comment:"+taskID.Hex()+":fail")
+			ts.Do("DEL", "task_op_fail:"+ID.Hex())
+		})
+
+		Convey("delete_comment fail", func() {
+			taskID := ts.PushTask("delete_comment", bson.NewObjectId(), bson.NewObjectId())
+
+			So(taskID.Hex(), ShouldNotEqual, "")
+
+			ID := ts.PushFail("delete_comment", taskID)
+
+			So(ID.Hex(), ShouldEqual, "")
+
+			ID = ts.PushFail("delete_comment", taskID, bson.NewObjectId())
+
+			So(ID.Hex(), ShouldNotEqual, "")
+
+			ts.Do("DEL", "delete_comment:"+taskID.Hex())
+			ts.Do("DEL", "delete_comment:"+taskID.Hex()+":fail")
+			ts.Do("DEL", "task_op_fail:"+ID.Hex())
 		})
 	})
 }
