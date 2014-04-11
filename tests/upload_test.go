@@ -1,6 +1,8 @@
 package tests
 
 import (
+	. "github.com/mvader/mask/modules/upload"
+	. "github.com/mvader/mask/util"
 	. "github.com/smartystreets/goconvey/convey"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -10,8 +12,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	. "github.com/mvader/mask/modules/upload"
-	. "github.com/mvader/mask/util"
 )
 
 func loadFile(path string) (io.ReadCloser, error) {

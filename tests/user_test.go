@@ -1,9 +1,9 @@
 package tests
 
 import (
+	. "github.com/mvader/mask/models"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
-	. "github.com/mvader/mask/models"
 )
 
 func TestUser(t *testing.T) {

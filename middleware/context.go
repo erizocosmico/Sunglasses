@@ -5,6 +5,7 @@ import (
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/sessions"
+	"github.com/mvader/mask/models"
 	"github.com/mvader/mask/modules/auth"
 	"github.com/mvader/mask/services"
 	. "github.com/mvader/mask/util"
@@ -14,7 +15,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"github.com/mvader/mask/models"
 )
 
 type Context struct {

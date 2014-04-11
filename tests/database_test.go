@@ -1,9 +1,9 @@
 package tests
 
 import (
+	. "github.com/mvader/mask/services"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
-	. "github.com/mvader/mask/services"
 )
 
 func TestNewDatabaseConn(t *testing.T) {

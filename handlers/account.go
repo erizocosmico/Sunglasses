@@ -5,6 +5,7 @@ import (
 	. "github.com/mvader/mask/error"
 	"github.com/mvader/mask/middleware"
 	"github.com/mvader/mask/models"
+	"github.com/mvader/mask/modules/upload"
 	"github.com/mvader/mask/util"
 	"labix.org/v2/mgo/bson"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"github.com/mvader/mask/modules/upload"
 )
 
 // CreateAccount creates a new user account

@@ -3,15 +3,15 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
+	. "github.com/mvader/mask/error"
+	. "github.com/mvader/mask/handlers"
+	. "github.com/mvader/mask/models"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
-	. "github.com/mvader/mask/handlers"
-	. "github.com/mvader/mask/models"
-	. "github.com/mvader/mask/error"
 )
 
 func TestBlockUser(t *testing.T) {

@@ -1,8 +1,8 @@
 package models
 
 import (
-	"labix.org/v2/mgo/bson"
 	"github.com/mvader/mask/services/interfaces"
+	"labix.org/v2/mgo/bson"
 	"time"
 )
 
@@ -17,16 +17,16 @@ type Follow struct {
 // FollowUser follows an user ("from" follows "to")
 func FollowUser(from, to bson.ObjectId, conn interfaces.Saver) error {
 	f := Follow{}
-f.ID = bson.NewObjectId()
-f.To = to
-f.From = from
-f.Time = float64(time.Now().Unix())
+	f.ID = bson.NewObjectId()
+	f.To = to
+	f.From = from
+	f.Time = float64(time.Now().Unix())
 
-if err := conn.Save("follows", f.ID, f); err != nil {
-return err
-}
+	if err := conn.Save("follows", f.ID, f); err != nil {
+		return err
+	}
 
-return nil
+	return nil
 }
 
 // UnfollowUser unfollows an user ("from" unfollows "to")

@@ -1,8 +1,8 @@
 package models
 
 import (
-	"labix.org/v2/mgo/bson"
 	"github.com/mvader/mask/services/interfaces"
+	"labix.org/v2/mgo/bson"
 )
 
 // FollowRequest model

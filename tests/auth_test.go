@@ -4,17 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/martini-contrib/sessions"
+	. "github.com/mvader/mask/error"
+	. "github.com/mvader/mask/handlers"
+	. "github.com/mvader/mask/middleware"
+	. "github.com/mvader/mask/models"
+	"github.com/mvader/mask/util"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 	"time"
-	. "github.com/mvader/mask/handlers"
-	. "github.com/mvader/mask/models"
-	. "github.com/mvader/mask/error"
-	. "github.com/mvader/mask/middleware"
-	"github.com/mvader/mask/util"
 )
 
 func TestAccessTokenValidation(t *testing.T) {

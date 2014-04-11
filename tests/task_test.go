@@ -2,11 +2,11 @@ package tests
 
 import (
 	"github.com/garyburd/redigo/redis"
+	. "github.com/mvader/mask/models"
+	. "github.com/mvader/mask/services"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"testing"
-	. "github.com/mvader/mask/models"
-	. "github.com/mvader/mask/services"
 )
 
 func newTaskService() *TaskService {

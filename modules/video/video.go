@@ -1,10 +1,10 @@
 package video
 
 import (
+	"github.com/mvader/mask/models"
+	"github.com/mvader/mask/util"
 	"net/http"
 	"regexp"
-	"github.com/mvader/mask/util"
-	"github.com/mvader/mask/models"
 )
 
 // IsValidVideo determines if the video is valid or not

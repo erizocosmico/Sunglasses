@@ -3,6 +3,9 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
+	. "github.com/mvader/mask/error"
+	. "github.com/mvader/mask/handlers"
+	. "github.com/mvader/mask/models"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"net/http"
@@ -10,9 +13,6 @@ import (
 	"net/url"
 	"testing"
 	"time"
-	. "github.com/mvader/mask/handlers"
-	. "github.com/mvader/mask/models"
-	. "github.com/mvader/mask/error"
 )
 
 func TestFollowUser(t *testing.T) {

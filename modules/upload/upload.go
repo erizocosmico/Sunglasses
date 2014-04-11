@@ -3,6 +3,9 @@ package upload
 import (
 	"code.google.com/p/graphics-go/graphics"
 	"errors"
+	. "github.com/mvader/mask/error"
+	"github.com/mvader/mask/services"
+	"github.com/mvader/mask/util"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -11,9 +14,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"github.com/mvader/mask/util"
-	"github.com/mvader/mask/services"
-	. "github.com/mvader/mask/error"
 	"strings"
 )
 

@@ -3,6 +3,10 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
+	. "github.com/mvader/mask/error"
+	. "github.com/mvader/mask/handlers"
+	. "github.com/mvader/mask/models"
+	"github.com/mvader/mask/util"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"net/http"
@@ -12,10 +16,6 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
-	. "github.com/mvader/mask/handlers"
-	. "github.com/mvader/mask/models"
-	. "github.com/mvader/mask/error"
-	"github.com/mvader/mask/util"
 )
 
 func TestPostStatus(t *testing.T) {

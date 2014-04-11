@@ -2,6 +2,9 @@ package tests
 
 import (
 	"encoding/json"
+	. "github.com/mvader/mask/error"
+	. "github.com/mvader/mask/handlers"
+	. "github.com/mvader/mask/models"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"net/http"
@@ -9,9 +12,6 @@ import (
 	"net/url"
 	"testing"
 	"time"
-	. "github.com/mvader/mask/handlers"
-	. "github.com/mvader/mask/models"
-	. "github.com/mvader/mask/error"
 )
 
 func TestCreateComment(t *testing.T) {

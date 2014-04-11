@@ -1,9 +1,9 @@
 package models
 
 import (
+	"github.com/mvader/mask/services/interfaces"
 	"labix.org/v2/mgo/bson"
 	"time"
-	"github.com/mvader/mask/services/interfaces"
 )
 
 type Comment struct {

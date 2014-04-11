@@ -1,9 +1,9 @@
 package models
 
 import (
-	"labix.org/v2/mgo/bson"
-	"github.com/mvader/mask/util"
 	"github.com/mvader/mask/services/interfaces"
+	"github.com/mvader/mask/util"
+	"labix.org/v2/mgo/bson"
 )
 
 // TokenType represents the type of the token
@@ -28,7 +28,6 @@ type Token struct {
 	Expires float64       `json:"expires" bson:"expires"`
 	UserID  bson.ObjectId `json:"user_id,omitempty" bson:"user_id,omitempty"`
 }
-
 
 // Save inserts the Token instance if it hasn't been created yet or updates it if it has
 func (t *Token) Save(conn interfaces.Saver) error {

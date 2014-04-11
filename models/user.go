@@ -3,10 +3,10 @@ package models
 import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"errors"
+	"github.com/mvader/mask/services/interfaces"
+	"github.com/mvader/mask/util"
 	"labix.org/v2/mgo/bson"
 	"strings"
-	"github.com/mvader/mask/util"
-	"github.com/mvader/mask/services/interfaces"
 )
 
 // UserRole represents an user role
@@ -245,9 +245,9 @@ func GetUsersData(ids []bson.ObjectId, user *User, conn interfaces.Conn) map[bso
 	cursor := conn.C("users").Find(bson.M{"_id": bson.M{"$in": ids}}).Iter()
 
 	followsIter := conn.C("follows").Find(bson.M{"$or": []bson.M{
-	bson.M{"user_from": user.ID, "user_to": bson.M{"$in": ids}},
-	bson.M{"user_to": user.ID, "user_from": bson.M{"$in": ids}},
-}}).Iter()
+		bson.M{"user_from": user.ID, "user_to": bson.M{"$in": ids}},
+		bson.M{"user_to": user.ID, "user_from": bson.M{"$in": ids}},
+	}}).Iter()
 
 	if err := followsIter.All(&follows); err != nil {
 		return nil

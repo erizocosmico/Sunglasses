@@ -2,6 +2,9 @@ package tests
 
 import (
 	"encoding/json"
+	. "github.com/mvader/mask/error"
+	. "github.com/mvader/mask/handlers"
+	"github.com/mvader/mask/util"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"net/http"
@@ -10,9 +13,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	. "github.com/mvader/mask/handlers"
-	. "github.com/mvader/mask/error"
-	"github.com/mvader/mask/util"
 )
 
 func TestCreateAccount(t *testing.T) {

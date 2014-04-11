@@ -3,11 +3,11 @@ package auth
 import (
 	"github.com/martini-contrib/sessions"
 	"github.com/mvader/mask/models"
+	"github.com/mvader/mask/services/interfaces"
 	"github.com/mvader/mask/util"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"time"
-	"github.com/mvader/mask/services/interfaces"
 )
 
 // GetRequestToken returns the token associated with the request

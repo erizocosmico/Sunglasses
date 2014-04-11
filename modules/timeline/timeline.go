@@ -1,10 +1,10 @@
 package timeline
 
 import (
-	"labix.org/v2/mgo/bson"
+	"github.com/mvader/mask/middleware"
 	"github.com/mvader/mask/models"
 	"github.com/mvader/mask/services"
-	"github.com/mvader/mask/middleware"
+	"labix.org/v2/mgo/bson"
 )
 
 // PropagatePostOnCreation propagates the post to all timelines when a new post is created.
