@@ -55,8 +55,8 @@ func PropagatePostOnCreation(c Context, post *Post) {
 	}
 }
 
-// PropagateSingleOnCreatePost propagates a post to a certain timeline because it failed before
-func PropagateSingleOnCreatePost(conn *Connection, ts *TaskService, p *Post, u, task, op bson.ObjectId) error {
+// PropagateSinglePostOnCreation propagates a post to a certain timeline because it failed before
+func PropagateSinglePostOnCreation(conn *Connection, ts *TaskService, p *Post, u, task, op bson.ObjectId) error {
 	t := TimelineEntry{
 		ID:       bson.NewObjectId(),
 		Post:     p.ID,
