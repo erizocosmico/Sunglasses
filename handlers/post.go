@@ -136,6 +136,11 @@ func DeletePost(c middleware.Context) {
 		return
 	}
 
+	if post.Type == models.PostPhoto {
+		os.Remove(upload.ToLocalImagePath(post.PhotoURL, c.Config))
+		os.Remove(upload.ToLocalThumbnailPath(post.Thumbnail, c.Config))
+	}
+
 	c.RemoveAll("comments", bson.M{"post_id": post.ID})
 	c.RemoveAll("likes", bson.M{"post_id": post.ID})
 	c.RemoveAll("notifications", bson.M{"post_id": post.ID})
