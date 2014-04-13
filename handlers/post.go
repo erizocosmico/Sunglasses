@@ -44,8 +44,6 @@ func CreatePost(c middleware.Context) {
 func ShowPost(c middleware.Context) {
 	var post models.Post
 
-	// TODO post is liked?
-
 	if c.User == nil {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return
@@ -71,35 +69,14 @@ func ShowPost(c middleware.Context) {
 		return
 	}
 
-	uids := make([]bson.ObjectId, 0, 11)
-
-	count, _ := c.Count("comments", bson.M{"post_id": post.ID})
-	if count > 0 {
-		var comments []models.Comment
-		iter := c.Find("comments", bson.M{"post_id": post.ID}).Limit(10).Sort("-created").Iter()
-		err := iter.All(&comments)
-		if err == nil {
-			post.Comments = comments
-		}
-
-		for _, v := range comments {
-			uids = append(uids, v.UserID)
-		}
+	comments := models.GetCommentsForPost(post.ID, c.User, 10, c.Conn)
+	if comments != nil {
+		post.Comments = comments
 	}
 
-	uids = append(uids, post.UserID)
+	udata := models.GetUsersData([]bson.ObjectId{post.UserID}, c.User, c.Conn)
 
-	data := models.GetUsersData(uids, c.User, c.Conn)
-	if len(data) == 0 {
-		c.Error(500, CodeUnexpected, MsgUnexpected)
-		return
-	}
-
-	for i, _ := range post.Comments {
-		post.Comments[i].User = data[post.Comments[i].UserID]
-	}
-
-	post.User = data[post.UserID]
+	post.User = udata[post.UserID]
 
 	c.Success(200, map[string]interface{}{
 		"post": post,
