@@ -5,6 +5,7 @@ import (
 	. "github.com/mvader/mask/error"
 	"github.com/mvader/mask/middleware"
 	"github.com/mvader/mask/models"
+	"github.com/mvader/mask/modules/timeline"
 	"github.com/mvader/mask/modules/upload"
 	"github.com/mvader/mask/util"
 	"labix.org/v2/mgo/bson"
@@ -412,4 +413,85 @@ func UpdateProfilePicture(c middleware.Context) {
 	}
 
 	c.Error(400, CodeInvalidData, MsgInvalidData)
+}
+
+// DestroyAccount destroys the user account and all its related content such as comments, posts, images, etc.
+func DestroyAccount(c middleware.Context) {
+	if c.User == nil {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
+		return
+	}
+
+	confirmed := c.GetBoolean("confirmed")
+
+	if confirmed {
+		var (
+			p   models.Post
+			cmt models.Comment
+		)
+
+		// Destroy all user tokens
+		c.RemoveAll("tokens", bson.M{"user_id": c.User.ID})
+
+		// Destroy all user material (posts + comments + images)
+		iter := c.Find("posts", bson.M{"user_id": c.User.ID}).Iter()
+		for iter.Next(&p) {
+			if p.Type == models.PostPhoto {
+				go os.Remove(upload.ToLocalImagePath(p.PhotoURL, c.Config))
+				go os.Remove(upload.ToLocalThumbnailPath(p.Thumbnail, c.Config))
+			}
+
+			go timeline.PropagatePostsOnDeletion(c, p.ID)
+		}
+
+		iter.Close()
+		iter = c.Find("comments", bson.M{"user_id": c.User.ID}).Iter()
+		for iter.Next(&cmt) {
+			go timeline.PropagatePostOnCommentDeleted(c, cmt.PostID, cmt.ID)
+		}
+
+		iter.Close()
+
+		c.RemoveAll("posts", bson.M{"user_id": c.User.ID})
+		c.RemoveAll("comments", bson.M{"user_id": c.User.ID})
+		c.RemoveAll("follows", bson.M{"user_to": c.User.ID})
+		c.RemoveAll("follows", bson.M{"user_from": c.User.ID})
+		c.RemoveAll("blocks", bson.M{"user_to": c.User.ID})
+		c.RemoveAll("blocks", bson.M{"user_from": c.User.ID})
+		c.RemoveAll("timelines", bson.M{"user_id": c.User.ID})
+		c.RemoveAll("likes", bson.M{"user_id": c.User.ID})
+		go timeline.PropagatePostOnUserDeleted(c, c.User.ID)
+
+		// Logout user
+		c.RemoveAll("tokens", bson.M{"user_id": c.User.ID})
+		c.Session.Delete("user_token")
+		c.Session.Delete("csrf_key")
+
+		// Destroy user
+		c.Remove("users", bson.M{"_id": c.User.ID})
+
+		// Destroy all user notifications
+		c.RemoveAll("notifications", bson.M{"user_id": c.User.ID})
+
+		// Remove user avatars
+		if c.User.Avatar != "" {
+			os.Remove(upload.ToLocalImagePath(c.User.Avatar, c.Config))
+		}
+
+		if c.User.AvatarThumbnail != "" {
+			os.Remove(upload.ToLocalThumbnailPath(c.User.AvatarThumbnail, c.Config))
+		}
+
+		if c.User.PublicAvatar != "" {
+			os.Remove(upload.ToLocalImagePath(c.User.PublicAvatar, c.Config))
+		}
+
+		if c.User.PublicAvatarThumbnail != "" {
+			os.Remove(upload.ToLocalThumbnailPath(c.User.PublicAvatarThumbnail, c.Config))
+		}
+
+		c.Success(200, map[string]interface{}{"message": "User account has been successfully destroyed"})
+	} else {
+		c.Success(200, map[string]interface{}{"message": "User account has not been destroyed"})
+	}
 }
