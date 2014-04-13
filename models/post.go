@@ -115,3 +115,47 @@ func (p *Post) CanBeAccessedBy(u *User, conn interfaces.Conn) bool {
 
 	return false
 }
+
+// GetLikesForPosts gets all user likes for a list of posts
+func GetLikesForPosts(posts []bson.ObjectId, user bson.ObjectId, conn interfaces.Conn) map[bson.ObjectId]bool {
+	var like models.PostLike
+	result := make(map[bson.ObjectId]bool)
+
+	for _, v := range posts {
+		result[v] = false
+	}
+
+	iter := conn.C("likes").Find(bson.M{"post_id": bson.M{"$in": posts}, "user_id": user}).Iter()
+	for iter.Next(&like) {
+		result[like.PostID] = true
+	}
+
+	return result
+}
+
+// GetCommentsForPost returns up to N comments for the given post
+func GetCommentsForPost(post bson.ObjectId, user *User, n int, conn interfaces.Conn) []Comment {
+	uids := make([]bson.ObjectId, 0, n)
+	var comments []Comment
+
+	iter := conn.C("comments").Find(bson.M{"post_id": post}).Limit(n).Sort("-created").Iter()
+	err := iter.All(&comments)
+	if err != nil {
+		return nil
+	}
+
+	for _, v := range comments {
+		uids = append(uids, v.UserID)
+	}
+
+	data := GetUsersData(uids, user, conn)
+	if len(data) == 0 {
+		return nil
+	}
+
+	for i, _ := range comments {
+		comments[i].User = data[comments[i].UserID]
+	}
+
+	return comments
+}
