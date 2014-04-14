@@ -65,19 +65,6 @@ func TestMarkNotificationAsRead(t *testing.T) {
 	}
 
 	Convey("Marking notifications as read", t, func() {
-		Convey("When no valid user is given", func() {
-			testPutHandler(MarkNotificationRead, func(r *http.Request) {}, conn, "/", "/",
-				func(resp *httptest.ResponseRecorder) {
-					var errResp errorResponse
-					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
-						panic(err)
-					}
-					So(resp.Code, ShouldEqual, 400)
-					So(errResp.Code, ShouldEqual, CodeInvalidData)
-					So(errResp.Message, ShouldEqual, MsgInvalidData)
-				})
-		})
-
 		Convey("When no valid notification_id is given", func() {
 			testPutHandler(MarkNotificationRead, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
@@ -189,19 +176,6 @@ func TestListNotifications(t *testing.T) {
 	}
 
 	Convey("Listing user's notifications", t, func() {
-		Convey("When invalid user is provided", func() {
-			testGetHandler(ListNotifications, func(r *http.Request) {}, conn, "/", "/",
-				func(resp *httptest.ResponseRecorder) {
-					var errResp errorResponse
-					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
-						panic(err)
-					}
-					So(resp.Code, ShouldEqual, 403)
-					So(errResp.Code, ShouldEqual, CodeUnauthorized)
-					So(errResp.Message, ShouldEqual, MsgUnauthorized)
-				})
-		})
-
 		Convey("When no count params are passed", func() {
 			testGetHandler(ListNotifications, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)

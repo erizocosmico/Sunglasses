@@ -13,11 +13,6 @@ import (
 func ShowUserProfile(c middleware.Context, params martini.Params) {
 	var u models.User
 
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
-
 	user := params["username"]
 	if err := c.Find("users", bson.M{"username_lower": strings.ToLower(user)}).One(&u); err != nil {
 		c.Error(404, CodeNotFound, MsgNotFound)
@@ -43,11 +38,6 @@ func ShowUserProfile(c middleware.Context, params martini.Params) {
 
 // GetUserPosts retrieves a list of posts from an user
 func GetUserPosts(c middleware.Context) {
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
-
 	userID := c.Form("user_id")
 	if userID == "" || !bson.IsObjectIdHex(userID) {
 		c.Error(400, CodeInvalidData, MsgInvalidData)

@@ -15,11 +15,6 @@ func Search(c middleware.Context) {
 	count, offset := c.ListCountParams()
 
 	search := c.Form("q")
-	if c.User == nil || search == "" {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
-
 	justFollowings := c.GetBoolean("just_followings")
 
 	getUserIter := func(count, offset int) *mgo.Iter {

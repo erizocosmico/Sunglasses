@@ -33,25 +33,25 @@ func testMartini() *martini.ClassicMartini {
 	return &martini.ClassicMartini{m, r}
 }
 
-func testGetHandler(handler, middleware martini.Handler, conn *Connection, reqUrl, handlerUrl string, testFunc func(*httptest.ResponseRecorder)) {
+func testGetHandler(handler, middleware martini.Handler, conn *Connection, handlerUrl, reqUrl string, testFunc func(*httptest.ResponseRecorder)) {
 	testHandler(func(m *martini.ClassicMartini) {
 		m.Get(handlerUrl, handler)
 	}, middleware, conn, reqUrl, "GET", testFunc)
 }
 
-func testPostHandler(handler, middleware martini.Handler, conn *Connection, reqUrl, handlerUrl string, testFunc func(*httptest.ResponseRecorder)) {
+func testPostHandler(handler, middleware martini.Handler, conn *Connection, handlerUrl, reqUrl string, testFunc func(*httptest.ResponseRecorder)) {
 	testHandler(func(m *martini.ClassicMartini) {
 		m.Post(handlerUrl, handler)
 	}, middleware, conn, reqUrl, "POST", testFunc)
 }
 
-func testPutHandler(handler, middleware martini.Handler, conn *Connection, reqUrl, handlerUrl string, testFunc func(*httptest.ResponseRecorder)) {
+func testPutHandler(handler, middleware martini.Handler, conn *Connection, handlerUrl, reqUrl string, testFunc func(*httptest.ResponseRecorder)) {
 	testHandler(func(m *martini.ClassicMartini) {
 		m.Put(handlerUrl, handler)
 	}, middleware, conn, reqUrl, "PUT", testFunc)
 }
 
-func testDeleteHandler(handler, middleware martini.Handler, conn *Connection, reqUrl, handlerUrl string, testFunc func(*httptest.ResponseRecorder)) {
+func testDeleteHandler(handler, middleware martini.Handler, conn *Connection, handlerUrl, reqUrl string, testFunc func(*httptest.ResponseRecorder)) {
 	testHandler(func(m *martini.ClassicMartini) {
 		m.Delete(handlerUrl, handler)
 	}, middleware, conn, reqUrl, "DELETE", testFunc)
@@ -153,7 +153,7 @@ func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.H
 		panic(err)
 	}
 
-	req, _ := http.NewRequest(method, reqUrl, nil)
+	req, _ := http.NewRequest(method, "http://localhost:3000"+reqUrl, nil)
 	m := testMartini()
 	m.Map(conn)
 	m.Map(config)

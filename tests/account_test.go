@@ -128,13 +128,6 @@ func TestGetAccountInfo(t *testing.T) {
 	defer conn.Session.Close()
 
 	Convey("Testing the retrieval of account info", t, func() {
-		Convey("When no user is passed", func() {
-			testGetHandler(GetAccountInfo, func(req *http.Request) {}, conn, "/", "/",
-				func(res *httptest.ResponseRecorder) {
-					So(res.Code, ShouldEqual, 400)
-				})
-		})
-
 		Convey("When valid user is passed", func() {
 			user, token := createRequestUser(conn)
 			defer func() {
@@ -156,13 +149,6 @@ func TestGetAccountSettings(t *testing.T) {
 	defer conn.Session.Close()
 
 	Convey("Testing the retrieval of account settings", t, func() {
-		Convey("When no user is passed", func() {
-			testGetHandler(GetAccountSettings, func(req *http.Request) {}, conn, "/", "/",
-				func(res *httptest.ResponseRecorder) {
-					So(res.Code, ShouldEqual, 400)
-				})
-		})
-
 		Convey("When valid user is passed", func() {
 			user, token := createRequestUser(conn)
 			defer func() {
@@ -189,19 +175,6 @@ func TestUpdateAccountInfo(t *testing.T) {
 	}()
 
 	Convey("Testing the update of account info", t, func() {
-
-		Convey("When invalid user is given", func() {
-			testPutHandler(UpdateAccountInfo, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
 		Convey("When any of the fields is more than 500 characters long", func() {
 			testPutHandler(UpdateAccountInfo, func(req *http.Request) {
 				req.Header.Add("X-User-Token", token.Hash)
@@ -309,19 +282,6 @@ func TestUpdateAccountSettings(t *testing.T) {
 	}()
 
 	Convey("Testing the update of account settings", t, func() {
-
-		Convey("When invalid user is given", func() {
-			testPutHandler(UpdateAccountSettings, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
 		Convey("When override default privacy is true and there is an error with privacy settings", func() {
 			testPutHandler(UpdateAccountSettings, func(req *http.Request) {
 				req.Header.Add("X-User-Token", token.Hash)
@@ -455,18 +415,6 @@ func TestUpdateProfilePicture(t *testing.T) {
 	}()
 
 	Convey("Updating a profile picture", t, func() {
-		Convey("When no user is passed", func() {
-			testPostHandler(UpdateProfilePicture, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
 		Convey("When no file is uploaded", func() {
 			testPostHandler(UpdateProfilePicture, func(r *http.Request) {
 				if r.PostForm == nil {

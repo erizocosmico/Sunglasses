@@ -48,18 +48,6 @@ func TestCreateComment(t *testing.T) {
 	}()
 
 	Convey("Creating new comments", t, func() {
-		Convey("When no user is passed", func() {
-			testPostHandler(CreateComment, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
 		Convey("When an invalid post id is passed", func() {
 			testPostHandler(CreateComment, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
@@ -188,6 +176,7 @@ func TestRemoveComment(t *testing.T) {
 
 	defer func() {
 		conn.Db.C("posts").RemoveAll(nil)
+		conn.Db.C("comments").RemoveAll(nil)
 		user.Remove(conn)
 		token.Remove(conn)
 		userTmp.Remove(conn)
@@ -196,26 +185,13 @@ func TestRemoveComment(t *testing.T) {
 	}()
 
 	Convey("Removing comments", t, func() {
-		Convey("When no user is passed", func() {
-			testDeleteHandler(RemoveComment, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
-		Convey("When an invalid post id is passed", func() {
+		Convey("When an invalid comment id is passed", func() {
 			testDeleteHandler(RemoveComment, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
-				r.PostForm.Add("comment_id", "")
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:comment_id", "/a", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -229,11 +205,7 @@ func TestRemoveComment(t *testing.T) {
 		Convey("When a comment id that doesn't exist is passed", func() {
 			testDeleteHandler(RemoveComment, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("comment_id", bson.NewObjectId().Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:comment_id", "/"+bson.NewObjectId().Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -247,11 +219,7 @@ func TestRemoveComment(t *testing.T) {
 		Convey("When the comment does not belong to the user", func() {
 			testDeleteHandler(RemoveComment, func(r *http.Request) {
 				r.Header.Add("X-User-Token", tokenTmp.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("comment_id", c.ID.Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:comment_id", "/"+c.ID.Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -265,11 +233,7 @@ func TestRemoveComment(t *testing.T) {
 		Convey("When the post does not exist", func() {
 			testDeleteHandler(RemoveComment, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("comment_id", c.ID.Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:comment_id", "/"+c.ID.Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -283,11 +247,7 @@ func TestRemoveComment(t *testing.T) {
 		Convey("When everything is OK", func() {
 			testDeleteHandler(RemoveComment, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("comment_id", c2.ID.Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:comment_id", "/"+c2.ID.Hex(), func(res *httptest.ResponseRecorder) {
 				So(res.Code, ShouldEqual, 200)
 			})
 		})
@@ -338,27 +298,10 @@ func TestCommentsForPost(t *testing.T) {
 	}()
 
 	Convey("Listing comments for post", t, func() {
-		Convey("When invalid user is provided", func() {
-			testGetHandler(CommentsForPost, func(r *http.Request) {}, conn, "/", "/",
-				func(resp *httptest.ResponseRecorder) {
-					var errResp errorResponse
-					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
-						panic(err)
-					}
-					So(resp.Code, ShouldEqual, 400)
-					So(errResp.Code, ShouldEqual, CodeInvalidData)
-					So(errResp.Message, ShouldEqual, MsgInvalidData)
-				})
-		})
-
 		Convey("When post does not exist", func() {
 			testGetHandler(CommentsForPost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.Form == nil {
-					r.Form = make(url.Values)
-				}
-				r.Form.Add("post_id", bson.NewObjectId().Hex())
-			}, conn, "/", "/",
+			}, conn, "/:post_id", "/"+bson.NewObjectId().Hex(),
 				func(resp *httptest.ResponseRecorder) {
 					var errResp errorResponse
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
@@ -373,11 +316,7 @@ func TestCommentsForPost(t *testing.T) {
 		Convey("When post can't be acessed by the user", func() {
 			testGetHandler(CommentsForPost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", tokenTmp.Hash)
-				if r.Form == nil {
-					r.Form = make(url.Values)
-				}
-				r.Form.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/",
+			}, conn, "/:post_id", "/"+post.ID.Hex(),
 				func(resp *httptest.ResponseRecorder) {
 					var errResp errorResponse
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
@@ -392,11 +331,7 @@ func TestCommentsForPost(t *testing.T) {
 		Convey("When no count params are passed", func() {
 			testGetHandler(CommentsForPost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.Form == nil {
-					r.Form = make(url.Values)
-				}
-				r.Form.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/",
+			}, conn, "/:post_id", "/"+post.ID.Hex(),
 				func(resp *httptest.ResponseRecorder) {
 					var errResp map[string]interface{}
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
@@ -415,8 +350,7 @@ func TestCommentsForPost(t *testing.T) {
 					r.Form = make(url.Values)
 				}
 				r.Form.Add("count", "10")
-				r.Form.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/",
+			}, conn, "/:post_id", "/"+post.ID.Hex(),
 				func(resp *httptest.ResponseRecorder) {
 					var errResp map[string]interface{}
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
@@ -436,8 +370,7 @@ func TestCommentsForPost(t *testing.T) {
 				}
 				r.Form.Add("count", "10")
 				r.Form.Add("offset", "15")
-				r.Form.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/",
+			}, conn, "/:post_id", "/"+post.ID.Hex(),
 				func(resp *httptest.ResponseRecorder) {
 					var errResp map[string]interface{}
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
@@ -456,8 +389,7 @@ func TestCommentsForPost(t *testing.T) {
 					r.Form = make(url.Values)
 				}
 				r.Form.Add("count", "2")
-				r.Form.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/",
+			}, conn, "/:post_id", "/"+post.ID.Hex(),
 				func(resp *httptest.ResponseRecorder) {
 					var errResp map[string]interface{}
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {

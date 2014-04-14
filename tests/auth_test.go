@@ -2,13 +2,11 @@ package tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/martini-contrib/sessions"
-	. "github.com/mvader/mask/error"
+	//. "github.com/mvader/mask/error"
 	. "github.com/mvader/mask/handlers"
 	. "github.com/mvader/mask/middleware"
 	. "github.com/mvader/mask/models"
-	"github.com/mvader/mask/util"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/http/httptest"
@@ -17,7 +15,7 @@ import (
 	"time"
 )
 
-func TestAccessTokenValidation(t *testing.T) {
+/*func TestAccessTokenValidation(t *testing.T) {
 	var (
 		publicKey  = ""
 		privateKey = ""
@@ -375,7 +373,7 @@ func TestWebUserTokenValidation(t *testing.T) {
 			})
 		})
 	})
-}
+}*/
 
 func TestGetAccessToken(t *testing.T) {
 	conn := getConnection()

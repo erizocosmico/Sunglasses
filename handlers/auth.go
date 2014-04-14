@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// ValidateAccessToken validates the supplied access token
+/*// ValidateAccessToken validates the supplied access token
 func ValidateAccessToken(c middleware.Context) {
 	if !c.RequestIsValid(true) {
 		c.Error(400, CodeInvalidSignature, MsgInvalidSignature)
@@ -49,7 +49,7 @@ func ValidateUserToken(c middleware.Context) {
 			c.Error(403, CodeInvalidUserToken, MsgInvalidUserToken)
 		}
 	}
-}
+}*/
 
 // GetAccessToken is a handler to retrieve an access token
 func GetAccessToken(c middleware.Context) {

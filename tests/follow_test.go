@@ -60,25 +60,6 @@ func TestSendFollowRequest(t *testing.T) {
 	defer conn.Session.Close()
 
 	Convey("Sending follow requests", t, func() {
-
-		Convey("With invalid request user", func() {
-			user, token := createRequestUser(conn)
-			defer func() {
-				user.Remove(conn)
-				token.Remove(conn)
-			}()
-			testPostHandler(SendFollowRequest, func(r *http.Request) {}, conn, "/", "/",
-				func(resp *httptest.ResponseRecorder) {
-					var errResp errorResponse
-					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
-						panic(err)
-					}
-					So(resp.Code, ShouldEqual, 400)
-					So(errResp.Code, ShouldEqual, CodeInvalidData)
-					So(errResp.Message, ShouldEqual, MsgInvalidData)
-				})
-		})
-
 		Convey("With invalid 'user_to'", func() {
 			user, token := createRequestUser(conn)
 			defer func() {
@@ -373,7 +354,7 @@ func TestReplyFollowRequest(t *testing.T) {
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
 						panic(err)
 					}
-					So(resp.Code, ShouldEqual, 404)
+					So(resp.Code, ShouldEqual, 403)
 					So(errResp.Code, ShouldEqual, CodeUnauthorized)
 					So(errResp.Message, ShouldEqual, MsgUnauthorized)
 				})
@@ -451,25 +432,6 @@ func TestUnfollow(t *testing.T) {
 	defer conn.Session.Close()
 
 	Convey("Unfollowing an user", t, func() {
-
-		Convey("With invalid request user", func() {
-			user, token := createRequestUser(conn)
-			defer func() {
-				user.Remove(conn)
-				token.Remove(conn)
-			}()
-			testPostHandler(Unfollow, func(r *http.Request) {}, conn, "/", "/",
-				func(resp *httptest.ResponseRecorder) {
-					var errResp errorResponse
-					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
-						panic(err)
-					}
-					So(resp.Code, ShouldEqual, 400)
-					So(errResp.Code, ShouldEqual, CodeInvalidData)
-					So(errResp.Message, ShouldEqual, MsgInvalidData)
-				})
-		})
-
 		Convey("With invalid 'user_to'", func() {
 			user, token := createRequestUser(conn)
 			defer func() {
@@ -613,19 +575,6 @@ func TestListFollowers(t *testing.T) {
 	}
 
 	Convey("Listing followers", t, func() {
-		Convey("When invalid user is provided", func() {
-			testGetHandler(ListFollowers, func(r *http.Request) {}, conn, "/", "/",
-				func(resp *httptest.ResponseRecorder) {
-					var errResp errorResponse
-					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
-						panic(err)
-					}
-					So(resp.Code, ShouldEqual, 403)
-					So(errResp.Code, ShouldEqual, CodeUnauthorized)
-					So(errResp.Message, ShouldEqual, MsgUnauthorized)
-				})
-		})
-
 		Convey("When no count params are passed", func() {
 			testGetHandler(ListFollowers, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
@@ -740,19 +689,6 @@ func TestListFollowing(t *testing.T) {
 	}
 
 	Convey("Listing followings", t, func() {
-		Convey("When invalid user is provided", func() {
-			testGetHandler(ListFollowing, func(r *http.Request) {}, conn, "/", "/",
-				func(resp *httptest.ResponseRecorder) {
-					var errResp errorResponse
-					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
-						panic(err)
-					}
-					So(resp.Code, ShouldEqual, 403)
-					So(errResp.Code, ShouldEqual, CodeUnauthorized)
-					So(errResp.Message, ShouldEqual, MsgUnauthorized)
-				})
-		})
-
 		Convey("When no count params are passed", func() {
 			testGetHandler(ListFollowing, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
@@ -873,19 +809,6 @@ func TestListFollowRequests(t *testing.T) {
 	}
 
 	Convey("Listing follow requests", t, func() {
-		Convey("When invalid user is provided", func() {
-			testGetHandler(ListFollowRequests, func(r *http.Request) {}, conn, "/", "/",
-				func(resp *httptest.ResponseRecorder) {
-					var errResp errorResponse
-					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
-						panic(err)
-					}
-					So(resp.Code, ShouldEqual, 403)
-					So(errResp.Code, ShouldEqual, CodeUnauthorized)
-					So(errResp.Message, ShouldEqual, MsgUnauthorized)
-				})
-		})
-
 		Convey("When no count params are passed", func() {
 			testGetHandler(ListFollowRequests, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)

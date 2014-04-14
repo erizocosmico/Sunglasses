@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/go-martini/martini"
 	. "github.com/mvader/mask/error"
 	"github.com/mvader/mask/middleware"
 	"github.com/mvader/mask/models"
@@ -12,11 +13,6 @@ import (
 // CreateComment adds a comment to a post
 func CreateComment(c middleware.Context) {
 	var post models.Post
-
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
 
 	postID := c.Form("post_id")
 	if !bson.IsObjectIdHex(postID) {
@@ -60,18 +56,13 @@ func CreateComment(c middleware.Context) {
 }
 
 // DeleteComment removes a comment from a post
-func RemoveComment(c middleware.Context) {
+func RemoveComment(c middleware.Context, params martini.Params) {
 	var (
 		post    models.Post
 		comment models.Comment
 	)
 
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
-
-	commentID := c.Form("comment_id")
+	commentID := params["comment_id"]
 	if !bson.IsObjectIdHex(commentID) {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return
@@ -97,31 +88,33 @@ func RemoveComment(c middleware.Context) {
 		return
 	}
 
-	post.CommentsNum--
-	(&post).Save(c.Conn)
+	if c.GetBoolean("confirmed") {
+		post.CommentsNum--
+		(&post).Save(c.Conn)
 
-	go timeline.PropagatePostOnCommentDeleted(c, post.ID, comment.ID)
+		go timeline.PropagatePostOnCommentDeleted(c, post.ID, comment.ID)
 
-	c.Success(200, map[string]interface{}{
-		"deleted": true,
-		"message": "Comment deleted successfully",
-	})
+		c.Success(200, map[string]interface{}{
+			"deleted": true,
+			"message": "Comment deleted successfully",
+		})
+	} else {
+		c.Success(200, map[string]interface{}{
+			"deleted": false,
+			"message": "Comment was not deleted",
+		})
+	}
 }
 
 // CommentsForPost returns a list with the comments for a post
-func CommentsForPost(c middleware.Context) {
+func CommentsForPost(c middleware.Context, params martini.Params) {
 	var (
 		post   models.Post
 		result models.Comment
 	)
 	count, offset := c.ListCountParams()
 
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
-
-	postID := c.Form("post_id")
+	postID := params["post_id"]
 	if !bson.IsObjectIdHex(postID) {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return

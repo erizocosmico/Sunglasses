@@ -18,13 +18,14 @@ import (
 )
 
 type Context struct {
-	Config  *services.Config
-	Conn    *services.Connection
-	Request *http.Request
-	Render  render.Render
-	Session sessions.Session
-	User    *models.User
-	Tasks   *services.TaskService
+	Config     *services.Config
+	Conn       *services.Connection
+	Request    *http.Request
+	Render     render.Render
+	Session    sessions.Session
+	User       *models.User
+	Tasks      *services.TaskService
+	IsWebToken bool
 }
 
 // CreateContext initializes the context for a request
@@ -32,7 +33,7 @@ func CreateContext(ctx martini.Context, config *services.Config, conn *services.
 	c := Context{Config: config, Conn: conn, Request: r, Render: render, Session: s, Tasks: ts}
 
 	if r != nil && s != nil && conn != nil {
-		c.User = auth.GetRequestUser(r, conn, s)
+		c.User, c.IsWebToken = auth.GetRequestUser(r, conn, s)
 	}
 
 	ctx.Map(c)

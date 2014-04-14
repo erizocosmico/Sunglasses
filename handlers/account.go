@@ -134,293 +134,343 @@ func GetAccountInfo(c middleware.Context) {
 
 // UpdateAccountInfo updates the user's information
 func UpdateAccountInfo(c middleware.Context) {
-	if c.User != nil {
-		info := models.UserInfo{}
+	info := models.UserInfo{}
 
-		for _, v := range c.Request.PostForm {
-			for _, f := range v {
-				if util.Strlen(f) > 500 {
-					c.Error(400, CodeInvalidInfoLength, MsgInvalidInfoLength)
-					return
-				}
-			}
-		}
-
-		if v, ok := c.Request.PostForm["websites"]; ok {
-			sites := make([]string, 0, len(v))
-
-			for _, site := range v {
-				if !strings.HasPrefix(site, "http://") && !strings.HasPrefix(site, "https://") {
-					site = "http://" + site
-				}
-
-				if !util.IsValidURL(site) {
-					c.Error(400, CodeInvalidWebsites, MsgInvalidWebsites)
-					return
-				}
-
-				sites = append(sites, site)
-			}
-			info.Websites = sites
-		}
-
-		if gender := c.Form("gender"); gender != "" {
-			gender, err := strconv.ParseInt(gender, 10, 8)
-			if err == nil {
-				if gender == models.Male || gender == models.Female || gender == models.Other {
-					info.Gender = models.Gender(gender)
-				} else {
-					err = errors.New("invalid gender")
-				}
-			}
-
-			if err != nil {
-				c.Error(400, CodeInvalidGender, MsgInvalidGender)
+	for _, v := range c.Request.PostForm {
+		for _, f := range v {
+			if util.Strlen(f) > 500 {
+				c.Error(400, CodeInvalidInfoLength, MsgInvalidInfoLength)
 				return
 			}
 		}
+	}
 
-		if status := c.Form("status"); status != "" {
-			status, err := strconv.ParseInt(status, 10, 8)
-			if err == nil {
-				if status >= 0 && status <= 4 {
-					info.Status = models.UserStatus(status)
-				} else {
-					err = errors.New("invalid statusr")
-				}
+	if v, ok := c.Request.PostForm["websites"]; ok {
+		sites := make([]string, 0, len(v))
+
+		for _, site := range v {
+			if !strings.HasPrefix(site, "http://") && !strings.HasPrefix(site, "https://") {
+				site = "http://" + site
 			}
 
-			if err != nil {
-				c.Error(400, CodeInvalidStatus, MsgInvalidStatus)
+			if !util.IsValidURL(site) {
+				c.Error(400, CodeInvalidWebsites, MsgInvalidWebsites)
 				return
+			}
+
+			sites = append(sites, site)
+		}
+		info.Websites = sites
+	}
+
+	if gender := c.Form("gender"); gender != "" {
+		gender, err := strconv.ParseInt(gender, 10, 8)
+		if err == nil {
+			if gender == models.Male || gender == models.Female || gender == models.Other {
+				info.Gender = models.Gender(gender)
+			} else {
+				err = errors.New("invalid gender")
 			}
 		}
 
-		info.Work = strings.TrimSpace(c.Form("work"))
-		info.Education = strings.TrimSpace(c.Form("education"))
-		info.Hobbies = strings.TrimSpace(c.Form("hobbies"))
-		info.Books = strings.TrimSpace(c.Form("books"))
-		info.Movies = strings.TrimSpace(c.Form("movies"))
-		info.TV = strings.TrimSpace(c.Form("tv"))
-		info.About = strings.TrimSpace(c.Form("about"))
-
-		c.User.Info = info
-		if err := c.User.Save(c.Conn); err != nil {
-			c.Error(500, CodeUnexpected, MsgUnexpected)
+		if err != nil {
+			c.Error(400, CodeInvalidGender, MsgInvalidGender)
 			return
 		}
+	}
 
-		c.Success(200, map[string]interface{}{
-			"message": "User info updated successfully",
-		})
+	if status := c.Form("status"); status != "" {
+		status, err := strconv.ParseInt(status, 10, 8)
+		if err == nil {
+			if status >= 0 && status <= 4 {
+				info.Status = models.UserStatus(status)
+			} else {
+				err = errors.New("invalid statusr")
+			}
+		}
+
+		if err != nil {
+			c.Error(400, CodeInvalidStatus, MsgInvalidStatus)
+			return
+		}
+	}
+
+	info.Work = strings.TrimSpace(c.Form("work"))
+	info.Education = strings.TrimSpace(c.Form("education"))
+	info.Hobbies = strings.TrimSpace(c.Form("hobbies"))
+	info.Books = strings.TrimSpace(c.Form("books"))
+	info.Movies = strings.TrimSpace(c.Form("movies"))
+	info.TV = strings.TrimSpace(c.Form("tv"))
+	info.About = strings.TrimSpace(c.Form("about"))
+
+	c.User.Info = info
+	if err := c.User.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
 	}
 
-	c.Error(400, CodeInvalidData, MsgInvalidData)
+	c.Success(200, map[string]interface{}{
+		"message": "User info updated successfully",
+	})
 }
 
 // GetAccountSettings retrieves the settings of the user
 func GetAccountSettings(c middleware.Context) {
-	if c.User != nil {
-		c.Success(200, map[string]interface{}{
-			"account_settings": c.User.Settings,
-		})
+	info := models.UserInfo{}
+
+	for _, v := range c.Request.PostForm {
+		for _, f := range v {
+			if util.Strlen(f) > 500 {
+				c.Error(400, CodeInvalidInfoLength, MsgInvalidInfoLength)
+				return
+			}
+		}
+	}
+
+	if v, ok := c.Request.PostForm["websites"]; ok {
+		sites := make([]string, 0, len(v))
+
+		for _, site := range v {
+			if !strings.HasPrefix(site, "http://") && !strings.HasPrefix(site, "https://") {
+				site = "http://" + site
+			}
+
+			if !util.IsValidURL(site) {
+				c.Error(400, CodeInvalidWebsites, MsgInvalidWebsites)
+				return
+			}
+
+			sites = append(sites, site)
+		}
+		info.Websites = sites
+	}
+
+	if gender := c.Form("gender"); gender != "" {
+		gender, err := strconv.ParseInt(gender, 10, 8)
+		if err == nil {
+			if gender == models.Male || gender == models.Female || gender == models.Other {
+				info.Gender = models.Gender(gender)
+			} else {
+				err = errors.New("invalid gender")
+			}
+		}
+
+		if err != nil {
+			c.Error(400, CodeInvalidGender, MsgInvalidGender)
+			return
+		}
+	}
+
+	if status := c.Form("status"); status != "" {
+		status, err := strconv.ParseInt(status, 10, 8)
+		if err == nil {
+			if status >= 0 && status <= 4 {
+				info.Status = models.UserStatus(status)
+			} else {
+				err = errors.New("invalid statusr")
+			}
+		}
+
+		if err != nil {
+			c.Error(400, CodeInvalidStatus, MsgInvalidStatus)
+			return
+		}
+	}
+
+	info.Work = strings.TrimSpace(c.Form("work"))
+	info.Education = strings.TrimSpace(c.Form("education"))
+	info.Hobbies = strings.TrimSpace(c.Form("hobbies"))
+	info.Books = strings.TrimSpace(c.Form("books"))
+	info.Movies = strings.TrimSpace(c.Form("movies"))
+	info.TV = strings.TrimSpace(c.Form("tv"))
+	info.About = strings.TrimSpace(c.Form("about"))
+
+	c.User.Info = info
+	if err := c.User.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
 	}
 
-	c.Error(400, CodeInvalidData, MsgInvalidData)
+	c.Success(200, map[string]interface{}{
+		"message": "User info updated successfully",
+	})
 }
 
 // UpdateAccountSettings updates the user's settings
 func UpdateAccountSettings(c middleware.Context) {
-	if c.User != nil {
-		s := models.UserSettings{}
-		getPrivacy := func(r *http.Request, kind string) (models.PrivacySettings, error) {
-			p := models.PrivacySettings{}
+	s := models.UserSettings{}
+	getPrivacy := func(r *http.Request, kind string) (models.PrivacySettings, error) {
+		p := models.PrivacySettings{}
 
-			if privacyType := c.Form("privacy_" + kind + "_type"); privacyType != "" {
-				pType, err := strconv.ParseInt(privacyType, 10, 8)
-				if !models.IsValidPrivacyType(models.PrivacyType(pType)) || err != nil {
-					return p, errors.New("invalid data provided")
-				}
-
-				p.Type = models.PrivacyType(pType)
-			} else {
-				return p, errors.New("privacy type is required")
+		if privacyType := c.Form("privacy_" + kind + "_type"); privacyType != "" {
+			pType, err := strconv.ParseInt(privacyType, 10, 8)
+			if !models.IsValidPrivacyType(models.PrivacyType(pType)) || err != nil {
+				return p, errors.New("invalid data provided")
 			}
 
-			if users, ok := r.Form["privacy_"+kind+"_users"]; ok {
-				uids := make([]bson.ObjectId, 0, len(users))
-				for _, u := range users {
-					if !bson.IsObjectIdHex(u) {
-						return p, errors.New("invalid data provided")
-					}
-					uids = append(uids, bson.ObjectIdHex(u))
-				}
-
-				count, err := c.Count("follows", bson.M{"user_from": c.User.ID, "user_to": bson.M{"$in": uids}})
-				if err != nil || count != len(p.Users) {
-					count2, err := c.Count("follows", bson.M{"user_to": c.User.ID, "user_from": bson.M{"$in": uids}})
-					if err != nil || count+count2 != len(uids) {
-						return p, errors.New("invalid user list provided")
-					}
-				}
-
-				p.Users = uids
-			} else if p.Type > models.PrivacyNone {
-				return p, errors.New("users param required for this privacy type")
-			}
-
-			return p, nil
+			p.Type = models.PrivacyType(pType)
+		} else {
+			return p, errors.New("privacy type is required")
 		}
 
-		s.OverrideDefaultPrivacy = c.GetBoolean("override_default_privacy")
-		if s.OverrideDefaultPrivacy {
-			p, err := getPrivacy(c.Request, "status")
+		if users, ok := r.Form["privacy_"+kind+"_users"]; ok {
+			uids := make([]bson.ObjectId, 0, len(users))
+			for _, u := range users {
+				if !bson.IsObjectIdHex(u) {
+					return p, errors.New("invalid data provided")
+				}
+				uids = append(uids, bson.ObjectIdHex(u))
+			}
+
+			count, err := c.Count("follows", bson.M{"user_from": c.User.ID, "user_to": bson.M{"$in": uids}})
+			if err != nil || count != len(p.Users) {
+				count2, err := c.Count("follows", bson.M{"user_to": c.User.ID, "user_from": bson.M{"$in": uids}})
+				if err != nil || count+count2 != len(uids) {
+					return p, errors.New("invalid user list provided")
+				}
+			}
+
+			p.Users = uids
+		} else if p.Type > models.PrivacyNone {
+			return p, errors.New("users param required for this privacy type")
+		}
+
+		return p, nil
+	}
+
+	s.OverrideDefaultPrivacy = c.GetBoolean("override_default_privacy")
+	if s.OverrideDefaultPrivacy {
+		p, err := getPrivacy(c.Request, "status")
+		if err != nil {
+			c.Error(400, CodeInvalidPrivacySettings, MsgInvalidPrivacySettings)
+			return
+		}
+
+		s.DefaultStatusPrivacy = p
+	} else {
+		for _, k := range []string{"status", "video", "photo", "link", "album"} {
+			p, err := getPrivacy(c.Request, k)
 			if err != nil {
 				c.Error(400, CodeInvalidPrivacySettings, MsgInvalidPrivacySettings)
 				return
 			}
 
-			s.DefaultStatusPrivacy = p
-		} else {
-			for _, k := range []string{"status", "video", "photo", "link", "album"} {
-				p, err := getPrivacy(c.Request, k)
-				if err != nil {
-					c.Error(400, CodeInvalidPrivacySettings, MsgInvalidPrivacySettings)
-					return
-				}
-
-				switch k {
-				case "status":
-					s.DefaultStatusPrivacy = p
-					break
-				case "video":
-					s.DefaultVideoPrivacy = p
-					break
-				case "photo":
-					s.DefaultPhotoPrivacy = p
-					break
-				case "link":
-					s.DefaultLinkPrivacy = p
-					break
-				case "album":
-					s.DefaultAlbumPrivacy = p
-					break
-				}
+			switch k {
+			case "status":
+				s.DefaultStatusPrivacy = p
+				break
+			case "video":
+				s.DefaultVideoPrivacy = p
+				break
+			case "photo":
+				s.DefaultPhotoPrivacy = p
+				break
+			case "link":
+				s.DefaultLinkPrivacy = p
+				break
+			case "album":
+				s.DefaultAlbumPrivacy = p
+				break
 			}
 		}
+	}
 
-		s.Invisible = c.GetBoolean("invisible")
-		s.CanReceiveRequests = c.GetBoolean("can_receive_requests")
-		s.FollowApprovalRequired = c.GetBoolean("follow_approval_required")
-		s.DisplayAvatarBeforeApproval = c.GetBoolean("display_avatar_before_approval")
-		s.NotifyNewComment = c.GetBoolean("notify_new_comment")
-		s.NotifyNewCommentOthers = c.GetBoolean("notify_new_comment_others")
-		s.NotifyPostsInMyProfile = c.GetBoolean("notify_new_posts_in_my_profile")
-		s.NotifyLikes = c.GetBoolean("notify_likes")
-		s.AllowPostsInMyProfile = c.GetBoolean("allow_posts_in_my_profile")
-		s.AllowCommentsInPosts = c.GetBoolean("allow_comments_in_posts")
-		s.DisplayInfoFollowersOnly = c.GetBoolean("display_info_followers_only")
+	s.Invisible = c.GetBoolean("invisible")
+	s.CanReceiveRequests = c.GetBoolean("can_receive_requests")
+	s.FollowApprovalRequired = c.GetBoolean("follow_approval_required")
+	s.DisplayAvatarBeforeApproval = c.GetBoolean("display_avatar_before_approval")
+	s.NotifyNewComment = c.GetBoolean("notify_new_comment")
+	s.NotifyNewCommentOthers = c.GetBoolean("notify_new_comment_others")
+	s.NotifyPostsInMyProfile = c.GetBoolean("notify_new_posts_in_my_profile")
+	s.NotifyLikes = c.GetBoolean("notify_likes")
+	s.AllowPostsInMyProfile = c.GetBoolean("allow_posts_in_my_profile")
+	s.AllowCommentsInPosts = c.GetBoolean("allow_comments_in_posts")
+	s.DisplayInfoFollowersOnly = c.GetBoolean("display_info_followers_only")
 
-		if recoveryMethod := c.Form("recovery_method"); recoveryMethod != "" {
-			method, err := strconv.ParseInt(recoveryMethod, 10, 8)
-			if err != nil || (method != models.RecoveryNone && method != models.RecoverByQuestion && method != models.RecoverByEMail) {
-				s.PasswordRecoveryMethod = models.RecoveryNone
-			}
-
-			s.PasswordRecoveryMethod = models.RecoveryMethod(method)
-			if s.PasswordRecoveryMethod == models.RecoverByQuestion {
-				s.RecoveryQuestion = c.Form("recovery_question")
-				s.RecoveryAnswer = c.Form("recovery_answer")
-
-				if s.RecoveryAnswer == "" || s.RecoveryQuestion == "" {
-					c.Error(400, CodeInvalidRecoveryQuestion, MsgInvalidRecoveryQuestion)
-					return
-				}
-			}
-		} else {
+	if recoveryMethod := c.Form("recovery_method"); recoveryMethod != "" {
+		method, err := strconv.ParseInt(recoveryMethod, 10, 8)
+		if err != nil || (method != models.RecoveryNone && method != models.RecoverByQuestion && method != models.RecoverByEMail) {
 			s.PasswordRecoveryMethod = models.RecoveryNone
 		}
 
-		c.User.Settings = s
-		if err := c.User.Save(c.Conn); err != nil {
-			c.Error(500, CodeUnexpected, MsgUnexpected)
-			return
-		}
+		s.PasswordRecoveryMethod = models.RecoveryMethod(method)
+		if s.PasswordRecoveryMethod == models.RecoverByQuestion {
+			s.RecoveryQuestion = c.Form("recovery_question")
+			s.RecoveryAnswer = c.Form("recovery_answer")
 
-		c.Success(200, map[string]interface{}{
-			"message": "User settings updated successfully",
-		})
+			if s.RecoveryAnswer == "" || s.RecoveryQuestion == "" {
+				c.Error(400, CodeInvalidRecoveryQuestion, MsgInvalidRecoveryQuestion)
+				return
+			}
+		}
+	} else {
+		s.PasswordRecoveryMethod = models.RecoveryNone
+	}
+
+	c.User.Settings = s
+	if err := c.User.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
 	}
 
-	c.Error(400, CodeInvalidData, MsgInvalidData)
+	c.Success(200, map[string]interface{}{
+		"message": "User settings updated successfully",
+	})
 }
 
 // UpldateProfilePicture updates the current profile picture of the user
 func UpdateProfilePicture(c middleware.Context) {
-	if c.User != nil {
-		file, err := upload.RetrieveUploadedImage(c.Request, "account_picture")
-		if err != nil {
-			code, msg := upload.CodeAndMessageForUploadError(err)
-			c.Error(400, code, msg)
-			return
-		}
-
-		imagePath, thumbnailPath, err := upload.StoreImage(file, upload.ProfileUploadOptions(c.Config))
-		if err != nil {
-			code, msg := upload.CodeAndMessageForUploadError(err)
-			c.Error(400, code, msg)
-			return
-		}
-
-		var prevAvatar, prevThumbnail string
-
-		if c.Form("picture_type") == "public" {
-			prevAvatar = c.User.PublicAvatar
-			c.User.PublicAvatar = imagePath
-			prevThumbnail = c.User.PublicAvatarThumbnail
-			c.User.PublicAvatarThumbnail = thumbnailPath
-		} else {
-			prevAvatar = c.User.Avatar
-			c.User.Avatar = imagePath
-			prevThumbnail = c.User.AvatarThumbnail
-			c.User.AvatarThumbnail = thumbnailPath
-		}
-
-		if c.User.Save(c.Conn); err != nil {
-			c.Error(500, CodeUnexpected, MsgUnexpected)
-
-			os.Remove(upload.ToLocalImagePath(imagePath, c.Config))
-			os.Remove(upload.ToLocalThumbnailPath(thumbnailPath, c.Config))
-			return
-		} else {
-			if prevAvatar != "" {
-				os.Remove(upload.ToLocalImagePath(prevAvatar, c.Config))
-			}
-
-			if prevThumbnail != "" {
-				os.Remove(upload.ToLocalThumbnailPath(prevThumbnail, c.Config))
-			}
-		}
-
-		c.Success(200, map[string]interface{}{
-			"message": "User settings updated successfully",
-		})
+	file, err := upload.RetrieveUploadedImage(c.Request, "account_picture")
+	if err != nil {
+		code, msg := upload.CodeAndMessageForUploadError(err)
+		c.Error(400, code, msg)
 		return
 	}
 
-	c.Error(400, CodeInvalidData, MsgInvalidData)
+	imagePath, thumbnailPath, err := upload.StoreImage(file, upload.ProfileUploadOptions(c.Config))
+	if err != nil {
+		code, msg := upload.CodeAndMessageForUploadError(err)
+		c.Error(400, code, msg)
+		return
+	}
+
+	var prevAvatar, prevThumbnail string
+
+	if c.Form("picture_type") == "public" {
+		prevAvatar = c.User.PublicAvatar
+		c.User.PublicAvatar = imagePath
+		prevThumbnail = c.User.PublicAvatarThumbnail
+		c.User.PublicAvatarThumbnail = thumbnailPath
+	} else {
+		prevAvatar = c.User.Avatar
+		c.User.Avatar = imagePath
+		prevThumbnail = c.User.AvatarThumbnail
+		c.User.AvatarThumbnail = thumbnailPath
+	}
+
+	if c.User.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+
+		os.Remove(upload.ToLocalImagePath(imagePath, c.Config))
+		os.Remove(upload.ToLocalThumbnailPath(thumbnailPath, c.Config))
+		return
+	} else {
+		if prevAvatar != "" {
+			os.Remove(upload.ToLocalImagePath(prevAvatar, c.Config))
+		}
+
+		if prevThumbnail != "" {
+			os.Remove(upload.ToLocalThumbnailPath(prevThumbnail, c.Config))
+		}
+	}
+
+	c.Success(200, map[string]interface{}{
+		"message": "User settings updated successfully",
+	})
 }
 
 // DestroyAccount destroys the user account and all its related content such as comments, posts, images, etc.
 func DestroyAccount(c middleware.Context) {
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
-
 	confirmed := c.GetBoolean("confirmed")
 
 	if confirmed {

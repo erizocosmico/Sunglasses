@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"github.com/go-martini/martini"
 	. "github.com/mvader/mask/error"
 	"github.com/mvader/mask/middleware"
 	"github.com/mvader/mask/models"
@@ -18,11 +19,6 @@ import (
 // CreatePost creates a new post
 func CreatePost(c middleware.Context) {
 	postType := c.Form("post_type")
-
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
 
 	switch postType {
 	case "photo":
@@ -41,15 +37,10 @@ func CreatePost(c middleware.Context) {
 }
 
 // ShowPost returns all data about a post including comments and likes
-func ShowPost(c middleware.Context) {
+func ShowPost(c middleware.Context, params martini.Params) {
 	var post models.Post
 
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
-
-	postID := c.Form("post_id")
+	postID := params["id"]
 	if !bson.IsObjectIdHex(postID) {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return
@@ -84,15 +75,10 @@ func ShowPost(c middleware.Context) {
 }
 
 // DeletePost deletes a post owned by the user making the request
-func DeletePost(c middleware.Context) {
+func DeletePost(c middleware.Context, params martini.Params) {
 	var post models.Post
 
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
-
-	postID := c.Form("post_id")
+	postID := params["id"]
 	if !bson.IsObjectIdHex(postID) {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return
@@ -131,15 +117,10 @@ func DeletePost(c middleware.Context) {
 }
 
 // LikePost likes a post (or unlikes it if the post has already been liked)
-func LikePost(c middleware.Context) {
+func LikePost(c middleware.Context, params martini.Params) {
 	var post models.Post
 
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
-
-	postID := c.Form("post_id")
+	postID := params["id"]
 	if !bson.IsObjectIdHex(postID) {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return
@@ -418,15 +399,10 @@ func getPostPrivacy(postType models.ObjectType, c middleware.Context) (models.Pr
 }
 
 // ChangePostPrivacy changes a post privacy settings
-func ChangePostPrivacy(c middleware.Context) {
+func ChangePostPrivacy(c middleware.Context, params martini.Params) {
 	var post models.Post
 
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
-
-	postID := c.Form("post_id")
+	postID := params["id"]
 	if !bson.IsObjectIdHex(postID) {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return
@@ -457,6 +433,6 @@ func ChangePostPrivacy(c middleware.Context) {
 	go timeline.PropagatePostOnPrivacyChange(c, &post)
 
 	c.Success(200, map[string]interface{}{
-			"message": "Post privacy updated successfully",
+		"message": "Post privacy updated successfully",
 	})
 }

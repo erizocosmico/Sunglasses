@@ -29,18 +29,6 @@ func TestPostStatus(t *testing.T) {
 	}()
 
 	Convey("Posting a status", t, func() {
-		Convey("When no user is passed", func() {
-			testPostHandler(CreatePost, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
 		Convey("When the status text is invalid", func() {
 			testPostHandler(CreatePost, func(r *http.Request) {
 				if r.PostForm == nil {
@@ -130,18 +118,6 @@ func TestPostVideo(t *testing.T) {
 	}()
 
 	Convey("Posting a video", t, func() {
-		Convey("When no user is passed", func() {
-			testPostHandler(CreatePost, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
 		Convey("When the status text is invalid", func() {
 			testPostHandler(CreatePost, func(r *http.Request) {
 				if r.PostForm == nil {
@@ -248,18 +224,6 @@ func TestPostLink(t *testing.T) {
 	}()
 
 	Convey("Posting a link", t, func() {
-		Convey("When no user is passed", func() {
-			testPostHandler(CreatePost, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
 		Convey("When the status text is invalid", func() {
 			testPostHandler(CreatePost, func(r *http.Request) {
 				if r.PostForm == nil {
@@ -335,18 +299,6 @@ func TestPostPhoto(t *testing.T) {
 	}()
 
 	Convey("Posting a photo", t, func() {
-		Convey("When no user is passed", func() {
-			testPostHandler(CreatePost, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
 		Convey("When the status text is invalid", func() {
 			testUploadFileHandler("../test_assets/gopher.jpg", "post_picture", "/", CreatePost, conn, func(r *http.Request) {
 				if r.PostForm == nil {
@@ -434,26 +386,10 @@ func TestDeletePost(t *testing.T) {
 	}()
 
 	Convey("Deleting a post", t, func() {
-		Convey("When no user is passed", func() {
-			testDeleteHandler(DeletePost, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
 		Convey("When an invalid post id is passed", func() {
 			testDeleteHandler(DeletePost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("post_id", "")
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/a", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -467,11 +403,7 @@ func TestDeletePost(t *testing.T) {
 		Convey("When a post id that doesn't exist is passed", func() {
 			testDeleteHandler(DeletePost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("post_id", bson.NewObjectId().Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/"+bson.NewObjectId().Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -485,11 +417,7 @@ func TestDeletePost(t *testing.T) {
 		Convey("When the post does not belong to the user", func() {
 			testDeleteHandler(DeletePost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", tokenTmp.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/"+post.ID.Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -503,11 +431,7 @@ func TestDeletePost(t *testing.T) {
 		Convey("When everything is OK", func() {
 			testDeleteHandler(DeletePost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/"+post.ID.Hex(), func(res *httptest.ResponseRecorder) {
 				So(res.Code, ShouldEqual, 200)
 			})
 		})
@@ -550,26 +474,10 @@ func TestLikePost(t *testing.T) {
 	}()
 
 	Convey("Liking a post", t, func() {
-		Convey("When no user is passed", func() {
-			testPostHandler(LikePost, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
 		Convey("When an invalid post id is passed", func() {
 			testPostHandler(LikePost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("post_id", "")
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/a", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -583,11 +491,7 @@ func TestLikePost(t *testing.T) {
 		Convey("When a post id that doesn't exist is passed", func() {
 			testPostHandler(LikePost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("post_id", bson.NewObjectId().Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/"+bson.NewObjectId().Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -601,11 +505,7 @@ func TestLikePost(t *testing.T) {
 		Convey("When the post can't be accessed by the user", func() {
 			testPostHandler(LikePost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", tokenTmp.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/"+post.ID.Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -619,11 +519,7 @@ func TestLikePost(t *testing.T) {
 		Convey("When everything is OK (like)", func() {
 			testPostHandler(LikePost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/"+post.ID.Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -636,11 +532,7 @@ func TestLikePost(t *testing.T) {
 		Convey("When everything is OK (unlike)", func() {
 			testPostHandler(LikePost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/"+post.ID.Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -710,26 +602,10 @@ func TestShowPost(t *testing.T) {
 	}()
 
 	Convey("Showing a post", t, func() {
-		Convey("When no user is passed", func() {
-			testGetHandler(ShowPost, nil, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-				var errResp errorResponse
-				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-					panic(err)
-				}
-				So(res.Code, ShouldEqual, 400)
-				So(errResp.Code, ShouldEqual, CodeInvalidData)
-				So(errResp.Message, ShouldEqual, MsgInvalidData)
-			})
-		})
-
 		Convey("When an invalid post id is passed", func() {
 			testGetHandler(ShowPost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.Form == nil {
-					r.Form = make(url.Values)
-				}
-				r.Form.Add("post_id", "")
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/a", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -743,11 +619,7 @@ func TestShowPost(t *testing.T) {
 		Convey("When a post id that doesn't exist is passed", func() {
 			testGetHandler(ShowPost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.Form == nil {
-					r.Form = make(url.Values)
-				}
-				r.Form.Add("post_id", bson.NewObjectId().Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/"+bson.NewObjectId().Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -761,11 +633,7 @@ func TestShowPost(t *testing.T) {
 		Convey("When the post can't be accessed by the user", func() {
 			testGetHandler(ShowPost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", tokenTmp.Hash)
-				if r.Form == nil {
-					r.Form = make(url.Values)
-				}
-				r.Form.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/"+post.ID.Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)
@@ -779,11 +647,7 @@ func TestShowPost(t *testing.T) {
 		Convey("When everything is OK", func() {
 			testGetHandler(ShowPost, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)
-				if r.PostForm == nil {
-					r.PostForm = make(url.Values)
-				}
-				r.PostForm.Add("post_id", post.ID.Hex())
-			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			}, conn, "/:id", "/"+post.ID.Hex(), func(res *httptest.ResponseRecorder) {
 				var errResp map[string]interface{}
 				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 					panic(err)

@@ -7,6 +7,8 @@ const (
 	CodeUnauthorized     = 12
 	CodeNotFound         = 13
 	CodeInvalidSignature = 14
+	CodeNotLoggedIn      = 15
+	CodeLoggedIn         = 16
 
 	// Auth codes [1-9]
 	CodeInvalidAccessToken        = 1
@@ -50,6 +52,8 @@ const (
 	MsgUnauthorized     = "You are not authorized to access this resource"
 	MsgNotFound         = "The resource was not found"
 	MsgInvalidSignature = "Invalid signature"
+	MsgNotLoggedIn      = "Login required"
+	MsgLoggedIn         = "You can't access this resource being logged in"
 
 	// Auth messages
 	MsgInvalidAccessToken        = "Invalid access token provided"

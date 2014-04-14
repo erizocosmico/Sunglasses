@@ -1,39 +1,34 @@
 package handlers
 
 import (
-	"github.com/mvader/mask/middleware"
 	. "github.com/mvader/mask/error"
-	"labix.org/v2/mgo/bson"
+	"github.com/mvader/mask/middleware"
 	"github.com/mvader/mask/models"
+	"labix.org/v2/mgo/bson"
 )
 
 // GetUserTimeline gets all posts, comments and likes needed to render the timeline for the user
 func GetUserTimeline(c middleware.Context) {
-	if c.User == nil {
-		c.Error(400, CodeInvalidData, MsgInvalidData)
-		return
-	}
-
 	count, offset := c.ListCountParams()
 
 	var (
-		t models.TimelineEntry
-		comments = make(map[bson.ObjectId][]models.Comment)
-		posts = make([]bson.ObjectId, 0, count)
-		users   = make([]bson.ObjectId, 0, count)
+		t           models.TimelineEntry
+		comments    = make(map[bson.ObjectId][]models.Comment)
+		posts       = make([]bson.ObjectId, 0, count)
+		users       = make([]bson.ObjectId, 0, count)
 		postsResult = make([]models.Post, 0, count)
-		p     models.Post
+		p           models.Post
 	)
 
 	iter := c.Find("timelines", bson.M{"user_id": c.User.ID}).Sort("-time").Limit(count).Skip(offset).Iter()
 	for iter.Next(&t) {
-			cmts := models.GetCommentsForPost(t.Post, c.User, 5, c.Conn)
-			if cmts != nil {
-				comments[t.Post] = cmts
-			}
+		cmts := models.GetCommentsForPost(t.Post, c.User, 5, c.Conn)
+		if cmts != nil {
+			comments[t.Post] = cmts
+		}
 
-			posts = append(posts, t.Post)
-			users = append(users, t.PostUser)
+		posts = append(posts, t.Post)
+		users = append(users, t.PostUser)
 	}
 
 	iter.Close()

@@ -59,24 +59,6 @@ func TestBlockHandler(t *testing.T) {
 	defer conn.Session.Close()
 
 	Convey("Blocking an user", t, func() {
-		Convey("With invalid request user", func() {
-			user, token := createRequestUser(conn)
-			defer func() {
-				user.Remove(conn)
-				token.Remove(conn)
-			}()
-			testPostHandler(BlockHandler, func(r *http.Request) {}, conn, "/", "/",
-				func(resp *httptest.ResponseRecorder) {
-					var errResp errorResponse
-					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
-						panic(err)
-					}
-					So(resp.Code, ShouldEqual, 400)
-					So(errResp.Code, ShouldEqual, CodeInvalidData)
-					So(errResp.Message, ShouldEqual, MsgInvalidData)
-				})
-		})
-
 		Convey("With invalid 'user_to'", func() {
 			user, token := createRequestUser(conn)
 			defer func() {
@@ -91,6 +73,7 @@ func TestBlockHandler(t *testing.T) {
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
 						panic(err)
 					}
+					fmt.Println(errResp)
 					So(resp.Code, ShouldEqual, 400)
 					So(errResp.Code, ShouldEqual, CodeInvalidData)
 					So(errResp.Message, ShouldEqual, MsgInvalidData)
@@ -115,6 +98,7 @@ func TestBlockHandler(t *testing.T) {
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
 						panic(err)
 					}
+					fmt.Println(errResp)
 					So(resp.Code, ShouldEqual, 404)
 					So(errResp.Code, ShouldEqual, CodeUserDoesNotExist)
 					So(errResp.Message, ShouldEqual, MsgUserDoesNotExist)
@@ -155,6 +139,7 @@ func TestBlockHandler(t *testing.T) {
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
 						panic(err)
 					}
+					fmt.Println(errResp)
 					So(resp.Code, ShouldEqual, 200)
 					So(errResp.Error, ShouldEqual, false)
 					So(errResp.Message, ShouldEqual, "User was already blocked")
@@ -191,6 +176,7 @@ func TestBlockHandler(t *testing.T) {
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
 						panic(err)
 					}
+					fmt.Println(errResp)
 					So(resp.Code, ShouldEqual, 200)
 					So(errResp.Error, ShouldEqual, false)
 					So(errResp.Message, ShouldEqual, "User blocked successfully")
@@ -204,25 +190,6 @@ func TestUnblock(t *testing.T) {
 	defer conn.Session.Close()
 
 	Convey("Unblocking an user", t, func() {
-
-		Convey("With invalid request user", func() {
-			user, token := createRequestUser(conn)
-			defer func() {
-				user.Remove(conn)
-				token.Remove(conn)
-			}()
-			testPostHandler(Unblock, func(r *http.Request) {}, conn, "/", "/",
-				func(resp *httptest.ResponseRecorder) {
-					var errResp errorResponse
-					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
-						panic(err)
-					}
-					So(resp.Code, ShouldEqual, 400)
-					So(errResp.Code, ShouldEqual, CodeInvalidData)
-					So(errResp.Message, ShouldEqual, MsgInvalidData)
-				})
-		})
-
 		Convey("With invalid 'user_to'", func() {
 			user, token := createRequestUser(conn)
 			defer func() {
@@ -366,19 +333,6 @@ func TestListBlocks(t *testing.T) {
 	}
 
 	Convey("Listing blocked users", t, func() {
-		Convey("When invalid user is provided", func() {
-			testGetHandler(ListBlocks, func(r *http.Request) {}, conn, "/", "/",
-				func(resp *httptest.ResponseRecorder) {
-					var errResp errorResponse
-					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
-						panic(err)
-					}
-					So(resp.Code, ShouldEqual, 403)
-					So(errResp.Code, ShouldEqual, CodeUnauthorized)
-					So(errResp.Message, ShouldEqual, MsgUnauthorized)
-				})
-		})
-
 		Convey("When no count params are passed", func() {
 			testGetHandler(ListBlocks, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)

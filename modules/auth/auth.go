@@ -51,7 +51,7 @@ func IsTokenValid(tokenID string, tokenType models.TokenType, conn interfaces.Co
 }
 
 // GetRequestUser returns the user associated with the request
-func GetRequestUser(r *http.Request, conn interfaces.Conn, s sessions.Session) *models.User {
+func GetRequestUser(r *http.Request, conn interfaces.Conn, s sessions.Session) (*models.User, bool) {
 	var (
 		userID bson.ObjectId
 		valid  bool
@@ -61,18 +61,19 @@ func GetRequestUser(r *http.Request, conn interfaces.Conn, s sessions.Session) *
 
 	if valid, userID = IsTokenValid(token, tokenType, conn); valid {
 		if err := conn.C("users").FindId(userID).One(&user); err == nil {
-			return &user
+			return &user, tokenType == models.SessionToken
 		}
 	}
 
-	return nil
+	return nil, false
 }
 
 // EraseExpiredTokens removes all expired tokens from the database
 func EraseExpiredTokens(conn interfaces.Conn) error {
-	_, err := conn.C("tokens").RemoveAll(bson.M{"expires": bson.M{"$lt": float64(time.Now().Unix())}})
-	if err != nil {
-		// TODO log error
+	var err error
+
+	if _, err = conn.C("tokens").RemoveAll(bson.M{"expires": bson.M{"$lt": float64(time.Now().Unix())}}); err != nil {
+		// TODO Log
 	}
 
 	return err
