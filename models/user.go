@@ -91,7 +91,6 @@ type UserSettings struct {
 	NotifyLikes                 bool           `json:"notify_likes,omitempty" bson:"notify_likes"`
 	AllowPostsInMyProfile       bool           `json:"allow_posts_in_my_profile,omitempty" bson:"allow_posts_in_my_profile"`
 	AllowCommentsInPosts        bool           `json:"allow_comments_in_posts,omitempty" bson:"allow_comments_in_posts"`
-	DisplayEmail                bool           `json:"display_email,omitempty" bson:"display_email"`
 	DisplayInfoFollowersOnly    bool           `json:"display_info_followers_only,omitempty" bson:"display_info_followers_only"`
 	PasswordRecoveryMethod      RecoveryMethod `json:"recovery_method,omitempty" bson:"recovery_method"`
 	RecoveryQuestion            string         `json:"recovery_question,omitempty" bson:"recovery_question,omitempty"`
@@ -146,7 +145,6 @@ func (u *User) Save(conn interfaces.Conn) error {
 		u.Settings.NotifyNewCommentOthers = false
 		u.Settings.AllowPostsInMyProfile = false
 		u.Settings.AllowCommentsInPosts = false
-		u.Settings.DisplayEmail = false
 		u.Settings.DisplayInfoFollowersOnly = true
 		u.Settings.PasswordRecoveryMethod = RecoveryNone
 		u.Settings.DefaultStatusPrivacy = pvSet
@@ -267,38 +265,7 @@ func GetUsersData(ids []bson.ObjectId, user *User, conn interfaces.Conn) map[bso
 		}
 
 		if _, ok := users[u.ID]; !ok {
-			var user map[string]interface{}
-
-			if !u.Settings.Invisible || hasAccess {
-				user = map[string]interface{}{
-					"id":                      u.ID,
-					"username":                u.Username,
-					"public_avatar":           u.PublicAvatar,
-					"public_avatar_thumbnail": u.PublicAvatarThumbnail,
-					"public_name":             u.PublicName,
-					"avatar":                  "",
-					"avatar_thumbnail":        "",
-					"private_name":            "",
-				}
-
-				if u.Settings.DisplayAvatarBeforeApproval || hasAccess {
-					user["avatar"] = u.Avatar
-					user["avatar_thumbnail"] = u.AvatarThumbnail
-					user["private_name"] = u.PrivateName
-				}
-			} else {
-				user = map[string]interface{}{
-					"username":                "Protected",
-					"public_avatar":           "",
-					"public_avatar_thumbnail": "",
-					"public_name":             "",
-					"avatar":                  "",
-					"avatar_thumbnail":        "",
-					"private_name":            "",
-				}
-			}
-
-			users[u.ID] = user
+			users[u.ID] = UserForDisplay(u, hasAccess, false)
 		}
 	}
 
@@ -307,4 +274,44 @@ func GetUsersData(ids []bson.ObjectId, user *User, conn interfaces.Conn) map[bso
 	}
 
 	return users
+}
+
+// UserForDisplay returns a displayable version of the user model based on the users permissions
+func UserForDisplay(u User, hasAccess, includeInfo bool) map[string]interface{} {
+	var user map[string]interface{}
+
+	if !(u.Settings.Invisible && !hasAccess) {
+		user = map[string]interface{}{
+			"id":                      u.ID,
+			"username":                u.Username,
+			"public_avatar":           u.PublicAvatar,
+			"public_avatar_thumbnail": u.PublicAvatarThumbnail,
+			"public_name":             u.PublicName,
+			"avatar":                  "",
+			"avatar_thumbnail":        "",
+			"private_name":            "",
+		}
+
+		if u.Settings.DisplayAvatarBeforeApproval || hasAccess {
+			user["avatar"] = u.Avatar
+			user["avatar_thumbnail"] = u.AvatarThumbnail
+			user["private_name"] = u.PrivateName
+		}
+
+		if hasAccess && includeInfo {
+			user["info"] = u.Info
+		}
+	} else {
+		user = map[string]interface{}{
+			"username":                "Protected",
+			"public_avatar":           "",
+			"public_avatar_thumbnail": "",
+			"public_name":             "",
+			"avatar":                  "",
+			"avatar_thumbnail":        "",
+			"private_name":            "",
+		}
+	}
+
+	return user
 }

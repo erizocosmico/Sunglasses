@@ -321,7 +321,6 @@ func UpdateAccountSettings(c middleware.Context) {
 		s.NotifyLikes = c.GetBoolean("notify_likes")
 		s.AllowPostsInMyProfile = c.GetBoolean("allow_posts_in_my_profile")
 		s.AllowCommentsInPosts = c.GetBoolean("allow_comments_in_posts")
-		s.DisplayEmail = c.GetBoolean("display_email")
 		s.DisplayInfoFollowersOnly = c.GetBoolean("display_info_followers_only")
 
 		if recoveryMethod := c.Form("recovery_method"); recoveryMethod != "" {

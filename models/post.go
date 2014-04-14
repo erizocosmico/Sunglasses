@@ -118,7 +118,7 @@ func (p *Post) CanBeAccessedBy(u *User, conn interfaces.Conn) bool {
 
 // GetLikesForPosts gets all user likes for a list of posts
 func GetLikesForPosts(posts []bson.ObjectId, user bson.ObjectId, conn interfaces.Conn) map[bson.ObjectId]bool {
-	var like models.PostLike
+	var like PostLike
 	result := make(map[bson.ObjectId]bool)
 
 	for _, v := range posts {
