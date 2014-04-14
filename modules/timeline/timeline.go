@@ -75,7 +75,10 @@ func PropagateSinglePostOnCreation(conn *services.Connection, ts *services.TaskS
 // PropagatePostOnPrivacyChange propagates the privacy changes across all timelines, removing and adding the post
 // according to the new privacy settings.
 func PropagatePostOnPrivacyChange(c middleware.Context, post *models.Post) {
-	// TODO: Implement, requires handler for changing posts privacy
+	if !c.Config.Debug {
+		PropagatePostsOnDeletion(c, post.ID)
+		PropagatePostOnCreation(c, post)
+	}
 }
 
 // PropagatePostsOnUserFollow propagates the posts to the timeline when a new user is followed

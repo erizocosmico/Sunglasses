@@ -416,3 +416,47 @@ func getPostPrivacy(postType models.ObjectType, c middleware.Context) (models.Pr
 
 	return p, nil
 }
+
+// ChangePostPrivacy changes a post privacy settings
+func ChangePostPrivacy(c middleware.Context) {
+	var post models.Post
+
+	if c.User == nil {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
+		return
+	}
+
+	postID := c.Form("post_id")
+	if !bson.IsObjectIdHex(postID) {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
+		return
+	}
+
+	if err := c.FindId("posts", bson.ObjectIdHex(postID)).One(&post); err != nil {
+		c.Error(404, CodeNotFound, MsgNotFound)
+		return
+	}
+
+	if post.UserID.Hex() != c.User.ID.Hex() {
+		c.Error(403, CodeUnauthorized, MsgUnauthorized)
+		return
+	}
+
+	privacy, err := getPostPrivacy(post.Type, c)
+	if err != nil {
+		c.Error(400, CodeInvalidUserList, MsgInvalidUserList)
+		return
+	}
+
+	post.Privacy = privacy
+	if err := (&post).Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+		return
+	}
+
+	go timeline.PropagatePostOnPrivacyChange(c, &post)
+
+	c.Success(200, map[string]interface{}{
+			"message": "Post privacy updated successfully",
+	})
+}
