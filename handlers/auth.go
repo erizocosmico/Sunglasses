@@ -11,46 +11,6 @@ import (
 	"time"
 )
 
-/*// ValidateAccessToken validates the supplied access token
-func ValidateAccessToken(c middleware.Context) {
-	if !c.RequestIsValid(true) {
-		c.Error(400, CodeInvalidSignature, MsgInvalidSignature)
-		return
-	}
-
-	tokenID, _ := auth.GetRequestToken(c.Request, true, c.Session)
-
-	var token models.Token
-	if err := c.Find("tokens", bson.M{"hash": tokenID}).One(&token); err != nil {
-		c.Error(403, CodeInvalidAccessToken, MsgInvalidAccessToken)
-	} else {
-		if token.ID.Hex() == "" || token.Type != models.AccessToken || token.Expires < float64(time.Now().Unix()) {
-			c.Error(403, CodeInvalidAccessToken, MsgInvalidAccessToken)
-		}
-	}
-
-	_ = auth.EraseExpiredTokens(c.Conn)
-}
-
-// ValidateUserToken validates the supplied user token
-func ValidateUserToken(c middleware.Context) {
-	if !c.RequestIsValid(false) {
-		c.Error(400, CodeInvalidSignature, MsgInvalidSignature)
-		return
-	}
-
-	tokenID, tokenType := auth.GetRequestToken(c.Request, false, c.Session)
-
-	var token models.Token
-	if err := c.Find("tokens", bson.M{"hash": tokenID}).One(&token); err != nil {
-		c.Error(403, CodeInvalidUserToken, MsgInvalidUserToken)
-	} else {
-		if token.ID.Hex() == "" || token.Type != tokenType || token.Expires < float64(time.Now().Unix()) {
-			c.Error(403, CodeInvalidUserToken, MsgInvalidUserToken)
-		}
-	}
-}*/
-
 // GetAccessToken is a handler to retrieve an access token
 func GetAccessToken(c middleware.Context) {
 	token := new(models.Token)

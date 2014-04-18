@@ -11,6 +11,7 @@ import (
 
 // Search is a handler for searching users
 func Search(c middleware.Context) {
+	// TODO untested
 	var user models.User
 	count, offset := c.ListCountParams()
 

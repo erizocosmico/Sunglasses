@@ -667,3 +667,88 @@ func TestShowPost(t *testing.T) {
 		})
 	})
 }
+
+func TestChangePostPrivacy(t *testing.T) {
+	conn := getConnection()
+	user, token := createRequestUser(conn)
+
+	userTmp := NewUser()
+	userTmp.Username = "testing_very_hard"
+	if err := userTmp.Save(conn); err != nil {
+		panic(err)
+	}
+
+	tokenTmp := new(Token)
+	tokenTmp.Type = UserToken
+	tokenTmp.Expires = float64(time.Now().Unix() + int64(3600*time.Second))
+	tokenTmp.UserID = userTmp.ID
+	if err := tokenTmp.Save(conn); err != nil {
+		panic(err)
+	}
+
+	post := NewPost(PostStatus, user)
+	post.Text = "A fancy post"
+	post.Privacy = PrivacySettings{}
+	if err := post.Save(conn); err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		conn.Db.C("posts").RemoveAll(nil)
+		conn.Db.C("users").RemoveAll(nil)
+		conn.Db.C("tokens").RemoveAll(nil)
+		conn.Session.Close()
+	}()
+
+	Convey("Changing privacy settings of posts", t, func() {
+		Convey("When invalid id is passed", func() {
+			testPutHandler(ChangePostPrivacy, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+			}, conn, "/:id", "/a", func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 400)
+				So(errResp.Code, ShouldEqual, CodeInvalidData)
+				So(errResp.Message, ShouldEqual, MsgInvalidData)
+			})
+		})
+
+		Convey("When the post does not exist", func() {
+			testPutHandler(ChangePostPrivacy, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+			}, conn, "/:id", "/"+bson.NewObjectId().Hex(), func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 404)
+				So(errResp.Code, ShouldEqual, CodeNotFound)
+				So(errResp.Message, ShouldEqual, MsgNotFound)
+			})
+		})
+
+		Convey("When the post does not belong to the user", func() {
+			testPutHandler(ChangePostPrivacy, func(r *http.Request) {
+				r.Header.Add("X-User-Token", tokenTmp.Hash)
+			}, conn, "/:id", "/"+post.ID.Hex(), func(res *httptest.ResponseRecorder) {
+				var errResp errorResponse
+				if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+					panic(err)
+				}
+				So(res.Code, ShouldEqual, 403)
+				So(errResp.Code, ShouldEqual, CodeUnauthorized)
+				So(errResp.Message, ShouldEqual, MsgUnauthorized)
+			})
+		})
+
+		Convey("When everything is OK", func() {
+			testPutHandler(ChangePostPrivacy, func(r *http.Request) {
+				r.Header.Add("X-User-Token", token.Hash)
+			}, conn, "/:id", "/"+post.ID.Hex(), func(res *httptest.ResponseRecorder) {
+				So(res.Code, ShouldEqual, 200)
+			})
+		})
+	})
+}

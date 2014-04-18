@@ -471,6 +471,7 @@ func UpdateProfilePicture(c middleware.Context) {
 
 // DestroyAccount destroys the user account and all its related content such as comments, posts, images, etc.
 func DestroyAccount(c middleware.Context) {
+	// TODO: Untested
 	confirmed := c.GetBoolean("confirmed")
 
 	if confirmed {

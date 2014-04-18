@@ -11,6 +11,7 @@ import (
 
 // ShowUserProfile retrieves a list of the first 25 posts and the data of the requested user
 func ShowUserProfile(c middleware.Context, params martini.Params) {
+	// TODO untested
 	var u models.User
 
 	user := params["username"]
@@ -38,6 +39,7 @@ func ShowUserProfile(c middleware.Context, params martini.Params) {
 
 // GetUserPosts retrieves a list of posts from an user
 func GetUserPosts(c middleware.Context) {
+	// TODO untested
 	userID := c.Form("user_id")
 	if userID == "" || !bson.IsObjectIdHex(userID) {
 		c.Error(400, CodeInvalidData, MsgInvalidData)

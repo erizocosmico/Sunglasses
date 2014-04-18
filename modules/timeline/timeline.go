@@ -7,6 +7,8 @@ import (
 	"labix.org/v2/mgo/bson"
 )
 
+// TODO untested
+
 // PropagatePostOnCreation propagates the post to all timelines when a new post is created.
 func PropagatePostOnCreation(c middleware.Context, post *models.Post) {
 	if !c.Config.Debug {

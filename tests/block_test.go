@@ -73,7 +73,6 @@ func TestBlockHandler(t *testing.T) {
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
 						panic(err)
 					}
-					fmt.Println(errResp)
 					So(resp.Code, ShouldEqual, 400)
 					So(errResp.Code, ShouldEqual, CodeInvalidData)
 					So(errResp.Message, ShouldEqual, MsgInvalidData)
@@ -98,7 +97,6 @@ func TestBlockHandler(t *testing.T) {
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
 						panic(err)
 					}
-					fmt.Println(errResp)
 					So(resp.Code, ShouldEqual, 404)
 					So(errResp.Code, ShouldEqual, CodeUserDoesNotExist)
 					So(errResp.Message, ShouldEqual, MsgUserDoesNotExist)
@@ -139,7 +137,6 @@ func TestBlockHandler(t *testing.T) {
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
 						panic(err)
 					}
-					fmt.Println(errResp)
 					So(resp.Code, ShouldEqual, 200)
 					So(errResp.Error, ShouldEqual, false)
 					So(errResp.Message, ShouldEqual, "User was already blocked")
@@ -176,7 +173,6 @@ func TestBlockHandler(t *testing.T) {
 					if err := json.Unmarshal(resp.Body.Bytes(), &errResp); err != nil {
 						panic(err)
 					}
-					fmt.Println(errResp)
 					So(resp.Code, ShouldEqual, 200)
 					So(errResp.Error, ShouldEqual, false)
 					So(errResp.Message, ShouldEqual, "User blocked successfully")
