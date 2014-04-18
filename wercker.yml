@@ -19,6 +19,7 @@ build:
         code: |
           cd $WERCKER_SOURCE_DIR
           go get -t .
+          go get github.com/smartystreets/goconvey
     - script:
         name: go test
         code: |
