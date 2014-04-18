@@ -57,7 +57,7 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 // addRoutes adds all necessary routes to a martini instance
 func addRoutes(m *martini.ClassicMartini) {
 	// Post routes
-	m.Group("/posts", func(r martini.Routes) {
+	m.Group("/posts", func(r martini.Router) {
 		r.Get("/show/:id", handlers.ShowPost)
 		r.Post("/create", handlers.CreatePost)
 		r.Delete("/destroy/:id", handlers.DeletePost)
@@ -65,21 +65,21 @@ func addRoutes(m *martini.ClassicMartini) {
 		r.Put("/change_privacy/:id", handlers.ChangePostPrivacy)
 	}, middleware.LoginRequired)
 
-	m.Group("/auth", func(r martini.Routes) {
+	m.Group("/auth", func(r martini.Router) {
 		r.Get("/access_token", handlers.GetAccessToken)
 		r.Post("/user_token", handlers.GetUserToken)
 		r.Post("/login", handlers.Login)
 	}, middleware.LoginForbidden)
 
 	// Comment routes
-	m.Group("/comments", func(r martini.Routes) {
+	m.Group("/comments", func(r martini.Router) {
 		r.Post("/create", handlers.CreateComment)
 		r.Get("/for_post/:post_id", handlers.CommentsForPost)
 		r.Delete("/destroy/:comment_id", handlers.RemoveComment)
 	}, middleware.LoginRequired)
 
 	// Account routes
-	m.Group("/account", func(r martini.Routes) {
+	m.Group("/account", func(r martini.Router) {
 		r.Post("/signup", handlers.CreateAccount)
 		r.Get("/info", handlers.GetAccountInfo)
 		r.Put("/info", handlers.UpdateAccountInfo)
@@ -91,14 +91,14 @@ func addRoutes(m *martini.ClassicMartini) {
 	m.Get("/account/logout", handlers.DestroyUserToken)
 
 	// Block routes
-	m.Group("/blocks", func(r martini.Routes) {
+	m.Group("/blocks", func(r martini.Router) {
 		r.Post("/create", handlers.BlockHandler)
 		r.Delete("/destroy", handlers.Unblock)
 		r.Get("/show", handlers.ListBlocks)
 	}, middleware.LoginRequired)
 
 	// User routes
-	m.Group("/users", func(r martini.Routes) {
+	m.Group("/users", func(r martini.Router) {
 		r.Post("/follow", handlers.SendFollowRequest)
 		r.Delete("/unfollow", handlers.Unfollow)
 		r.Get("/follow_requests", handlers.ListFollowRequests)
@@ -109,7 +109,7 @@ func addRoutes(m *martini.ClassicMartini) {
 	}, middleware.LoginRequired)
 
 	// Notification routes
-	m.Group("/notifications", func(r martini.Routes) {
+	m.Group("/notifications", func(r martini.Router) {
 		r.Get("/list", handlers.ListNotifications)
 		r.Put("/seen/:id", handlers.MarkNotificationRead)
 	}, middleware.LoginRequired)

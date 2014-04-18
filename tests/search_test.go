@@ -52,9 +52,9 @@ func TestSearch(t *testing.T) {
 				testGetHandler(Search, func(r *http.Request) {
 					r.Header.Add("X-User-Token", token.Hash)
 
-						if r.Form == nil {
-							r.Form = make(url.Values)
-						}
+					if r.Form == nil {
+						r.Form = make(url.Values)
+					}
 
 					r.Form.Add("q", "test")
 				}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
@@ -89,46 +89,46 @@ func TestSearch(t *testing.T) {
 		})
 
 		Convey("Searching for just the followings", func() {
-				Convey("When no count params passed", func() {
-						testGetHandler(Search, func(r *http.Request) {
-								r.Header.Add("X-User-Token", token.Hash)
+			Convey("When no count params passed", func() {
+				testGetHandler(Search, func(r *http.Request) {
+					r.Header.Add("X-User-Token", token.Hash)
 
-								if r.Form == nil {
-									r.Form = make(url.Values)
-								}
+					if r.Form == nil {
+						r.Form = make(url.Values)
+					}
 
-								r.Form.Add("q", "test")
-								r.Form.Add("just_followings", "true")
-							}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-								var errResp map[string]interface{}
-								if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-									panic(err)
-								}
-								So(res.Code, ShouldEqual, 200)
-								So(errResp["count"].(float64), ShouldEqual, float64(12))
-							})
-					})
+					r.Form.Add("q", "test")
+					r.Form.Add("just_followings", "true")
+				}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(res.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(12))
+				})
+			})
 
-				Convey("When count = 10 and offset = 10", func() {
-						testGetHandler(Search, func(r *http.Request) {
-								r.Header.Add("X-User-Token", token.Hash)
-								if r.Form == nil {
-									r.Form = make(url.Values)
-								}
+			Convey("When count = 10 and offset = 10", func() {
+				testGetHandler(Search, func(r *http.Request) {
+					r.Header.Add("X-User-Token", token.Hash)
+					if r.Form == nil {
+						r.Form = make(url.Values)
+					}
 
-								r.Form.Add("count", "10")
-								r.Form.Add("offset", "20")
-								r.Form.Add("q", "test")
-								r.Form.Add("just_followings", "true")
-							}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
-								var errResp map[string]interface{}
-								if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
-									panic(err)
-								}
-								So(res.Code, ShouldEqual, 200)
-								So(errResp["count"].(float64), ShouldEqual, float64(5))
-							})
-					})
+					r.Form.Add("count", "10")
+					r.Form.Add("offset", "20")
+					r.Form.Add("q", "test")
+					r.Form.Add("just_followings", "true")
+				}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+					var errResp map[string]interface{}
+					if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+						panic(err)
+					}
+					So(res.Code, ShouldEqual, 200)
+					So(errResp["count"].(float64), ShouldEqual, float64(5))
+				})
+			})
 		})
 	})
 }
