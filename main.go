@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"github.com/mvader/mask/app"
-	. "github.com/mvader/mask/mask"
 	"net/http"
 	"os"
 )
