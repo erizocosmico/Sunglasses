@@ -264,6 +264,10 @@ func GetUsersData(ids []bson.ObjectId, user *User, conn interfaces.Conn) map[bso
 			}
 		}
 
+		if u.ID.Hex() == user.ID.Hex() {
+			hasAccess = true
+		}
+
 		if _, ok := users[u.ID]; !ok {
 			users[u.ID] = UserForDisplay(u, hasAccess, false)
 		}
