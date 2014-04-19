@@ -23,7 +23,7 @@ func NewTaskService(config *Config) (*TaskService, error) {
 	)
 
 	if os.Getenv("WERCKER_REDIS_HOST") != "" {
-		config.RedisAddress = os.Getenv("WERCKER_REDIS_HOST"+":6379")
+		config.RedisAddress = os.Getenv("WERCKER_REDIS_HOST")+":6379"
 	}
 
 	if conn, err = redis.Dial("tcp", config.RedisAddress); err != nil {
