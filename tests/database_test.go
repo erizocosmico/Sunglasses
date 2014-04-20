@@ -7,7 +7,6 @@ import (
 )
 
 func TestNewDatabaseConn(t *testing.T) {
-	// TODO: Revisit, test Redis
 	Convey("Subject: Establishing a database connection", t, func() {
 		Convey("Given a valid config", func() {
 			config, err := NewConfig("../config.sample.json")

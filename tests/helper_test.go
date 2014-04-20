@@ -153,6 +153,9 @@ func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.H
 		panic(err)
 	}
 
+	config.StorePath = "../test_assets/"
+	config.ThumbnailStorePath = "../test_assets/"
+
 	req, _ := http.NewRequest(method, "http://localhost:3000"+reqUrl, nil)
 	m := testMartini()
 	m.Map(conn)

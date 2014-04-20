@@ -269,7 +269,6 @@ func PropagatePostOnCommentDeleted(c middleware.Context, postID, commentID bson.
 			allCompleted := true
 			iter := conn.Db.C("timelines").Find(bson.M{"post_id": postID}).Iter()
 			for iter.Next(&t) {
-				// TODO redo
 				cmts := make([]bson.ObjectId, 0, len(t.Comments)-1)
 				for _, v := range t.Comments {
 					if v != commentID {
@@ -301,7 +300,6 @@ func PropagateSinglePostOnCommentDeleted(conn *services.Connection, ts *services
 		return err
 	}
 
-	// TODO redo
 	cmts := make([]bson.ObjectId, 0, len(t.Comments)-1)
 	for _, v := range t.Comments {
 		if v != c {

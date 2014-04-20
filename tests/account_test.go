@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	. "github.com/mvader/mask/error"
 	. "github.com/mvader/mask/handlers"
+	. "github.com/mvader/mask/models"
 	"github.com/mvader/mask/util"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
@@ -444,5 +445,123 @@ func TestUpdateProfilePicture(t *testing.T) {
 				So(res.Code, ShouldEqual, 200)
 			})
 		})
+	})
+}
+
+func TestDestroyAccount(t *testing.T) {
+	conn := getConnection()
+
+	// Make sure there are no residual records
+	conn.C("tokens").RemoveAll(nil)
+	conn.C("users").RemoveAll(nil)
+	conn.C("posts").RemoveAll(nil)
+	conn.C("notifications").RemoveAll(nil)
+	conn.C("follows").RemoveAll(nil)
+	conn.C("blocks").RemoveAll(nil)
+	conn.C("likes").RemoveAll(nil)
+	conn.C("timelines").RemoveAll(nil)
+	conn.C("comments").RemoveAll(nil)
+
+	user, token := createRequestUser(conn)
+	defer func() {
+		conn.C("tokens").RemoveAll(nil)
+		conn.C("users").RemoveAll(nil)
+		conn.C("posts").RemoveAll(nil)
+		conn.C("notifications").RemoveAll(nil)
+		conn.C("follows").RemoveAll(nil)
+		conn.C("blocks").RemoveAll(nil)
+		conn.C("likes").RemoveAll(nil)
+		conn.C("timelines").RemoveAll(nil)
+		conn.C("comments").RemoveAll(nil)
+	}()
+
+	Convey("Destroying an user account", t, func() {
+		// Upload profile pictures
+		testUploadFileHandler("../test_assets/gopher_avatar.png", "account_picture", "/", UpdateProfilePicture, conn, func(r *http.Request) {
+			if r.PostForm == nil {
+				r.PostForm = make(url.Values)
+			}
+			r.Header.Add("X-User-Token", token.Hash)
+		}, func(res *httptest.ResponseRecorder) {
+			So(res.Code, ShouldEqual, 200)
+		})
+
+		// Uploading a post with a photo
+		testUploadFileHandler("../test_assets/gopher.jpg", "post_picture", "/", CreatePost, conn, func(r *http.Request) {
+			if r.PostForm == nil {
+				r.PostForm = make(url.Values)
+			}
+			r.PostForm.Add("post_type", "photo")
+			r.Header.Add("X-User-Token", token.Hash)
+			r.PostForm.Add("post_text", "Fancy pic")
+		}, func(res *httptest.ResponseRecorder) {
+			var errResp errorResponse
+			if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+				panic(err)
+			}
+			So(res.Code, ShouldEqual, 201)
+		})
+
+		FollowUser(user.ID, bson.NewObjectId(), conn)
+		FollowUser(bson.NewObjectId(), user.ID, conn)
+
+		BlockUser(user.ID, bson.NewObjectId(), conn)
+		BlockUser(bson.NewObjectId(), user.ID, conn)
+
+		cmt := NewComment(user.ID, bson.NewObjectId())
+		err := cmt.Save(conn)
+		So(err, ShouldEqual, nil)
+
+		post := NewPost(PostStatus, user)
+		post.Text = "A fancy post"
+		post.Privacy = PrivacySettings{Type: PrivacyPublic}
+
+		err = post.Save(conn)
+		So(err, ShouldEqual, nil)
+
+		testPostHandler(LikePost, func(r *http.Request) {
+			r.Header.Add("X-User-Token", token.Hash)
+		}, conn, "/:id", "/"+post.ID.Hex(), func(res *httptest.ResponseRecorder) {
+			var errResp errorResponse
+			if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+				panic(err)
+			}
+			So(res.Code, ShouldEqual, 200)
+			So(errResp.Message, ShouldEqual, "Post liked successfully")
+		})
+
+		err = SendNotification(NotificationPostCommented, user, bson.NewObjectId(), bson.NewObjectId(), conn)
+		So(err, ShouldEqual, nil)
+
+		testDeleteHandler(DestroyAccount, func(r *http.Request) {
+			r.Header.Add("X-User-Token", token.Hash)
+			if r.PostForm == nil {
+				r.PostForm = make(url.Values)
+			}
+			r.PostForm.Add("confirmed", "true")
+		}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
+			var errResp errorResponse
+			if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
+				panic(err)
+			}
+			So(res.Code, ShouldEqual, 200)
+			So(errResp.Message, ShouldEqual, "User account has been successfully destroyed")
+		})
+
+		files := 0
+		filepath.Walk("../test_assets/", func(path string, fi os.FileInfo, _ error) error {
+			if fi.Name() != ".DS_Store" && fi.Name() != "test_assets" {
+				files++
+			}
+			return nil
+		})
+
+		So(files, ShouldEqual, 3)
+
+		for _, col := range []string{"tokens", "users", "comments", "timelines", "posts", "follows", "blocks", "notifications", "likes"} {
+			count, err := conn.C(col).Count()
+			So(count, ShouldEqual, 0)
+			So(err, ShouldEqual, nil)
+		}
 	})
 }

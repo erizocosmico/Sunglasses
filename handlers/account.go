@@ -471,7 +471,7 @@ func UpdateProfilePicture(c middleware.Context) {
 
 // DestroyAccount destroys the user account and all its related content such as comments, posts, images, etc.
 func DestroyAccount(c middleware.Context) {
-	// TODO: Untested
+	// TODO: Log errors removing images and push image remove to tasks
 	confirmed := c.GetBoolean("confirmed")
 
 	if confirmed {
@@ -487,8 +487,8 @@ func DestroyAccount(c middleware.Context) {
 		iter := c.Find("posts", bson.M{"user_id": c.User.ID}).Iter()
 		for iter.Next(&p) {
 			if p.Type == models.PostPhoto {
-				go os.Remove(upload.ToLocalImagePath(p.PhotoURL, c.Config))
-				go os.Remove(upload.ToLocalThumbnailPath(p.Thumbnail, c.Config))
+				os.Remove(upload.ToLocalImagePath(p.PhotoURL, c.Config))
+				os.Remove(upload.ToLocalThumbnailPath(p.Thumbnail, c.Config))
 			}
 
 			go timeline.PropagatePostsOnDeletion(c, p.ID)
@@ -513,7 +513,6 @@ func DestroyAccount(c middleware.Context) {
 		go timeline.PropagatePostOnUserDeleted(c, c.User.ID)
 
 		// Logout user
-		c.RemoveAll("tokens", bson.M{"user_id": c.User.ID})
 		c.Session.Delete("user_token")
 		c.Session.Delete("csrf_key")
 

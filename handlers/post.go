@@ -237,6 +237,7 @@ func postPhoto(c middleware.Context) {
 
 	c.Success(201, map[string]interface{}{
 		"message": "Photo posted successfully",
+		"post":    *p,
 	})
 }
 
@@ -278,6 +279,7 @@ func postVideo(c middleware.Context) {
 
 	c.Success(201, map[string]interface{}{
 		"message": "Video posted successfully",
+		"post":    *post,
 	})
 }
 
@@ -318,6 +320,7 @@ func postLink(c middleware.Context) {
 
 	c.Success(201, map[string]interface{}{
 		"message": "Link posted successfully",
+		"post":    *post,
 	})
 }
 
@@ -347,6 +350,7 @@ func postStatus(c middleware.Context) {
 
 	c.Success(201, map[string]interface{}{
 		"message": "Status posted successfully",
+		"post":    *post,
 	})
 }
 
