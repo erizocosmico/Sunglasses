@@ -2,8 +2,10 @@ package app
 
 import (
 	"github.com/go-martini/martini"
+	"github.com/martini-contrib/cors"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/sessions"
+	"github.com/martini-contrib/strict"
 	"github.com/mvader/mask/handlers"
 	"github.com/mvader/mask/middleware"
 	"github.com/mvader/mask/models"
@@ -32,13 +34,32 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 		return nil, "", err
 	}
 
-	// Map services
+	// Map config as *Config
 	m.Map(config)
+
+	// Map conn as *Connection
 	m.Map(conn)
+
+	// Mask ts as *TaskService
 	m.Map(ts)
+
+	// Setup CORS
+	m.Use(cors.Allow(&cors.Options{
+		AllowOrigins:     []string{"https://*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "X-User-Token", "X-Access-Token"},
+		ExposeHeaders:    []string{"Content-Length", "Content-Encoding", "Content-Type"},
+		AllowCredentials: false,
+	}))
+
+	// Setup render middleware
 	m.Use(render.Renderer())
+
+	// Setup store paths
 	m.Use(martini.Static(config.StorePath))
 	m.Use(martini.Static(config.ThumbnailStorePath))
+
+	// Setup sessions
 	store := sessions.NewCookieStore([]byte(config.SecretKey), []byte(config.EncriptionKey))
 	store.Options(sessions.Options{
 		MaxAge:   models.UserTokenExpirationDays * 86400,
@@ -46,10 +67,14 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 		HttpOnly: true,
 	})
 	m.Use(sessions.Sessions(config.SessionName, store))
+
+	// Add context middleware
 	m.Use(middleware.CreateContext)
 
 	// Add routes
 	addRoutes(m)
+
+	m.Router.NotFound(strict.MethodNotAllowed, strict.NotFound)
 
 	return m, config.Port, nil
 }
@@ -127,8 +152,10 @@ func addRoutes(m *martini.ClassicMartini) {
 	m.Get("/", func(c middleware.Context) {
 		if c.User == nil {
 			// Render not logged in home
+			// TODO
 		} else {
 			// Render logged in home
+			// TODO
 		}
 	})
 }
