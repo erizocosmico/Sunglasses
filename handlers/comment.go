@@ -52,6 +52,7 @@ func CreateComment(c middleware.Context) {
 	c.Success(201, map[string]interface{}{
 		"created": true,
 		"message": "Comment posted successfully",
+		"comment": *comment,
 	})
 }
 

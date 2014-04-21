@@ -12,7 +12,7 @@ import (
 	"github.com/mvader/mask/services"
 )
 
-// NewApp instantiates the application
+// NewApp creates a new application
 func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 	// Create app
 	m := martini.Classic()
@@ -29,6 +29,7 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 		return nil, "", err
 	}
 
+	// Create task service
 	ts, err := services.NewTaskService(config)
 	if err != nil {
 		return nil, "", err

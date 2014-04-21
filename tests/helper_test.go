@@ -36,25 +36,25 @@ func testMartini() *martini.ClassicMartini {
 func testGetHandler(handler, middleware martini.Handler, conn *Connection, handlerUrl, reqUrl string, testFunc func(*httptest.ResponseRecorder)) {
 	testHandler(func(m *martini.ClassicMartini) {
 		m.Get(handlerUrl, handler)
-	}, middleware, conn, reqUrl, "GET", testFunc)
+	}, middleware, conn, reqUrl, "GET", testFunc, false)
 }
 
 func testPostHandler(handler, middleware martini.Handler, conn *Connection, handlerUrl, reqUrl string, testFunc func(*httptest.ResponseRecorder)) {
 	testHandler(func(m *martini.ClassicMartini) {
 		m.Post(handlerUrl, handler)
-	}, middleware, conn, reqUrl, "POST", testFunc)
+	}, middleware, conn, reqUrl, "POST", testFunc, false)
 }
 
 func testPutHandler(handler, middleware martini.Handler, conn *Connection, handlerUrl, reqUrl string, testFunc func(*httptest.ResponseRecorder)) {
 	testHandler(func(m *martini.ClassicMartini) {
 		m.Put(handlerUrl, handler)
-	}, middleware, conn, reqUrl, "PUT", testFunc)
+	}, middleware, conn, reqUrl, "PUT", testFunc, false)
 }
 
 func testDeleteHandler(handler, middleware martini.Handler, conn *Connection, handlerUrl, reqUrl string, testFunc func(*httptest.ResponseRecorder)) {
 	testHandler(func(m *martini.ClassicMartini) {
 		m.Delete(handlerUrl, handler)
-	}, middleware, conn, reqUrl, "DELETE", testFunc)
+	}, middleware, conn, reqUrl, "DELETE", testFunc, false)
 }
 
 func uploadFile(file, key, url string) (*http.Request, error) {
@@ -142,7 +142,7 @@ func testUploadFileHandler(file, key, url string, handler martini.Handler, conn 
 
 }
 
-func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.Handler, conn *Connection, reqUrl, method string, testFunc func(*httptest.ResponseRecorder)) {
+func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.Handler, conn *Connection, reqUrl, method string, testFunc func(*httptest.ResponseRecorder), overrideDebug bool) {
 	config, err := NewConfig("../config.sample.json")
 	if err != nil {
 		panic(err)
@@ -155,6 +155,10 @@ func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.H
 
 	config.StorePath = "../test_assets/"
 	config.ThumbnailStorePath = "../test_assets/"
+
+	if overrideDebug {
+		config.Debug = false
+	}
 
 	req, _ := http.NewRequest(method, "http://localhost:3000"+reqUrl, nil)
 	m := testMartini()

@@ -7,8 +7,6 @@ import (
 	"labix.org/v2/mgo/bson"
 )
 
-// TODO untested
-
 // PropagatePostOnCreation propagates the post to all timelines when a new post is created.
 func PropagatePostOnCreation(c middleware.Context, post *models.Post) {
 	if !c.Config.Debug {
@@ -194,7 +192,6 @@ func PropagatePostsOnDeletion(c middleware.Context, postID bson.ObjectId) {
 // PropagatePostOnLike sets the new like value for the user's timeline
 func PropagatePostOnLike(c middleware.Context, postID bson.ObjectId, liked bool) {
 	if !c.Config.Debug {
-
 		ID := c.Tasks.PushTask("post_like", c.User.ID.Hex(), postID.Hex(), liked)
 		c.AsyncQuery(func(conn *services.Connection) {
 			var t models.TimelineEntry
