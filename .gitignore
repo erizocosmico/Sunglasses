@@ -27,3 +27,12 @@ config.json
 
 *.txt
 *.rdb
+
+client/node_modules/*
+client/vendor/*
+public/node_modules/*
+public/vendor/*
+
+public/js/app.min.js
+
+*.css

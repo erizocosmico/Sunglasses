@@ -1,0 +1,35 @@
+{
+  "name": "Mask",
+  "version": "0.0.0",
+  "homepage": "https://github.com/mvader/Mask",
+  "authors": [
+    "José Miguel Molina <hi@mvader.me>"
+  ],
+  "description": "Mask is a completely anonymous social platform with a great focus on privacy where you can get in touch with the people you want without having to worry about your data.",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "social",
+    "network",
+    "privacy",
+    "sharing",
+    "posts"
+  ],
+  "license": "GNU GPL v3",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "latest",
+    "angular-route": "latest",
+    "ionicons": "latest",
+    "jquery": "latest"
+  }
+}

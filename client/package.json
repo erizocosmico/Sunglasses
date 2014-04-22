@@ -1,0 +1,38 @@
+{
+  "name": "Mask",
+  "version": "0.0.0",
+  "description": "Mask is a completely anonymous social platform with a great focus on privacy where you can get in touch with the people you want without having to worry about your data.",
+  "main": "Gulpfile.js",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "gulp": "latest",
+    "gulp-react": "latest",
+    "gulp-coffee": "latest",
+    "gulp-concat": "latest",
+    "gulp-imagemin": "latest",
+    "gulp-sass": "latest",
+    "gulp-ngmin": "latest",
+    "gulp-shell": "latest",
+    "bower": "latest"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mvader/Mask"
+  },
+  "keywords": [
+    "social",
+    "network",
+    "privacy",
+    "sharing",
+    "posts"
+  ],
+  "author": "José Miguel Molina <hi@mvader.me>",
+  "license": "GPL v3",
+  "bugs": {
+    "url": "https://github.com/mvader/Mask/issues"
+  }
+}
