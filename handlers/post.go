@@ -375,7 +375,7 @@ func getPostPrivacy(postType models.ObjectType, c middleware.Context) (models.Pr
 		}
 	}
 
-	if p.Type == models.PrivacyAllBut || p.Type == models.PrivacyNoneBut {
+	if p.Type > 4 {
 		if privacyType == 0 {
 			p.Users = defaultSettings.Users
 		} else {
