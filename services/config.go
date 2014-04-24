@@ -23,6 +23,8 @@ type Config struct {
 	ThumbnailStorePath    string `json:"thumbnail_store_path"`
 	WebStorePath          string `json:"web_store_path"`
 	WebThumbnailStorePath string `json:"web_thumbnail_store_path"`
+	LogsPath              string `json:"logs_path"`
+	UseHTTPS              bool   `json:"use_https"`
 }
 
 // NewConfig creates a new config struct

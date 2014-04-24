@@ -85,12 +85,12 @@ func (p *Post) CanBeAccessedBy(u *User, conn interfaces.Conn) bool {
 	}
 
 	inUsersArray := false
-		for _, i := range p.Privacy.Users {
-			if i.Hex() == u.ID.Hex() {
-				inUsersArray = true
-				break
-			}
+	for _, i := range p.Privacy.Users {
+		if i.Hex() == u.ID.Hex() {
+			inUsersArray = true
+			break
 		}
+	}
 
 	switch int(p.Privacy.Type) {
 	case PrivacyPublic:

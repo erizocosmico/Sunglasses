@@ -36,3 +36,5 @@ public/vendor/*
 public/js/app.min.js
 
 *.css
+
+*.log

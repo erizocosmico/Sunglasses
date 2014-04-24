@@ -13,5 +13,7 @@
     "store_path": "/path/to/store/dir/",
     "thumbnail_store_path": "/path/to/thumbnail/store/dir/",
     "web_store_path": "/path/to/store/dir/",
-    "web_thumbnail_store_path": "/path/to/thumbnail/store/dir/"
+    "web_thumbnail_store_path": "/path/to/thumbnail/store/dir/",
+    "logs_path": "../logs/",
+    "use_https": true
 }

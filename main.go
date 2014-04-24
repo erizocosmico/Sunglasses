@@ -12,10 +12,19 @@ func main() {
 	configPath := fs.String("config", "config.json", "Path to config.json")
 	fs.Parse(os.Args[1:])
 
-	app, port, err := app.NewApp(*configPath)
+	a, err := app.NewApp(*configPath)
 	if err != nil {
 		panic(err)
 	}
 
-	http.ListenAndServe(port, app)
+	defer func() {
+		a.Connection.Session.Close()
+		a.LogFile.Close()
+	}()
+
+	if a.Config.UseHTTPS {
+		// TODO
+	} else {
+		http.ListenAndServe(a.Config.Port, a.Martini)
+	}
 }

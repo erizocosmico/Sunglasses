@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/cors"
 	"github.com/martini-contrib/render"
@@ -10,30 +11,57 @@ import (
 	"github.com/mvader/mask/middleware"
 	"github.com/mvader/mask/models"
 	"github.com/mvader/mask/services"
+	"log"
+	"os"
+	"strings"
 )
 
+type App struct {
+	Martini    *martini.ClassicMartini
+	Config     *services.Config
+	Connection *services.Connection
+	LogFile    *os.File
+}
+
 // NewApp creates a new application
-func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
+func NewApp(configPath string) (*App, error) {
+	var err error
+
 	// Create app
 	m := martini.Classic()
 
 	// Create config service
 	config, err := services.NewConfig(configPath)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
 	// Create database service
 	conn, err := services.NewDatabaseConn(config)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
 	// Create task service
 	ts, err := services.NewTaskService(config)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
+
+	// Create and setup logger
+	var logFile string
+	if strings.HasSuffix(config.LogsPath, "/") {
+		logFile = config.LogsPath + "mask.log"
+	} else {
+		logFile = config.LogsPath + "/mask.log"
+	}
+
+	var file *os.File
+	if file, err = os.OpenFile(logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666); err != nil {
+		return nil, errors.New("unable to open or create log file: " + logFile)
+	}
+
+	logger := log.New(file, "[mask] ", 0)
 
 	// Map config as *Config
 	m.Map(config)
@@ -43,6 +71,9 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 
 	// Mask ts as *TaskService
 	m.Map(ts)
+
+	// Map logger as *log.Logger
+	m.Map(logger)
 
 	// Setup CORS
 	m.Use(cors.Allow(&cors.Options{
@@ -59,6 +90,7 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 	// Setup store paths
 	m.Use(martini.Static(config.StorePath))
 	m.Use(martini.Static(config.ThumbnailStorePath))
+	m.Use(martini.Static(config.StaticContentPath))
 
 	// Setup sessions
 	store := sessions.NewCookieStore([]byte(config.SecretKey), []byte(config.EncriptionKey))
@@ -75,79 +107,82 @@ func NewApp(configPath string) (*martini.ClassicMartini, string, error) {
 	// Add routes
 	addRoutes(m)
 
+	// Add NotFound handler
 	m.Router.NotFound(strict.MethodNotAllowed, strict.NotFound)
 
-	return m, config.Port, nil
+	return &App{m, config, conn, file}, nil
 }
 
 // addRoutes adds all necessary routes to a martini instance
 func addRoutes(m *martini.ClassicMartini) {
-	// Post routes
-	m.Group("/posts", func(r martini.Router) {
-		r.Get("/show/:id", handlers.ShowPost)
-		r.Post("/create", handlers.CreatePost)
-		r.Delete("/destroy/:id", handlers.DeletePost)
-		r.Put("/like/:id", handlers.LikePost)
-		r.Put("/change_privacy/:id", handlers.ChangePostPrivacy)
-	}, middleware.LoginRequired)
+	m.Group("/api", func(r martini.Router) {
+		// Post routes
+		r.Group("/posts", func(r martini.Router) {
+			r.Get("/show/:id", handlers.ShowPost)
+			r.Post("/create", handlers.CreatePost)
+			r.Delete("/destroy/:id", handlers.DeletePost)
+			r.Put("/like/:id", handlers.LikePost)
+			r.Put("/change_privacy/:id", handlers.ChangePostPrivacy)
+		}, middleware.LoginRequired)
 
-	m.Group("/auth", func(r martini.Router) {
-		r.Get("/access_token", handlers.GetAccessToken)
-		r.Post("/user_token", handlers.GetUserToken)
-		r.Post("/login", handlers.Login)
-	}, middleware.LoginForbidden)
+		r.Group("/auth", func(r martini.Router) {
+			r.Get("/access_token", handlers.GetAccessToken)
+			r.Post("/user_token", handlers.GetUserToken)
+			r.Post("/login", handlers.Login)
+		}, middleware.LoginForbidden)
 
-	// Comment routes
-	m.Group("/comments", func(r martini.Router) {
-		r.Post("/create", handlers.CreateComment)
-		r.Get("/for_post/:post_id", handlers.CommentsForPost)
-		r.Delete("/destroy/:comment_id", handlers.RemoveComment)
-	}, middleware.LoginRequired)
+		// Comment routes
+		r.Group("/comments", func(r martini.Router) {
+			r.Post("/create", handlers.CreateComment)
+			r.Get("/for_post/:post_id", handlers.CommentsForPost)
+			r.Delete("/destroy/:comment_id", handlers.RemoveComment)
+		}, middleware.LoginRequired)
 
-	// Account routes
-	m.Group("/account", func(r martini.Router) {
-		r.Post("/signup", handlers.CreateAccount)
-		r.Get("/info", handlers.GetAccountInfo)
-		r.Put("/info", handlers.UpdateAccountInfo)
-		r.Get("/settings", handlers.GetAccountSettings)
-		r.Put("/settings", handlers.UpdateAccountSettings)
-	}, middleware.WebOnly, middleware.LoginRequired)
+		// Account routes
+		r.Group("/account", func(r martini.Router) {
+			r.Post("/signup", handlers.CreateAccount)
+			r.Get("/info", handlers.GetAccountInfo)
+			r.Put("/info", handlers.UpdateAccountInfo)
+			r.Get("/settings", handlers.GetAccountSettings)
+			r.Put("/settings", handlers.UpdateAccountSettings)
+		}, middleware.WebOnly, middleware.LoginRequired)
 
-	// Logout
-	m.Get("/account/logout", handlers.DestroyUserToken)
+		// Logout
+		r.Get("/account/logout", handlers.DestroyUserToken)
 
-	// Block routes
-	m.Group("/blocks", func(r martini.Router) {
-		r.Post("/create", handlers.BlockHandler)
-		r.Delete("/destroy", handlers.Unblock)
-		r.Get("/show", handlers.ListBlocks)
-	}, middleware.LoginRequired)
+		// Block routes
+		r.Group("/blocks", func(r martini.Router) {
+			r.Post("/create", handlers.BlockHandler)
+			r.Delete("/destroy", handlers.Unblock)
+			r.Get("/show", handlers.ListBlocks)
+		}, middleware.LoginRequired)
 
-	// User routes
-	m.Group("/users", func(r martini.Router) {
-		r.Post("/follow", handlers.SendFollowRequest)
-		r.Delete("/unfollow", handlers.Unfollow)
-		r.Get("/follow_requests", handlers.ListFollowRequests)
-		r.Post("/reply_follow_request", handlers.ReplyFollowRequest)
+		// User routes
+		r.Group("/users", func(r martini.Router) {
+			r.Post("/follow", handlers.SendFollowRequest)
+			r.Delete("/unfollow", handlers.Unfollow)
+			r.Get("/follow_requests", handlers.ListFollowRequests)
+			r.Post("/reply_follow_request", handlers.ReplyFollowRequest)
 
-		r.Get("/followers", handlers.ListFollowers)
-		r.Get("/following", handlers.ListFollowing)
-	}, middleware.LoginRequired)
+			r.Get("/followers", handlers.ListFollowers)
+			r.Get("/following", handlers.ListFollowing)
+		}, middleware.LoginRequired)
 
-	// Notification routes
-	m.Group("/notifications", func(r martini.Router) {
-		r.Get("/list", handlers.ListNotifications)
-		r.Put("/seen/:id", handlers.MarkNotificationRead)
-	}, middleware.LoginRequired)
+		// Notification routes
+		r.Group("/notifications", func(r martini.Router) {
+			r.Get("/list", handlers.ListNotifications)
+			r.Put("/seen/:id", handlers.MarkNotificationRead)
+		}, middleware.LoginRequired)
 
-	// Show user profile
-	m.Get("/u/:username", middleware.LoginRequired, handlers.ShowUserProfile)
+		// Show user profile
+		r.Get("/u/:username", middleware.LoginRequired, handlers.ShowUserProfile)
 
-	// Search for users
-	m.Get("/search", middleware.LoginRequired, handlers.Search)
+		// Search for users
+		r.Get("/search", middleware.LoginRequired, handlers.Search)
 
-	// Get user timeline
-	m.Get("/timeline", middleware.LoginRequired, handlers.GetUserTimeline)
+		// Get user timeline
+		r.Get("/timeline", middleware.LoginRequired, handlers.GetUserTimeline)
+	})
 
 	// Render the layout
 	m.Get("/", func(c middleware.Context) {
