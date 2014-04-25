@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/cors"
@@ -11,6 +12,8 @@ import (
 	"github.com/mvader/mask/middleware"
 	"github.com/mvader/mask/models"
 	"github.com/mvader/mask/services"
+	"github.com/mvader/mask/util"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -185,13 +188,33 @@ func addRoutes(m *martini.ClassicMartini) {
 	})
 
 	// Render the layout
-	m.Get("/", func(c middleware.Context) {
-		if c.User == nil {
-			// Render not logged in home
-			// TODO
-		} else {
-			// Render logged in home
-			// TODO
+	m.Get("/", func(c middleware.Context) string {
+		var (
+			content    []byte
+			strContent string
+			err        error
+		)
+
+		if content, err = ioutil.ReadFile(c.Config.StaticContentPath + "app.html"); err != nil {
+			panic(err)
 		}
+
+		strContent = string(content)
+
+		if c.User != nil {
+			b, err := json.Marshal(*c.User)
+			if err != nil {
+				panic(err)
+			}
+
+			strContent = strings.Replace(strContent, "userData = undefined;", "userData = "+string(b)+";", 1)
+		}
+
+		token := util.NewRandomHash()
+
+		c.Session.Set("csrf_token", token)
+		strContent = strings.Replace(strContent, "csrfToken = undefined;", "csrfToken = '"+token+"';", 1)
+
+		return strContent
 	})
 }
