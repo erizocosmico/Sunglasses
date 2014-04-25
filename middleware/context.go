@@ -36,6 +36,10 @@ func CreateContext(ctx martini.Context, config *services.Config, conn *services.
 		c.User, c.IsWebToken = auth.GetRequestUser(r, conn, s)
 	}
 
+	if !c.IsWebToken && r.Header.Get("X-Access-Token") == "" && r.Header.Get("X-User-Token") == "" {
+		c.IsWebToken = true
+	}
+
 	ctx.Map(c)
 }
 

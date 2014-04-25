@@ -22,3 +22,10 @@ func WebOnly(c Context) {
 		c.Error(403, CodeUnauthorized, MsgUnauthorized)
 	}
 }
+
+// RequiresValidSignature returns an error if the request signature is not valid
+func RequiresValidSignature(c Context) {
+	if !c.RequestIsValid(c.Request.Header.Get("X-Access-Token") != "") {
+		c.Error(400, CodeInvalidSignature, MsgInvalidSignature)
+	}
+}

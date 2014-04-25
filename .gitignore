@@ -35,3 +35,7 @@ public/*
 *.css
 
 *.log
+
+launch.sh
+
+gin-bin

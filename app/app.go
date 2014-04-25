@@ -143,12 +143,12 @@ func addRoutes(m *martini.ClassicMartini) {
 
 		// Account routes
 		r.Group("/account", func(r martini.Router) {
-			r.Post("/signup", handlers.CreateAccount)
 			r.Get("/info", handlers.GetAccountInfo)
 			r.Put("/info", handlers.UpdateAccountInfo)
 			r.Get("/settings", handlers.GetAccountSettings)
 			r.Put("/settings", handlers.UpdateAccountSettings)
 		}, middleware.WebOnly, middleware.LoginRequired)
+		r.Post("/account/signup", middleware.WebOnly, middleware.LoginForbidden, handlers.CreateAccount)
 
 		// Logout
 		r.Get("/account/logout", handlers.DestroyUserToken)
@@ -185,7 +185,7 @@ func addRoutes(m *martini.ClassicMartini) {
 
 		// Get user timeline
 		r.Get("/timeline", middleware.LoginRequired, handlers.GetUserTimeline)
-	})
+	}, middleware.RequiresValidSignature)
 
 	// Render the layout
 	m.Get("/", func(c middleware.Context) string {

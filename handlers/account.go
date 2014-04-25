@@ -19,6 +19,7 @@ import (
 
 // CreateAccount creates a new user account
 func CreateAccount(c middleware.Context) {
+    // TODO: Max retries
 	var (
 		username                = c.Form("username")
 		password                = c.Form("password")

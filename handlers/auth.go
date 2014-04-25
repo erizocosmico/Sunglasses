@@ -30,12 +30,14 @@ func GetAccessToken(c middleware.Context) {
 
 // Login is a handler to log the user in
 func Login(c middleware.Context) {
-	c.Request.PostForm.Add("token_type", "session")
+	c.Request.ParseForm()
+	c.Request.Form.Add("token_type", "session")
 	GetUserToken(c)
 }
 
 // GetUserToken is a handler to retrieve an user token
 func GetUserToken(c middleware.Context) {
+    // TODO: Max retries
 	username := strings.ToLower(c.Form("username"))
 	password := c.Form("password")
 
