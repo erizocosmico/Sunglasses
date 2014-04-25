@@ -1,6 +1,6 @@
 'use strict'
 
-angular.module('mask')
+angular.module('mask.controllers')
 .controller('HomeController', ['$scope', '$rootScope', '$http', ($scope, $rootScope, $http) ->
    $scope.posts = []
    $scope.numPosts = 0

@@ -1,20 +1,12 @@
 'use strict'
 
-mask = angular.module('mask', [
-    'ngRoute'
-])
-
-mask.config(['$routeProvider', '$rootScope'], ($routeProvider, $rootScope) ->
+angular.module('mask.controllers', [])
+angular.module('mask.services', ['ngRoute'])
+angular.module('mask', ['ngRoute', 'mask.controllers', 'mask.services'])
+.config(['$routeProvider', '$locationProvider', ($routeProvider, $locationProvider) ->
     $locationProvider.html5Mode(false)
 
-    #userData is rendered server-side when accessing /
-    $rootScope.loggedIn = userData?
-    $rootScope.refresh = () ->
-        window.location.href = window.location.href
-
-    if $rootScope.loggedIn
-        $rootScope.user = userData
-
+    if userData?
         $routeProvider
         .when('/profile',
             templateUrl: 'templates/profile.html'
@@ -49,4 +41,4 @@ mask.config(['$routeProvider', '$rootScope'], ($routeProvider, $rootScope) ->
     $routeProvider.otherwise(
         redirectTo: '/'
     )
-)
+])
