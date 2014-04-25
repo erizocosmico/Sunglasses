@@ -14,7 +14,8 @@
     "gulp-sass": "latest",
     "gulp-ngmin": "latest",
     "gulp-shell": "latest",
-    "bower": "latest"
+    "bower": "latest",
+    "gulp-jsonminify": "latest"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

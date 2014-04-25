@@ -7,6 +7,7 @@ var sass = require('gulp-sass');
 var react = require('gulp-react');
 var ngmin = require('gulp-ngmin');
 var shell = require('gulp-shell');
+var jsonminify = require('gulp-jsonminify');
 
 var paths = {
     scripts: ['js/**/*.coffee', '!vendor/**/*.coffee'],
@@ -75,6 +76,13 @@ gulp.task('vendor', function() {
         .pipe(gulp.dest('../public/vendor'));
 });
 
+// Move language files
+gulp.task('lang', function() {
+    return gulp.src('lang/*.json')
+        .pipe(jsonminify())
+        .pipe(gulp.dest('../public/lang'));
+});
+
 // Rerun the task when a file changes
 gulp.task('watch', function() {
     gulp.watch(paths.scripts, ['scripts']);
@@ -82,10 +90,10 @@ gulp.task('watch', function() {
     gulp.watch(paths.templates, ['react']);
     // TODO uncomment this as soon as https://github.com/hcatlin/libsass/issues/331 is solved
     //gulp.watch(paths.sass, ['sass']);
-    gulp.watch('vendor/**/*', ['vendor']);
     gulp.watch('app.html', ['index']);
+    gulp.watch('lang/*.json', ['lang']);
     gulp.watch('templates/**/*.html', ['tpls']);
 });
 
 // The default task (called when you run `gulp` from cli)
-gulp.task('default', ['setup', 'index', 'scripts', 'images', 'tpls', 'react', 'vendor', 'watch']);
+gulp.task('default', ['setup', 'index', 'scripts', 'lang', 'images', 'tpls', 'react', 'vendor', 'watch']);

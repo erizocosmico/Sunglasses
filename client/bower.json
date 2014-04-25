@@ -31,6 +31,15 @@
     "angular-route": "latest",
     "ionicons": "latest",
     "jquery": "latest",
-    "js-md5": "latest"
+    "js-md5": "latest",
+    "semantic-ui": "latest",
+    "normalize.css": "latest",
+    "angular-translate": "latest",
+    "angular-translate-loader-static-files": "latest",
+    "angular-translate-storage-local": "latest",
+    "angular-cookies": "latest"
+  },
+  "resolutions": {
+    "angular-translate": "2.1.0"
   }
 }
