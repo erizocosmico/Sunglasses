@@ -153,10 +153,10 @@ func (c Context) RequestIsValid(isAccessKey bool) bool {
 			return validateAPISignature(c.Conn, signature, timestamp, key, URL)
 		} else {
 			var csrfKey string
-			if c.Session.Get("csrf_key") == nil {
+			if c.Session.Get("csrf_token") == nil {
 				csrfKey = ""
 			} else {
-				csrfKey = c.Session.Get("csrf_key").(string)
+				csrfKey = c.Session.Get("csrf_token").(string)
 			}
 
 			if csrfKey == "" {
@@ -178,9 +178,9 @@ func validateAPISignature(conn *services.Connection, signature string, timestamp
 	}
 	privateKey := app.PrivateKey*/
 	privateKey := ""
-	return signature == Hash(URL.Path+privateKey+fmt.Sprint(timestamp))
+	return signature == HashMD5(URL.Path+privateKey+fmt.Sprint(timestamp))
 }
 
 func validateWebSignature(signature string, timestamp int64, csrfKey string, URL *url.URL) bool {
-	return signature == Hash(URL.Path+csrfKey+fmt.Sprint(timestamp))
+	return signature == HashMD5(URL.Path+csrfKey+fmt.Sprint(timestamp))
 }

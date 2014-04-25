@@ -2,10 +2,12 @@ package util
 
 import (
 	"code.google.com/p/go.crypto/bcrypt"
+	"crypto/md5"
 	"crypto/rand"
 	"crypto/sha512"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -22,8 +24,9 @@ func Crypt(str string) (string, error) {
 	return string(bytes[:]), nil
 }
 
+// RandomString returns a new random string
 func RandomString(n int) string {
-	const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#$%&/()=?*+-_"
 	var bytes = make([]byte, n)
 
 	rand.Read(bytes)
@@ -53,6 +56,13 @@ func Hash(h string) string {
 	hasher := sha512.New()
 	hasher.Write([]byte(h))
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+}
+
+// HashMD5 returns the md5 hash of a string
+func HashMD5(s string) string {
+	h := md5.New()
+	io.WriteString(h, s)
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 func Strlen(s string) int {
