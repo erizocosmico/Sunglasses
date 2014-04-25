@@ -15,7 +15,7 @@ var paths = {
     templates: 'templates/**/*.jsx'
 };
 
-gulp.task('setup', function () {
+gulp.task('setup', function() {
     return gulp.src('./')
         .pipe(shell([
             'npm install',
@@ -41,7 +41,7 @@ gulp.task('images', function() {
 
 // Compile scss files
 // TODO reactivate sass
-gulp.task('sass', function () {
+gulp.task('sass', function() {
     gulp.src(paths.sass)
         .pipe(sass({
             outputStyle: 'compressed',
@@ -51,14 +51,26 @@ gulp.task('sass', function () {
 });
 
 // Compile react templates
-gulp.task('react', function () {
+gulp.task('react', function() {
     return gulp.src(paths.templates)
         .pipe(react())
         .pipe(gulp.dest('../public/templates'));
 });
 
+// HTML templates
+gulp.task('tpls', function() {
+    return gulp.src('templates/**/*.html')
+        .pipe(gulp.dest('../public/templates'));
+});
+
+// Copy index file
+gulp.task('index', function() {
+    return gulp.src('app.html')
+        .pipe(gulp.dest('../public'))
+})
+
 // Move dependencies
-gulp.task('vendor', function () {
+gulp.task('vendor', function() {
     return gulp.src('vendor/**/*')
         .pipe(gulp.dest('../public/vendor'));
 });
@@ -71,7 +83,9 @@ gulp.task('watch', function() {
     // TODO uncomment this as soon as https://github.com/hcatlin/libsass/issues/331 is solved
     //gulp.watch(paths.sass, ['sass']);
     gulp.watch('vendor/**/*', ['vendor']);
+    gulp.watch('app.html', ['index']);
+    gulp.watch('templates/**/*.html', ['tpls']);
 });
 
 // The default task (called when you run `gulp` from cli)
-gulp.task('default', ['setup', 'scripts', 'images', 'react', 'vendor', 'watch']);
+gulp.task('default', ['setup', 'index', 'scripts', 'images', 'tpls', 'react', 'vendor', 'watch']);
