@@ -3,8 +3,15 @@
 <head>
     <title data-ng-bind="title">Mask</title>
     <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="vendor/normalize.css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="vendor/semantic-ui/build/packaged/css/semantic.min.css">
     <script type="text/javascript" src="vendor/angular/angular.min.js"></script>
     <script type="text/javascript" src="vendor/angular-route/angular-route.min.js"></script>
+    <script type="text/javascript" src="vendor/angular-cookies/angular-cookies.min.js"></script>
+    <script type="text/javascript" src="vendor/angular-translate/angular-translate.min.js"></script>
+    <script type="text/javascript" src="vendor/angular-translate-storage-cookie/angular-translate-storage-cookie.min.js"></script>
+    <script type="text/javascript" src="vendor/angular-translate-storage-local/angular-translate-storage-local.min.js"></script>
+    <script type="text/javascript" src="vendor/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
     <script type="text/javascript" src="vendor/js-md5/js/md5.min.js"></script>
     <script type="text/javascript">
         userData = undefined;
@@ -14,5 +21,8 @@
 </head>
 <body ng-app="mask">
     <ng-view></ng-view>
+    
+    <script type="text/javascript" src="vendor/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="vendor/semantic-ui/build/packaged/javascript/semantic.min.js"></script>
 </body>
 </html>
