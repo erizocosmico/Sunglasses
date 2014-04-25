@@ -30,6 +30,7 @@
     "angular": "latest",
     "angular-route": "latest",
     "ionicons": "latest",
-    "jquery": "latest"
+    "jquery": "latest",
+    "js-md5": "latest"
   }
 }
