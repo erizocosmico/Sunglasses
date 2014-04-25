@@ -30,10 +30,7 @@ config.json
 
 client/node_modules/*
 client/vendor/*
-public/node_modules/*
-public/vendor/*
-
-public/js/app.min.js
+public/*
 
 *.css
 
