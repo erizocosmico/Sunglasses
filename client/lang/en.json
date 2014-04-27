@@ -1,0 +1,35 @@
+{
+    "signup": "Sign up",
+    
+    "signup_section_username": "Choose an username. Mask does not require an email, a real name or a profile picture to get you started, you just have to choose an username.",
+    "signup_section_password": "Choose a password to access Mask.",
+    "signup_section_recovery": "Choose a recovery method. This will be the method used to recover your password in case you forget it.",
+    "signup_section_privacy": "You have been successfully signed up. Now it is time to setup your privacy. Mask cares a lot about your privacy, because of that by default you are completely private. You can choose between some predefined privacy settings now or setup your privacy settings yourself later.",
+    "signup_section_done": "You have been successfully signed up at Mask!",
+
+    "signup_step_username": "Username",
+    "signup_step_password": "Password",
+    "signup_step_recovery": "Recovery method",
+    "signup_step_privacy": "Privacy settings",
+    "signup_step_done": "Done!",
+    
+    "signup_username_error": "Invalid username or taken. Usernames can only contain letters, numbers or underscores and must be between 2 and 30 characters long.",
+    "signup_password_error": "Invalid password. Passwords must be at least 6 characters long.",
+    "signup_password_repeat_error": "Passwords do not match.",
+    "signup_recovery_question_error": "The recovery question can not be blank.",
+    "signup_recovery_answer_error": "The recovery answer can not be blank.",
+    "signup_recovery_email_error": "Invalid recovery email.",
+    "signup_recovery_email_info": "We will not store your email as plain text, we will store a hash.",
+    
+    "continue": "Continue",
+    "password": "Enter a password",
+    "password_repeat": "Enter your password again",
+    "select_recovery_method": "Select a recovery method",
+    "recovery_question": "Recovery question",
+    "recovery_answer": "Recovery answer",
+    "recovery_email": "Recovery email",
+    "recovery_method_none": "None",
+    "recovery_method_email": "Email",
+    "recovery_method_question": "Secret question",
+    "start_using_mask": "Start using Mask!"
+}

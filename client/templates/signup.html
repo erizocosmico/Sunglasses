@@ -1,0 +1,95 @@
+<div id="login-signup">
+    <section id="signup">
+        <div class="logo" ng-click="goHome()"></div>
+        <h1 class="ui center aligned header">{{ 'signup' | translate }}</h1>
+        
+        <ul class="step clear">
+            <div class="step-line"></div>
+            <li class="active">
+                <div class="circle"></div>
+                <p class="step-title">{{ 'signup_step_username' | translate }}</p>
+            </li>
+            <li>
+                <div class="circle"></div>
+                <p class="step-title">{{ 'signup_step_password' | translate }}</p>
+            </li>
+            <li>
+                <div class="circle"></div>
+                <p class="step-title">{{ 'signup_step_recovery' | translate }}</p>
+            </li>
+            <li>
+                <div class="circle"></div>
+                <p class="step-title">{{ 'signup_step_done' | translate }}</p>
+            </li>
+            <div class="clear"></div>
+        </ul>
+        
+        <div class="description">
+            <p>{{ 'signup_section_username' | translate }}</p>
+            <p class="hidden">{{ 'signup_section_password' | translate }}</p>
+            <p class="hidden">{{ 'signup_section_recovery' | translate }}</p>
+            <p class="hidden">{{ 'signup_section_done' | translate }}</p>
+        </div>
+
+        <div class="sections">
+            <article id="username">
+                <input type="text" class="inputbox" ng-model="user.username">
+                <div id="username-error" class="hidden">
+                    <div class="popup">{{ 'signup_username_error' | translate }}</div>
+                </div>
+                
+                <button ng-click="nextSection()" class="btn">{{ 'continue' | translate }} <span class="ion ion-chevron-right"></span></button>
+            </article>
+            
+            <article id="password" class="hidden">
+                <input type="password" class="inputbox" ng-model="user.password" placeholder="{{ 'password' | translate }}">
+                <div id="password-error" class="hidden">
+                    <div class="popup">{{ 'signup_password_error' | translate }}</div>
+                </div>
+                <input type="password" class="inputbox" ng-model="user.password_repeat" placeholder="{{ 'password_repeat' | translate }}">
+                <div id="password-repeat-error" class="hidden">
+                    <div class="popup">{{ 'signup_password_repeat_error' | translate }}</div>
+                </div>
+                
+                <button ng-click="nextSection()" class="btn">{{ 'continue' | translate }} <span class="ion ion-chevron-right"></span></button>
+            </article>
+            
+            <article id="recovery" class="hidden">
+                <div class="full-width-control">
+                    <div class="ui dropdown selection full-width-control">
+                        <input type="hidden">
+                        <div class="default text">{{ 'recovery_method_none' | translate }}</div>
+                        <i class="dropdown icon"></i>
+                        <div class="menu">
+                            <div class="item" data-value="0">{{ 'recovery_method_none' | translate }}</div>
+                            <div class="item" data-value="1">{{ 'recovery_method_email' | translate }}</div>
+                            <div class="item" data-value="2">{{ 'recovery_method_question' | translate }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="text" class="inputbox hidden" ng-model="user.recovery_question" placeholder="{{ 'recovery_question' | translate }}" id="recovery-question">
+                <div id="recovery-question-error" class="error hidden">
+                    <div class="popup">{{ 'signup_recovery_question_error' | translate }}</div>
+                </div>
+                
+                <input type="text" class="inputbox hidden" ng-model="user.recovery_answer" placeholder="{{ 'recovery_answer' | translate }}" id="recovery-answer">
+                <div id="recovery-answer-error" class="error hidden">
+                    <div class="popup">{{ 'signup_recovery_answer_error' | translate }}</div>
+                </div>
+                
+                <p class="hidden" id="recovery-email-info">{{ 'signup_recovery_email_info' | translate }}</p>
+                <input type="email" class="inputbox hidden" ng-model="user.recovery_email" placeholder="{{ 'recovery_email' | translate }}" id="recovery-email">
+                <div id="recovery-email-error" class="error hidden">
+                    <div class="popup">{{ 'signup_recovery_email_error' | translate }}</div>
+                </div>
+                
+                <button ng-click="nextSection()" class="btn">{{ 'continue' | translate }} <span class="ion ion-chevron-right"></span></button>
+            </article>
+            
+            <article id="done" class="hidden">
+                <button ng-click="nextSection()" class="btn">{{ 'start_using_mask' | translate }} <span class="ion ion-chevron-right"></span></button>
+            </article>
+        </div>
+    </section>
+</div>

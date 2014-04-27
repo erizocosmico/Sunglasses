@@ -36,7 +36,7 @@ gulp.task('scripts', function() {
 // Copy all static images
 gulp.task('images', function() {
     return gulp.src(paths.images)
-        .pipe(imagemin({optimizationLevel: 5}))
+//        .pipe(imagemin({optimizationLevel: 5}))
         .pipe(gulp.dest('../public/images'));
 });
 
@@ -89,11 +89,11 @@ gulp.task('watch', function() {
     gulp.watch(paths.images, ['images']);
     gulp.watch(paths.templates, ['react']);
     // TODO uncomment this as soon as https://github.com/hcatlin/libsass/issues/331 is solved
-    //gulp.watch(paths.sass, ['sass']);
+    gulp.watch(paths.sass, ['sass']);
     gulp.watch('app.html', ['index']);
     gulp.watch('lang/*.json', ['lang']);
     gulp.watch('templates/**/*.html', ['tpls']);
 });
 
 // The default task (called when you run `gulp` from cli)
-gulp.task('default', ['setup', 'index', 'scripts', 'lang', 'images', 'tpls', 'react', 'vendor', 'watch']);
+gulp.task('default', ['setup', 'index', 'scripts', 'sass', 'lang', 'images', 'tpls', 'react', 'vendor']);

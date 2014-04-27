@@ -9,15 +9,15 @@ angular.module('mask', ['ngRoute', 'ngCookies', 'mask.controllers', 'mask.servic
     '$translateProvider',
     ($routeProvider, $locationProvider, $translateProvider) ->
         $locationProvider.html5Mode(false)
-        
-        #languagesProvider.registerLanguages($translateProvider)
+
         $translateProvider.useStaticFilesLoader(
             prefix: 'lang/',
             suffix: '.json'
         )
-        $translateProvider.preferredLanguage('es')
+        $translateProvider.preferredLanguage('en')
         $translateProvider.useSanitizeValueStrategy('escaped')
         $translateProvider.useLocalStorage()
+        $translateProvider.fallbackLanguage('en')
 
         if userData?
             $routeProvider
@@ -55,5 +55,19 @@ angular.module('mask', ['ngRoute', 'ngCookies', 'mask.controllers', 'mask.servic
             redirectTo: '/'
         )
 ])
-
-angular.module('mask').value('bullshit', 'caca')
+.run(['$rootScope', '$translate', '$location', ($rootScope, $translate, $location) ->
+    document.getElementsByTagName('title')[0].innerHTML = '{{ title | translate }}'
+    $rootScope.title = 'Mask'
+    
+    $rootScope.changeLang = (lang) ->
+        $translate.use(lang);
+        
+    $rootScope.goHome = () ->
+        $location.path('/')
+        
+    $rootScope.animateElem = (elem, animation, callback) ->
+        elem.className = 'animated ' + animation
+        $(elem).one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', () ->
+            callback(elem)
+        )
+])

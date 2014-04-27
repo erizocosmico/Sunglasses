@@ -1,0 +1,203 @@
+// Global login and signup scope
+div#login-signup {
+    @include fullpage;
+    background-color: #fafafa;
+    
+    .logo {
+        margin: 0 auto;
+        height: 40px;
+        width: 89px;
+        background: #fafafa url(../images/mask_logo_gray.png);
+        background-size: cover;
+        opacity: 0.8;
+        margin-top: 50px;
+        cursor: pointer;
+        transition: opacity 300ms ease-in-out;
+        
+        &:hover {
+            opacity: 1.0;
+        }
+    }
+    
+    // Signup scope
+    section#signup {
+        @include fullpage;
+
+        h1 {
+            font-weight: 300;
+            font-size: 2.8em;
+            padding: 25px;
+            margin-top: 15px;
+            color: lighten(#000000, 30%);
+        }
+        
+        .description {
+            width: 80%;
+            max-width: 550px;
+            margin: 20px auto;
+            line-height: 1.5em;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        ul.step {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            padding-top: 15px;
+            
+            .step-line {
+                width: 100%;
+                height: 6px;
+                background: darken(#FFFFFF, 10%);
+            }
+            
+            li {
+                margin-top: -16px;
+                width: 25%;
+                float: left;
+                text-align: center;
+                
+                .circle {
+                    background: #fafafa;
+                    border: 3px solid darken(#FFFFFF, 20%);
+                    border-radius: 50%;
+                    width: 25px;
+                    height: 25px;
+                    margin: 0 auto;
+                }
+                
+                p {
+                    color: darken(#fff, 35%);
+                }
+                
+                &.active {
+                    .circle {
+                        background: lighten(#1b71ad, 10%);
+                        border-color: #1b71ad;
+                    }
+                    
+                    p {
+                        color: lighten(#000, 30%);
+                        font-weight: bold;
+                    }
+                }
+                
+                &.passed {
+                    .circle {
+                        background: darken(#FFFFFF, 20%);
+                        border-color: darken(#FFFFFF, 20%);
+                    }
+                }
+            }
+            
+        }
+        
+        .sections {
+            display: block;
+            float: none;
+            article {
+                width: 80%;
+                max-width: 600px;
+                margin: 25px auto;
+                padding-bottom: 40px;
+                
+                p {
+                    display: block;
+                    width: 90%;
+                    margin: 8px auto;
+                    max-width: 450px;
+                    text-align: center;
+                }
+            }
+        }
+    }
+    
+    .inputbox {
+        background: #FFF;
+        font-size: 1.4em;
+        padding: 7px;
+        border: 4px solid darken(white, 20%);
+        border-radius: 5px;
+        display: block;
+        width: 90%;
+        margin: 8px auto;
+        max-width: 450px;
+        transition: border-color 200ms ease-in-out;
+        text-align: center;
+        
+        &:hover, &:focus {
+            border-color: #1b71ad;
+        }
+    }
+    
+    .btn {
+        background: #1b71ad;
+        padding: 15px 25px;
+        display: block;
+        width: 90%;
+        margin: 0 auto;
+        max-width: 450px;
+        font-size: 1.2em;
+        text-transform: uppercase;
+        transition: background-color 200ms ease-in-out;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        margin-top: 20px;
+        
+        span.ion {
+            margin-left: 6px;
+        }
+        
+        &:hover {
+            background-color: darken(#1b71ad, 5%);
+        }
+    }
+
+    div.popup {
+        background: lighten(#FF0000, 10%);
+        color: #FFF;
+        display: block;
+        width: 90%;
+        margin: 0 auto;
+        max-width: 450px;
+        text-align: center;
+        position: relative;
+        font-size: 0.9em;
+        padding: 8px;
+        border-radius: 5px;
+
+        &:after {
+        	bottom: 100%;
+        	left: 50%;
+        	border: solid transparent;
+        	content: " ";
+        	height: 0;
+        	width: 0;
+        	position: absolute;
+        	pointer-events: none;
+        	border-color: transparent;
+        	border-bottom-color: lighten(#FF0000, 10%);
+        	border-width: 5px;
+        	margin-left: -5px;
+        }
+    }
+    
+    .full-width-control {
+        width: 90%;
+        margin: 0 auto;
+        max-width: 450px;
+        
+        &.dropdown {
+            width: 100%;
+        }
+    }
+    
+    .ui.dropdown, .ui.dropdown .item {
+        text-align: center;
+        font-family: $default-font;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+}
