@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/martini-contrib/sessions"
+	"github.com/gorilla/sessions"
 	"github.com/mvader/mask/models"
 	"github.com/mvader/mask/services/interfaces"
 	"github.com/mvader/mask/util"
@@ -11,7 +11,7 @@ import (
 )
 
 // GetRequestToken returns the token associated with the request
-func GetRequestToken(r *http.Request, isAccessToken bool, s sessions.Session) (string, models.TokenType) {
+func GetRequestToken(r *http.Request, isAccessToken bool, s *sessions.Session) (string, models.TokenType) {
 	var (
 		token     string
 		tokenType models.TokenType
@@ -27,9 +27,9 @@ func GetRequestToken(r *http.Request, isAccessToken bool, s sessions.Session) (s
 	if token == "" {
 		// We're accessing via web
 		tokenType = models.SessionToken
-		v := s.Get("user_token")
+		v := s.Values["user_token"]
 		if v != nil {
-			token = s.Get("user_token").(string)
+			token = v.(string)
 		}
 	}
 
@@ -51,7 +51,7 @@ func IsTokenValid(tokenID string, tokenType models.TokenType, conn interfaces.Co
 }
 
 // GetRequestUser returns the user associated with the request
-func GetRequestUser(r *http.Request, conn interfaces.Conn, s sessions.Session) (*models.User, bool) {
+func GetRequestUser(r *http.Request, conn interfaces.Conn, s *sessions.Session) (*models.User, bool) {
 	var (
 		userID bson.ObjectId
 		valid  bool

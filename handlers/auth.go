@@ -37,7 +37,7 @@ func Login(c middleware.Context) {
 
 // GetUserToken is a handler to retrieve an user token
 func GetUserToken(c middleware.Context) {
-    // TODO: Max retries
+	// TODO: Max retries
 	username := strings.ToLower(c.Form("username"))
 	password := c.Form("password")
 
@@ -53,7 +53,7 @@ func GetUserToken(c middleware.Context) {
 		token.Hash = util.NewRandomHash()
 		token.Expires = float64(time.Now().AddDate(0, 0, models.UserTokenExpirationDays).Unix())
 		token.UserID = user.ID
-		if c.Form("token_type") == "session" {
+		if c.IsWebToken {
 			token.Type = models.SessionToken
 		} else {
 			token.Type = models.UserToken
@@ -62,8 +62,9 @@ func GetUserToken(c middleware.Context) {
 		if err := token.Save(c.Conn); err != nil {
 			c.Error(500, CodeUnexpected, MsgUnexpected)
 		} else {
-			if c.Form("token_type") == "session" {
-				c.Session.Set("user_token", token.Hash)
+			if c.IsWebToken {
+				c.Session.Values["user_token"] = token.Hash
+				c.Session.Save(c.Request, c.ResponseWriter)
 
 				c.Success(200, map[string]interface{}{
 					"expires": token.Expires,
@@ -89,8 +90,9 @@ func DestroyUserToken(c middleware.Context) {
 			return
 		} else {
 			if tokenType == models.SessionToken {
-				c.Session.Delete("user_token")
-				c.Session.Delete("csrf_key")
+				c.Session.Values["user_token"] = nil
+				c.Session.Values["csrf_key"] = nil
+				c.Session.Save(c.Request, c.ResponseWriter)
 			}
 
 			c.Success(200, map[string]interface{}{

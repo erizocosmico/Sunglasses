@@ -3,8 +3,8 @@ package middleware
 import (
 	"fmt"
 	"github.com/go-martini/martini"
+	"github.com/gorilla/sessions"
 	"github.com/martini-contrib/render"
-	"github.com/martini-contrib/sessions"
 	"github.com/mvader/mask/models"
 	"github.com/mvader/mask/modules/auth"
 	"github.com/mvader/mask/services"
@@ -18,22 +18,24 @@ import (
 )
 
 type Context struct {
-	Config     *services.Config
-	Conn       *services.Connection
-	Request    *http.Request
-	Render     render.Render
-	Session    sessions.Session
-	User       *models.User
-	Tasks      *services.TaskService
-	IsWebToken bool
+	Config         *services.Config
+	Conn           *services.Connection
+	Request        *http.Request
+	Render         render.Render
+	Session        *sessions.Session
+	User           *models.User
+	Tasks          *services.TaskService
+	ResponseWriter http.ResponseWriter
+	IsWebToken     bool
 }
 
 // CreateContext initializes the context for a request
-func CreateContext(ctx martini.Context, config *services.Config, conn *services.Connection, render render.Render, r *http.Request, s sessions.Session, ts *services.TaskService) {
-	c := Context{Config: config, Conn: conn, Request: r, Render: render, Session: s, Tasks: ts}
+func CreateContext(ctx martini.Context, config *services.Config, conn *services.Connection, render render.Render, r *http.Request, s *sessions.CookieStore, ts *services.TaskService, rw http.ResponseWriter) {
+	c := Context{Config: config, Conn: conn, Request: r, Render: render, ResponseWriter: rw, Tasks: ts}
 
 	if r != nil && s != nil && conn != nil {
-		c.User, c.IsWebToken = auth.GetRequestUser(r, conn, s)
+		c.Session, _ = s.Get(r, config.SessionName)
+		c.User, c.IsWebToken = auth.GetRequestUser(r, conn, c.Session)
 	}
 
 	if !c.IsWebToken && r.Header.Get("X-Access-Token") == "" && r.Header.Get("X-User-Token") == "" {
@@ -157,10 +159,10 @@ func (c Context) RequestIsValid(isAccessKey bool) bool {
 			return validateAPISignature(c.Conn, signature, timestamp, key, URL)
 		} else {
 			var csrfKey string
-			if c.Session.Get("csrf_token") == nil {
+			if c.Session.Values["csrf_token"] == nil {
 				csrfKey = ""
 			} else {
-				csrfKey = c.Session.Get("csrf_token").(string)
+				csrfKey = c.Session.Values["csrf_token"].(string)
 			}
 
 			if csrfKey == "" {

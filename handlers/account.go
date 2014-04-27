@@ -472,8 +472,9 @@ func DestroyAccount(c middleware.Context) {
 		go timeline.PropagatePostOnUserDeleted(c, c.User.ID)
 
 		// Logout user
-		c.Session.Delete("user_token")
-		c.Session.Delete("csrf_key")
+		c.Session.Values["user_token"] = nil
+		c.Session.Values["csrf_key"] = nil
+		c.Session.Save(c.Request, c.ResponseWriter)
 
 		// Destroy user
 		c.Remove("users", bson.M{"_id": c.User.ID})

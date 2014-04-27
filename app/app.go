@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/go-martini/martini"
+	"github.com/gorilla/sessions"
 	"github.com/martini-contrib/cors"
 	"github.com/martini-contrib/render"
-	"github.com/martini-contrib/sessions"
 	"github.com/martini-contrib/strict"
 	"github.com/mvader/mask/handlers"
 	"github.com/mvader/mask/middleware"
-	"github.com/mvader/mask/models"
 	"github.com/mvader/mask/services"
 	"github.com/mvader/mask/util"
 	"io/ioutil"
@@ -99,13 +98,8 @@ func NewApp(configPath string) (*App, error) {
 	m.Use(martini.Static(config.StaticContentPath))
 
 	// Setup sessions
-	store := sessions.NewCookieStore([]byte(config.SecretKey), []byte(config.EncriptionKey))
-	store.Options(sessions.Options{
-		MaxAge:   models.UserTokenExpirationDays * 86400,
-		Secure:   config.SecureCookies,
-		HttpOnly: true,
-	})
-	m.Use(sessions.Sessions(config.SessionName, store))
+	store := sessions.NewCookieStore([]byte(config.SecretKey))
+	m.Map(store)
 
 	// Add context middleware
 	m.Use(middleware.CreateContext)
@@ -220,7 +214,8 @@ func addRoutes(m *martini.ClassicMartini) {
 
 		// Set new csrf_token and replace it on the HTML page
 		token := util.NewRandomHash()
-		c.Session.Set("csrf_token", token)
+		c.Session.Values["csrf_token"] = token
+		c.Session.Save(c.Request, c.ResponseWriter)
 		strContent = strings.Replace(strContent, "csrfToken = undefined;", "csrfToken = '"+token+"';", 1)
 
 		// Return page content
