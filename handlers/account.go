@@ -17,9 +17,16 @@ import (
 	"strings"
 )
 
-// CreateAccount creates a new user account
+// CreateAccount is a handler in charge of creating an user account. After a successful registration the user will be automatically logged in.
+//
+// This handler needs the following parameters:
+// - username: The username provided by the user
+// - password: The password chosen by the user
+// - password_repeat: The password, again
+// - recovery_method (optional): The recovery method chosen by the user (look at the values for the type RecoveryMethod on the models package)
+// - recovery_answer and recovery_question (optional): A recovery answer and question if the provided recovery method is question.
 func CreateAccount(c middleware.Context) {
-    // TODO: Max retries
+	// TODO: Max retries
 	var (
 		username                = c.Form("username")
 		password                = c.Form("password")
@@ -112,7 +119,7 @@ func CreateAccount(c middleware.Context) {
 			} else {
 				responseStatus = 500
 				errorList = append(errorList, MsgUnexpected)
-				codeList = append(codeList, CodeInvalidRecoveryQuestion)
+				codeList = append(codeList, CodeUnexpected)
 			}
 		}
 	}
@@ -120,23 +127,25 @@ func CreateAccount(c middleware.Context) {
 	c.Errors(responseStatus, codeList, errorList)
 }
 
+// IsUsernameTaken checks if the given username is already taken
+func IsUsernameTaken(c middleware.Context) {
+	count, _ := c.Count("users", bson.M{"username_lower": strings.ToLower(c.Form("username"))})
+
+	c.Success(200, map[string]interface{}{"taken": count > 0})
+}
+
 // GetAccountInfo retrieves the info of the user
 func GetAccountInfo(c middleware.Context) {
-	if c.User != nil {
-		c.Success(200, map[string]interface{}{
-			"error":        false,
-			"account_info": c.User.Info,
-		})
-		return
-	}
-
-	c.Error(400, CodeInvalidData, MsgInvalidData)
+	c.Success(200, map[string]interface{}{
+		"account_info": c.User.Info,
+	})
 }
 
 // UpdateAccountInfo updates the user's information
 func UpdateAccountInfo(c middleware.Context) {
-	info := models.UserInfo{}
+	info := c.User.Info
 
+	// If any field is more than 500 characters long directly return an error
 	for _, v := range c.Request.PostForm {
 		for _, f := range v {
 			if util.Strlen(f) > 500 {
@@ -146,6 +155,7 @@ func UpdateAccountInfo(c middleware.Context) {
 		}
 	}
 
+	// Check user websites
 	if v, ok := c.Request.PostForm["websites"]; ok {
 		sites := make([]string, 0, len(v))
 
@@ -164,6 +174,7 @@ func UpdateAccountInfo(c middleware.Context) {
 		info.Websites = sites
 	}
 
+	// Check gender
 	if gender := c.Form("gender"); gender != "" {
 		gender, err := strconv.ParseInt(gender, 10, 8)
 		if err == nil {
@@ -180,13 +191,14 @@ func UpdateAccountInfo(c middleware.Context) {
 		}
 	}
 
+	// Check status
 	if status := c.Form("status"); status != "" {
 		status, err := strconv.ParseInt(status, 10, 8)
 		if err == nil {
 			if status >= 0 && status <= 4 {
 				info.Status = models.UserStatus(status)
 			} else {
-				err = errors.New("invalid statusr")
+				err = errors.New("invalid status")
 			}
 		}
 
@@ -196,6 +208,7 @@ func UpdateAccountInfo(c middleware.Context) {
 		}
 	}
 
+	// The rest of the fields need no validation since their length was already checked before
 	info.Work = strings.TrimSpace(c.Form("work"))
 	info.Education = strings.TrimSpace(c.Form("education"))
 	info.Hobbies = strings.TrimSpace(c.Form("hobbies"))
@@ -204,6 +217,7 @@ func UpdateAccountInfo(c middleware.Context) {
 	info.TV = strings.TrimSpace(c.Form("tv"))
 	info.About = strings.TrimSpace(c.Form("about"))
 
+	// Update the user info in the database
 	c.User.Info = info
 	if err := c.User.Save(c.Conn); err != nil {
 		c.Error(500, CodeUnexpected, MsgUnexpected)
@@ -217,92 +231,19 @@ func UpdateAccountInfo(c middleware.Context) {
 
 // GetAccountSettings retrieves the settings of the user
 func GetAccountSettings(c middleware.Context) {
-	info := models.UserInfo{}
-
-	for _, v := range c.Request.PostForm {
-		for _, f := range v {
-			if util.Strlen(f) > 500 {
-				c.Error(400, CodeInvalidInfoLength, MsgInvalidInfoLength)
-				return
-			}
-		}
-	}
-
-	if v, ok := c.Request.PostForm["websites"]; ok {
-		sites := make([]string, 0, len(v))
-
-		for _, site := range v {
-			if !strings.HasPrefix(site, "http://") && !strings.HasPrefix(site, "https://") {
-				site = "http://" + site
-			}
-
-			if !util.IsValidURL(site) {
-				c.Error(400, CodeInvalidWebsites, MsgInvalidWebsites)
-				return
-			}
-
-			sites = append(sites, site)
-		}
-		info.Websites = sites
-	}
-
-	if gender := c.Form("gender"); gender != "" {
-		gender, err := strconv.ParseInt(gender, 10, 8)
-		if err == nil {
-			if gender == models.Male || gender == models.Female || gender == models.Other {
-				info.Gender = models.Gender(gender)
-			} else {
-				err = errors.New("invalid gender")
-			}
-		}
-
-		if err != nil {
-			c.Error(400, CodeInvalidGender, MsgInvalidGender)
-			return
-		}
-	}
-
-	if status := c.Form("status"); status != "" {
-		status, err := strconv.ParseInt(status, 10, 8)
-		if err == nil {
-			if status >= 0 && status <= 4 {
-				info.Status = models.UserStatus(status)
-			} else {
-				err = errors.New("invalid statusr")
-			}
-		}
-
-		if err != nil {
-			c.Error(400, CodeInvalidStatus, MsgInvalidStatus)
-			return
-		}
-	}
-
-	info.Work = strings.TrimSpace(c.Form("work"))
-	info.Education = strings.TrimSpace(c.Form("education"))
-	info.Hobbies = strings.TrimSpace(c.Form("hobbies"))
-	info.Books = strings.TrimSpace(c.Form("books"))
-	info.Movies = strings.TrimSpace(c.Form("movies"))
-	info.TV = strings.TrimSpace(c.Form("tv"))
-	info.About = strings.TrimSpace(c.Form("about"))
-
-	c.User.Info = info
-	if err := c.User.Save(c.Conn); err != nil {
-		c.Error(500, CodeUnexpected, MsgUnexpected)
-		return
-	}
-
 	c.Success(200, map[string]interface{}{
-		"message": "User info updated successfully",
+		"account_info": c.User.Info,
 	})
 }
 
 // UpdateAccountSettings updates the user's settings
 func UpdateAccountSettings(c middleware.Context) {
-	s := models.UserSettings{}
+	s := c.User.Settings
+
 	getPrivacy := func(r *http.Request, kind string) (models.PrivacySettings, error) {
 		p := models.PrivacySettings{}
 
+		// Get the privacy type for the current kind of privacy
 		if privacyType := c.Form("privacy_" + kind + "_type"); privacyType != "" {
 			pType, err := strconv.ParseInt(privacyType, 10, 8)
 			if !models.IsValidPrivacyType(models.PrivacyType(pType)) || err != nil {
@@ -314,6 +255,7 @@ func UpdateAccountSettings(c middleware.Context) {
 			return p, errors.New("privacy type is required")
 		}
 
+		// Get users for the current kind of privacy
 		if users, ok := r.Form["privacy_"+kind+"_users"]; ok {
 			uids := make([]bson.ObjectId, 0, len(users))
 			for _, u := range users {
@@ -323,6 +265,7 @@ func UpdateAccountSettings(c middleware.Context) {
 				uids = append(uids, bson.ObjectIdHex(u))
 			}
 
+			// Check that you only selected users you follow or that follow you
 			count, err := c.Count("follows", bson.M{"user_from": c.User.ID, "user_to": bson.M{"$in": uids}})
 			if err != nil || count != len(p.Users) {
 				count2, err := c.Count("follows", bson.M{"user_to": c.User.ID, "user_from": bson.M{"$in": uids}})
@@ -339,6 +282,8 @@ func UpdateAccountSettings(c middleware.Context) {
 		return p, nil
 	}
 
+	// If override_default_privacy is true the privacy settings used will be just status for
+	// all privacy kinds
 	s.OverrideDefaultPrivacy = c.GetBoolean("override_default_privacy")
 	if s.OverrideDefaultPrivacy {
 		p, err := getPrivacy(c.Request, "status")
@@ -376,6 +321,7 @@ func UpdateAccountSettings(c middleware.Context) {
 		}
 	}
 
+	// Get other boolean settings
 	s.Invisible = c.GetBoolean("invisible")
 	s.CanReceiveRequests = c.GetBoolean("can_receive_requests")
 	s.FollowApprovalRequired = c.GetBoolean("follow_approval_required")
@@ -388,6 +334,8 @@ func UpdateAccountSettings(c middleware.Context) {
 	s.AllowCommentsInPosts = c.GetBoolean("allow_comments_in_posts")
 	s.DisplayInfoFollowersOnly = c.GetBoolean("display_info_followers_only")
 
+	// Recovery method settings. If no recovery_method value is sent or an invalid recovery_method
+	// is entered RecoveryNone will be set!
 	if recoveryMethod := c.Form("recovery_method"); recoveryMethod != "" {
 		method, err := strconv.ParseInt(recoveryMethod, 10, 8)
 		if err != nil || (method != models.RecoveryNone && method != models.RecoverByQuestion && method != models.RecoverByEMail) {
@@ -408,6 +356,7 @@ func UpdateAccountSettings(c middleware.Context) {
 		s.PasswordRecoveryMethod = models.RecoveryNone
 	}
 
+	// Update the user settings in the database
 	c.User.Settings = s
 	if err := c.User.Save(c.Conn); err != nil {
 		c.Error(500, CodeUnexpected, MsgUnexpected)
@@ -421,6 +370,7 @@ func UpdateAccountSettings(c middleware.Context) {
 
 // UpldateProfilePicture updates the current profile picture of the user
 func UpdateProfilePicture(c middleware.Context) {
+	// Try to retrieve the uploaded image
 	file, err := upload.RetrieveUploadedImage(c.Request, "account_picture")
 	if err != nil {
 		code, msg := upload.CodeAndMessageForUploadError(err)
@@ -428,6 +378,7 @@ func UpdateProfilePicture(c middleware.Context) {
 		return
 	}
 
+	// Try to upload the image
 	imagePath, thumbnailPath, err := upload.StoreImage(file, upload.ProfileUploadOptions(c.Config))
 	if err != nil {
 		code, msg := upload.CodeAndMessageForUploadError(err)
@@ -436,7 +387,7 @@ func UpdateProfilePicture(c middleware.Context) {
 	}
 
 	var prevAvatar, prevThumbnail string
-
+	// If there was any previously set avatar we store its value to destroy them later
 	if c.Form("picture_type") == "public" {
 		prevAvatar = c.User.PublicAvatar
 		c.User.PublicAvatar = imagePath
@@ -449,13 +400,17 @@ func UpdateProfilePicture(c middleware.Context) {
 		c.User.AvatarThumbnail = thumbnailPath
 	}
 
+	// Update the data
 	if c.User.Save(c.Conn); err != nil {
 		c.Error(500, CodeUnexpected, MsgUnexpected)
 
+		// If it's been an error updating the changes in the database the files
+		// need to be erased
 		os.Remove(upload.ToLocalImagePath(imagePath, c.Config))
 		os.Remove(upload.ToLocalThumbnailPath(thumbnailPath, c.Config))
 		return
 	} else {
+		// Remove previous avatar
 		if prevAvatar != "" {
 			os.Remove(upload.ToLocalImagePath(prevAvatar, c.Config))
 		}
@@ -496,6 +451,8 @@ func DestroyAccount(c middleware.Context) {
 		}
 
 		iter.Close()
+
+		// Destroy all user comments
 		iter = c.Find("comments", bson.M{"user_id": c.User.ID}).Iter()
 		for iter.Next(&cmt) {
 			go timeline.PropagatePostOnCommentDeleted(c, cmt.PostID, cmt.ID)
@@ -503,6 +460,7 @@ func DestroyAccount(c middleware.Context) {
 
 		iter.Close()
 
+		// Remove other stuff related to the user
 		c.RemoveAll("posts", bson.M{"user_id": c.User.ID})
 		c.RemoveAll("comments", bson.M{"user_id": c.User.ID})
 		c.RemoveAll("follows", bson.M{"user_to": c.User.ID})

@@ -1,6 +1,12 @@
 package error
 
 const (
+	// Auth codes [1-9]
+	CodeInvalidAccessToken        = 1
+	CodeInvalidUserToken          = 2
+	CodeTokenNotFound             = 3
+	CodeInvalidUsernameOrPassword = 4
+
 	// Misc codes [10-19]
 	CodeUnexpected       = 10
 	CodeInvalidData      = 11
@@ -9,12 +15,6 @@ const (
 	CodeInvalidSignature = 14
 	CodeNotLoggedIn      = 15
 	CodeLoggedIn         = 16
-
-	// Auth codes [1-9]
-	CodeInvalidAccessToken        = 1
-	CodeInvalidUserToken          = 2
-	CodeTokenNotFound             = 3
-	CodeInvalidUsernameOrPassword = 4
 
 	// User codes [20-49]
 	CodeUserDoesNotExist          = 20
@@ -46,6 +46,12 @@ const (
 	CodeInvalidUserList       = 59
 	CodeInvalidCommentText    = 60
 
+	// Auth messages
+	MsgInvalidAccessToken        = "Invalid access token provided"
+	MsgInvalidUserToken          = "Invalid user token provided"
+	MsgTokenNotFound             = "Token not found"
+	MsgInvalidUsernameOrPassword = "Invalid username or password"
+
 	// Misc messages
 	MsgUnexpected       = "Unexpected error occurred"
 	MsgInvalidData      = "Invalid data provided"
@@ -54,12 +60,6 @@ const (
 	MsgInvalidSignature = "Invalid signature"
 	MsgNotLoggedIn      = "Login required"
 	MsgLoggedIn         = "You can't access this resource being logged in"
-
-	// Auth messages
-	MsgInvalidAccessToken        = "Invalid access token provided"
-	MsgInvalidUserToken          = "Invalid user token provided"
-	MsgTokenNotFound             = "Token not found"
-	MsgInvalidUsernameOrPassword = "Invalid username or password"
 
 	// User messages
 	MsgUserDoesNotExist          = "Requested user does not exist"

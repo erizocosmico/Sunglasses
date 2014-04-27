@@ -52,8 +52,7 @@ func TestGetUserToken(t *testing.T) {
 	}
 
 	Convey("Subject: Getting user token", t, func() {
-
-		Convey("When we request an user token with valid data the response code will be 200 and we will receive a token", func() {
+		Convey("When we request an user token with valid data the response code will be 200", func() {
 			testPostHandler(GetUserToken, func(req *http.Request) {
 				if req.PostForm == nil {
 					req.PostForm = make(url.Values)
@@ -61,13 +60,7 @@ func TestGetUserToken(t *testing.T) {
 				req.PostForm.Add("username", "Jane Doe")
 				req.PostForm.Add("password", "testing")
 			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
-				var resultBody map[string]interface{}
 				So(response.Code, ShouldEqual, 200)
-				err := json.Unmarshal(response.Body.Bytes(), &resultBody)
-				if err != nil {
-					panic(err)
-				}
-				So(resultBody["user_token"].(string), ShouldNotEqual, "")
 			})
 		})
 

@@ -57,6 +57,7 @@ func GetRequestUser(r *http.Request, conn interfaces.Conn, s sessions.Session) (
 		valid  bool
 		user   models.User
 	)
+
 	token, tokenType := GetRequestToken(r, false, s)
 
 	if valid, userID = IsTokenValid(token, tokenType, conn); valid {

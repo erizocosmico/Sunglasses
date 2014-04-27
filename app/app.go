@@ -19,6 +19,9 @@ import (
 	"strings"
 )
 
+// App represents the application, it contains the martini instance and the
+// instances of the Config and Connection services along with the LogFile
+// to be closed after running the application
 type App struct {
 	Martini    *martini.ClassicMartini
 	Config     *services.Config
@@ -26,7 +29,7 @@ type App struct {
 	LogFile    *os.File
 }
 
-// NewApp creates a new application
+// NewApp creates a new application given a path to a config file
 func NewApp(configPath string) (*App, error) {
 	var err error
 
@@ -128,8 +131,8 @@ func addRoutes(m *martini.ClassicMartini) {
 			r.Put("/change_privacy/:id", handlers.ChangePostPrivacy)
 		}, middleware.LoginRequired)
 
+		// Auth routes
 		r.Group("/auth", func(r martini.Router) {
-			r.Get("/access_token", handlers.GetAccessToken)
 			r.Post("/user_token", handlers.GetUserToken)
 			r.Post("/login", handlers.Login)
 		}, middleware.LoginForbidden)
@@ -148,6 +151,7 @@ func addRoutes(m *martini.ClassicMartini) {
 			r.Get("/settings", handlers.GetAccountSettings)
 			r.Put("/settings", handlers.UpdateAccountSettings)
 		}, middleware.WebOnly, middleware.LoginRequired)
+		r.Get("/account/username_taken", middleware.WebOnly, middleware.LoginForbidden, handlers.IsUsernameTaken)
 		r.Post("/account/signup", middleware.WebOnly, middleware.LoginForbidden, handlers.CreateAccount)
 
 		// Logout
@@ -186,6 +190,7 @@ func addRoutes(m *martini.ClassicMartini) {
 		// Get user timeline
 		r.Get("/timeline", middleware.LoginRequired, handlers.GetUserTimeline)
 	}, middleware.RequiresValidSignature)
+	m.Get("/api/auth/access_token", middleware.LoginForbidden, handlers.GetAccessToken)
 
 	// Render the layout
 	m.Get("/", func(c middleware.Context) string {
@@ -195,12 +200,15 @@ func addRoutes(m *martini.ClassicMartini) {
 			err        error
 		)
 
+		// Read app.html located on the static content path (public)
 		if content, err = ioutil.ReadFile(c.Config.StaticContentPath + "app.html"); err != nil {
 			panic(err)
 		}
 
 		strContent = string(content)
 
+		// If the user not logged in we will replace the default userData with the
+		// actual user data
 		if c.User != nil {
 			b, err := json.Marshal(*c.User)
 			if err != nil {
@@ -210,11 +218,12 @@ func addRoutes(m *martini.ClassicMartini) {
 			strContent = strings.Replace(strContent, "userData = undefined;", "userData = "+string(b)+";", 1)
 		}
 
+		// Set new csrf_token and replace it on the HTML page
 		token := util.NewRandomHash()
-
 		c.Session.Set("csrf_token", token)
 		strContent = strings.Replace(strContent, "csrfToken = undefined;", "csrfToken = '"+token+"';", 1)
 
+		// Return page content
 		return strContent
 	})
 }
