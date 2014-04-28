@@ -59,15 +59,36 @@ angular.module('mask', ['ngRoute', 'ngCookies', 'mask.controllers', 'mask.servic
     document.getElementsByTagName('title')[0].innerHTML = '{{ title | translate }}'
     $rootScope.title = 'Mask'
     
+    # changes the language of the application
     $rootScope.changeLang = (lang) ->
         $translate.use(lang);
         
+    # redirects the user to the home
     $rootScope.goHome = () ->
         $location.path('/')
         
+    # refreshes the page so that the frontend is loaded again (logged in or logged out)
+    $rootScope.fullRefresh = () ->
+        window.location.href = window.location.href
+            .substring(0, window.location.href.indexOf('#'))
+        
+    # animate element using animate.css and perform a callback on completion
     $rootScope.animateElem = (elem, animation, callback) ->
         elem.className = 'animated ' + animation
         $(elem).one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', () ->
             callback(elem)
         )
+        
+    # display error
+    $rootScope.displayError = (field) ->
+        elem = document.getElementById(field)
+        elem.className = 'error animated fadeInUp'
+        window.setTimeout(() ->
+            if elem.className.indexOf('hidden') == -1
+                $rootScope.animateElem(
+                    elem,
+                    'fadeOutDown',
+                    (el) -> el.className = 'error hidden'
+                )
+        , 6000)
 ])

@@ -21,6 +21,7 @@ angular.module('mask.controllers')
         # current section
         $scope.sections = [true, false, false, false]
         currentSection = 0
+        submitted = false
         
         # display dropdowns
         $('.ui.dropdown').dropdown(
@@ -44,19 +45,6 @@ angular.module('mask.controllers')
                     answer.className = 'inputbox'
         )
         
-        # display error
-        displayError = (field) ->
-            elem = document.getElementById(field)
-            elem.className = 'error animated fadeInUp'
-            window.setTimeout(() ->
-                if elem.className.indexOf('hidden') == -1
-                    $rootScope.animateElem(
-                        elem,
-                        'fadeOutDown',
-                        (el) -> el.className = 'error hidden'
-                    )
-            , 6000)
-        
         # validators for all steps
         validators = [
             # validator for username step
@@ -69,40 +57,40 @@ angular.module('mask.controllers')
                             if !resp.taken
                                 callback()
                             else
-                                displayError('username-error')
+                                $rootScope.displayError('username-error')
                         , (resp) ->
-                            displayError('username-error')
+                            $rootScope.displayError('username-error')
                     )
                 else
-                    displayError('username-error')
+                    $rootScope.displayError('username-error')
             # validator for password step
             , (callback) ->
                 valid = true
                 if $scope.user.password.length < 6
                     valid = false
-                    displayError('password-error')
+                    $rootScope.displayError('password-error')
                     
                 if $scope.user.password != $scope.user.password_repeat
                     valid = false
-                    displayError('password-repeat-error')
+                    $rootScope.displayError('password-repeat-error')
 
                 if valid then callback()
             , (callback) ->
                 switch $scope.user.recovery_method
                     when 1
                         if not /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test($scope.user.recovery_email)
-                            displayError('recovery-email-error')
+                            $rootScope.displayError('recovery-email-error')
                         else
                             callback()
                     when 2
                         valid = true
                         if $scope.user.recovery_question.length < 1
                             valid = false
-                            displayError('recovery-question-error')
+                            $rootScope.displayError('recovery-question-error')
                     
                         if $scope.user.recovery_answer.length < 1
                             valid = false
-                            displayError('recovery-answer-error')
+                            $rootScope.displayError('recovery-answer-error')
 
                         if valid then callback()
                     else
@@ -149,19 +137,20 @@ angular.module('mask.controllers')
                         
                 if currentSection+1 == 3
                     validators[currentSection](() ->
-                        api(
-                            '/api/account/signup',
-                            'POST',
-                            $scope.user,
-                            (resp) ->
-                                callback()
-                            , (resp) ->
-                                console.log(resp)    
-                        )
+                        if not submitted
+                            api(
+                                '/api/account/signup',
+                                'POST',
+                                $scope.user,
+                                (resp) ->
+                                    callback()
+                                , (resp) ->
+                                    console.log(resp)    
+                            )
+                            submitted = true
                     )
                 else
                     validators[currentSection](callback)
             else
-                window.location.href = window.location.href
-                    .substring(0, window.location.href.indexOf('#'))
+                $rootScope.fullRefresh()
 ])
