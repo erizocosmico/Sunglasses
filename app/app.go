@@ -148,8 +148,8 @@ func addRoutes(m *martini.ClassicMartini) {
 		r.Get("/account/username_taken", middleware.WebOnly, middleware.LoginForbidden, handlers.IsUsernameTaken)
 		r.Post("/account/signup", middleware.WebOnly, middleware.LoginForbidden, handlers.CreateAccount)
 
-		// Logout
-		r.Get("/account/logout", handlers.DestroyUserToken)
+		// Destroy user token
+		m.Delete("/auth/destroy_user_token", middleware.LoginRequired, handlers.DestroyUserToken)
 
 		// Block routes
 		r.Group("/blocks", func(r martini.Router) {
@@ -184,7 +184,12 @@ func addRoutes(m *martini.ClassicMartini) {
 		// Get user timeline
 		r.Get("/timeline", middleware.LoginRequired, handlers.GetUserTimeline)
 	}, middleware.RequiresValidSignature)
+
+	// Get access token
 	m.Get("/api/auth/access_token", middleware.LoginForbidden, handlers.GetAccessToken)
+
+	// Logout
+	m.Get("/account/logout", middleware.WebOnly, handlers.Logout)
 
 	// Render the layout
 	m.Get("/", func(c middleware.Context) string {

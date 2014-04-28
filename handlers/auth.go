@@ -7,6 +7,7 @@ import (
 	"github.com/mvader/mask/modules/auth"
 	"github.com/mvader/mask/util"
 	"labix.org/v2/mgo/bson"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -79,6 +80,22 @@ func GetUserToken(c middleware.Context) {
 	} else {
 		c.Error(400, CodeInvalidUsernameOrPassword, MsgInvalidUsernameOrPassword)
 	}
+}
+
+// Logout terminates the user session and redirects to home
+func Logout(c middleware.Context) {
+	tokenID, tokenType := auth.GetRequestToken(c.Request, false, c.Session)
+	if valid, _ := auth.IsTokenValid(tokenID, tokenType, c.Conn); valid {
+		if err := c.Remove("tokens", bson.M{"hash": tokenID}); err == nil {
+			if tokenType == models.SessionToken {
+				c.Session.Values["user_token"] = nil
+				c.Session.Values["csrf_key"] = nil
+				c.Session.Save(c.Request, c.ResponseWriter)
+			}
+		}
+	}
+
+	http.Redirect(c.ResponseWriter, c.Request, "/", 301)
 }
 
 // DestroyUserToken destroys the current user token
