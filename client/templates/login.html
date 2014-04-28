@@ -1,0 +1,25 @@
+<div id="login-signup">
+    <section id="signup">
+        <div class="logo" ng-click="goHome()"></div>
+        <h1 class="ui center aligned header">{{ 'login' | translate }}</h1>
+
+        <div class="sections">
+            <article id="username">
+                <div id="login-invalid-error" class="error hidden">
+                    <div class="error-box">{{ 'login_invalid_error' | translate }}</div>
+                </div>
+                <input type="text" class="inputbox" ng-model="data.username" placeholder="{{ 'username' | translate }}">
+                <div id="login-username-error" class="error hidden">
+                    <div class="popup">{{ 'login_username_error' | translate }}</div>
+                </div>
+                
+                <input type="password" class="inputbox" ng-model="data.password" placeholder="{{ 'password' | translate }}">
+                <div id="login-password-error" class="error hidden">
+                    <div class="popup">{{ 'signup_password_error' | translate }}</div>
+                </div>
+                
+                <button ng-click="loginClick()" class="btn">{{ 'login' | translate }} <span class="ion ion-chevron-right"></span></button>
+            </article>
+        </div>
+    </section>
+</div>

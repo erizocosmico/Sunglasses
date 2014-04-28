@@ -22,7 +22,8 @@
     "signup_recovery_email_info": "We will not store your email as plain text, we will store a hash.",
     
     "continue": "Continue",
-    "password": "Enter a password",
+    "username": "Enter your username",
+    "password": "Enter your password",
     "password_repeat": "Enter your password again",
     "select_recovery_method": "Select a recovery method",
     "recovery_question": "Recovery question",
@@ -31,5 +32,9 @@
     "recovery_method_none": "None",
     "recovery_method_email": "Email",
     "recovery_method_question": "Secret question",
-    "start_using_mask": "Start using Mask!"
+    "start_using_mask": "Start using Mask!",
+
+    "login": "Log in",
+    "login_invalid_error": "Invalid username or password.",
+    "login_username_error": "Usernames can only contain letters, numbers or underscores and must be between 2 and 30 characters long."
 }
