@@ -6,8 +6,7 @@ angular.module('mask.controllers')
     '$rootScope',
     'api',
     ($scope, $rootScope, api) ->
-        # errorVisible determines if the error is visible or not
-        $scope.errorVisible = false
+        $rootScope.title = 'login'
 
         # username and password
         $scope.data =

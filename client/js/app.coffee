@@ -48,7 +48,6 @@ angular.module('mask', ['ngRoute', 'ngCookies', 'mask.controllers', 'mask.servic
             )
             .when('/',
                 templateUrl: 'templates/landing.html'
-                controller: 'LandingController'
             )
 
         $routeProvider.otherwise(
@@ -66,6 +65,9 @@ angular.module('mask', ['ngRoute', 'ngCookies', 'mask.controllers', 'mask.servic
     # redirects the user to the home
     $rootScope.goHome = () ->
         $location.path('/')
+        
+    $rootScope.redirect = (path) ->
+        $location.path(path)
         
     # refreshes the page so that the frontend is loaded again (logged in or logged out)
     $rootScope.fullRefresh = () ->

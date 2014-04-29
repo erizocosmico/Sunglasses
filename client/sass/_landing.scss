@@ -1,0 +1,110 @@
+// Landing scope
+div#landing {
+    @include fullpage;
+    background: black url(../images/landing_bg.jpg) center center no-repeat;
+    background-size: cover;
+
+    div#wrap {
+        @include fullpage;
+        background-color: lighten(rgba(0, 0, 0, 0.7), 30%);
+        
+        h1 {
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 4.8em;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0px 2px 0px rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            text-align: center;
+            margin-top: 50px;
+            
+            .outline {
+                padding: 5px 50px;
+                border: 0px solid rgba(255, 255, 255, 0.3);
+                transition: border-color 300ms ease-in-out;
+        
+                &:hover {
+                    border-color: rgba(255, 255, 255, 0.8);
+                }
+            }
+            
+            .logo {
+                display: inline-block;
+                height: 40px;
+                width: 89px;
+                background: transparent url(../images/mask_logo_white.png);
+                background-size: cover;
+                opacity: 0.6;
+                cursor: pointer;
+                transition: opacity 300ms ease-in-out;
+        
+                &:hover {
+                    opacity: 8.0;
+                }
+            }
+        }
+    
+        h2 {
+            font-weight: 300;
+            font-size: 3.2em;
+            color: white;
+            text-shadow: 0px 2px 0px rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .btn-signup {
+            margin: 0 auto;
+            display: block;
+            width: 90%;
+            max-width: 350px;
+            padding: 15px 50px;
+            text-align: center;
+            font-weight: 400;
+            text-transform: uppercase;
+            background: rgba(#1b71ad, .7);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.4em;
+            border: none;
+            border-bottom: 4px solid rgba(darken(#1b71ad, 30%), .7);
+            border-radius: 5px;
+            transition: all 300ms ease-in-out;
+            
+            &:hover {
+                background-color: #1b71ad;
+                border-bottom-color: darken(#1b71ad, 30%);
+            }
+            
+            &:active {
+                background-color: darken(#1b71ad, 30%);
+                border-bottom-color: darken(#1b71ad, 80%);
+                color: darken(white, 30%);
+            }
+        }
+        
+        .btn-login {
+            margin: 0 auto;
+            display: block;
+            width: 90%;
+            max-width: 350px;
+            padding: 15px 50px;
+            text-align: center;
+            text-align: center;
+            font-weight: 400;
+            text-transform: uppercase;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0px 0px 0px rgba(black, .7);
+            font-size: 1.4em;
+            border: 1px solid rgba(white, .3);
+            border-radius: 3px;
+            transition: all 300ms ease-in-out;
+            box-shadow: 0px -1px 0px rgba(black, .6) inset;
+            margin-top: 30px;
+            
+            &:hover {
+                border-color: rgba(white, .7);
+            }
+        }
+    }
+}
