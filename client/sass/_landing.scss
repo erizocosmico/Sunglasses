@@ -7,6 +7,7 @@ div#landing {
     div#wrap {
         @include fullpage;
         background-color: lighten(rgba(0, 0, 0, 0.7), 30%);
+        padding-bottom: 50px;
         
         h1 {
             font-weight: 800;
@@ -25,21 +26,6 @@ div#landing {
         
                 &:hover {
                     border-color: rgba(255, 255, 255, 0.8);
-                }
-            }
-            
-            .logo {
-                display: inline-block;
-                height: 40px;
-                width: 89px;
-                background: transparent url(../images/mask_logo_white.png);
-                background-size: cover;
-                opacity: 0.6;
-                cursor: pointer;
-                transition: opacity 300ms ease-in-out;
-        
-                &:hover {
-                    opacity: 8.0;
                 }
             }
         }
