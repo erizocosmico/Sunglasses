@@ -40,6 +40,15 @@ func PropagatePostOnCreation(c middleware.Context, post *models.Post) {
 					break
 				}
 			}
+            
+            // Propagate the post on the users timeline
+			t.ID = bson.NewObjectId()
+			t.User = c.User.ID
+
+			if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
+				allCompleted = false
+				c.Tasks.PushFail("create_post", ID, c.User.ID)
+			}
 
 			if allCompleted {
 				c.Tasks.TaskDone("create_post", ID)

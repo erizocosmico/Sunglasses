@@ -9,7 +9,6 @@ import (
 
 // GetUserTimeline gets all posts, comments and likes needed to render the timeline for the user
 func GetUserTimeline(c middleware.Context) {
-	// TODO untested
 	count, offset := c.ListCountParams()
 
 	var (
