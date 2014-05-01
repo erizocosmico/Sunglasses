@@ -143,7 +143,7 @@ func TestPostVideo(t *testing.T) {
 					r.PostForm = make(url.Values)
 				}
 				r.PostForm.Add("post_type", "video")
-				r.PostForm.Add("video_url", "http://youtube.com/watch?v=notfoundvideo")
+				r.PostForm.Add("post_url", "http://youtube.com/watch?v=notfoundvideo")
 				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
@@ -162,7 +162,7 @@ func TestPostVideo(t *testing.T) {
 					r.PostForm = make(url.Values)
 				}
 				r.PostForm.Add("post_type", "video")
-				r.PostForm.Add("video_url", "http://vimeo.com/00000")
+				r.PostForm.Add("post_url", "http://vimeo.com/00000")
 				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
@@ -181,7 +181,7 @@ func TestPostVideo(t *testing.T) {
 					r.PostForm = make(url.Values)
 				}
 				r.PostForm.Add("post_type", "video")
-				r.PostForm.Add("video_url", "http://vimeo.com/89856635")
+				r.PostForm.Add("post_url", "http://vimeo.com/89856635")
 				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
@@ -199,7 +199,7 @@ func TestPostVideo(t *testing.T) {
 					r.PostForm = make(url.Values)
 				}
 				r.PostForm.Add("post_type", "video")
-				r.PostForm.Add("video_url", "http://www.youtube.com/watch?v=9bZkp7q19f0")
+				r.PostForm.Add("post_url", "http://www.youtube.com/watch?v=9bZkp7q19f0")
 				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
@@ -249,7 +249,7 @@ func TestPostLink(t *testing.T) {
 					r.PostForm = make(url.Values)
 				}
 				r.PostForm.Add("post_type", "link")
-				r.PostForm.Add("link_url", "http://alargedomainnamethatdoesnotexist.com")
+				r.PostForm.Add("post_url", "http://alargedomainnamethatdoesnotexist.com")
 				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
@@ -268,7 +268,7 @@ func TestPostLink(t *testing.T) {
 					r.PostForm = make(url.Values)
 				}
 				r.PostForm.Add("post_type", "link")
-				r.PostForm.Add("link_url", "http://google.es")
+				r.PostForm.Add("post_url", "http://google.es")
 				r.Header.Add("X-User-Token", token.Hash)
 			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 				var errResp errorResponse
