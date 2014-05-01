@@ -13,7 +13,7 @@ build:
     - script:
         name: Clone package
         code: |
-          git clone git@github.com:mvader/Mask.git $GOPATH/src/github.com/mvader/mask
+          git clone git@github.com:mvader/Sunglasses.git $GOPATH/src/github.com/mvader/sunglasses
     - script:
         name: go get
         code: |
