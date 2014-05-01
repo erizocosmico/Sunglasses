@@ -5,6 +5,7 @@ import (
 	"github.com/mvader/mask/middleware"
 	"github.com/mvader/mask/models"
 	"labix.org/v2/mgo/bson"
+	"strconv"
 )
 
 // GetUserTimeline gets all posts, comments and likes needed to render the timeline for the user
@@ -18,9 +19,25 @@ func GetUserTimeline(c middleware.Context) {
 		users       = make([]bson.ObjectId, 0, count)
 		postsResult = make([]models.Post, 0, count)
 		p           models.Post
+		newerThan   float64
 	)
 
-	iter := c.Find("timelines", bson.M{"user_id": c.User.ID}).Sort("-time").Limit(count).Skip(offset).Iter()
+	n, err := strconv.ParseInt(c.Form("newer_than"), 10, 64)
+	if err != nil {
+		newerThan = 0
+	} else {
+		newerThan = float64(n)
+	}
+
+	iter := c.Find("timelines", bson.M{
+		"user_id": c.User.ID,
+		"time":    bson.M{"$gt": newerThan},
+	}).
+		Sort("-time").
+		Limit(count).
+		Skip(offset).
+		Iter()
+
 	for iter.Next(&t) {
 		cmts := models.GetCommentsForPost(t.Post, c.User, 5, c.Conn)
 		if cmts != nil {
@@ -34,7 +51,8 @@ func GetUserTimeline(c middleware.Context) {
 	iter.Close()
 
 	udata := models.GetUsersData(users, c.User, c.Conn)
-
+	// TODO: This would only be an error if there are not any timeline entries
+	// BUG: User data does not come with the post
 	if len(udata) == 0 {
 		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
