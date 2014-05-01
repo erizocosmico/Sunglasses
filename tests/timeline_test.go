@@ -19,7 +19,7 @@ func TestGetUserTimeline(t *testing.T) {
 		users        = make([]*User, 3)
 		tokens       = make([]*Token, 3)
 		posts        = make([][]string, 3)
-		resultCounts = []float64{8.0, 10.0, 3.0}
+		resultCounts = []float64{16.0, 18.0, 11.0}
 	)
 
 	conn := getConnection()
