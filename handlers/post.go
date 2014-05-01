@@ -259,7 +259,7 @@ func postVideo(c middleware.Context) {
 
 	post.Privacy = privacy
 
-	valid, videoID, service, title := video.IsValidVideo(strings.TrimSpace(c.Form("video_url")))
+	valid, videoID, service, title := video.IsValidVideo(strings.TrimSpace(c.Form("post_url")))
 
 	if !valid {
 		c.Error(400, CodeInvalidVideoURL, MsgInvalidVideoURL)
@@ -301,7 +301,7 @@ func postLink(c middleware.Context) {
 
 	post.Privacy = privacy
 
-	valid, link, title := util.IsValidLink(strings.TrimSpace(c.Form("link_url")))
+	valid, link, title := util.IsValidLink(strings.TrimSpace(c.Form("post_url")))
 
 	if !valid {
 		c.Error(400, CodeInvalidLinkURL, MsgInvalidLinkURL)
