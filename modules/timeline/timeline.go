@@ -22,8 +22,18 @@ func PropagatePostOnCreation(c middleware.Context, post *models.Post) {
 		c.AsyncQuery(func(conn *services.Connection) {
 			var f models.Follow
 			allCompleted := true
+
+			// Propagate the post on the user's timeline
+			t.ID = bson.NewObjectId()
+			t.User = c.User.ID
+
+			if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
+				allCompleted = false
+				c.Tasks.PushFail("create_post", ID, c.User.ID)
+			}
+
 			iter := conn.Db.C("follows").Find(bson.M{"user_to": post.UserID}).Iter()
-			for iter.Next(&f) {
+			for iter.Next(&f) && allCompleted {
 				var u models.User
 				if err := conn.Db.C("users").FindId(f.From).One(&u); err == nil {
 					if post.CanBeAccessedBy(&u, conn) {
@@ -39,15 +49,6 @@ func PropagatePostOnCreation(c middleware.Context, post *models.Post) {
 					allCompleted = false
 					break
 				}
-			}
-            
-            // Propagate the post on the users timeline
-			t.ID = bson.NewObjectId()
-			t.User = c.User.ID
-
-			if _, err := conn.Db.C("timelines").UpsertId(t.ID, t); err != nil {
-				allCompleted = false
-				c.Tasks.PushFail("create_post", ID, c.User.ID)
 			}
 
 			if allCompleted {
