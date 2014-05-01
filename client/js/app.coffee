@@ -1,8 +1,8 @@
 'use strict'
 
-angular.module('mask.services', ['ngRoute'])
-angular.module('mask.controllers', ['mask.services'])
-angular.module('mask', ['ngRoute', 'ngCookies', 'mask.controllers', 'mask.services', 'pascalprecht.translate'])
+angular.module('sunglasses.services', ['ngRoute'])
+angular.module('sunglasses.controllers', ['sunglasses.services'])
+angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 'sunglasses.services', 'pascalprecht.translate'])
 .config([
     '$routeProvider',
     '$locationProvider',
@@ -56,7 +56,7 @@ angular.module('mask', ['ngRoute', 'ngCookies', 'mask.controllers', 'mask.servic
 ])
 .run(['$rootScope', '$translate', '$location', ($rootScope, $translate, $location) ->
     document.getElementsByTagName('title')[0].innerHTML = '{{ title | translate }}'
-    $rootScope.title = 'Mask'
+    $rootScope.title = 'sunglasses'
     
     # changes the language of the application
     $rootScope.changeLang = (lang) ->

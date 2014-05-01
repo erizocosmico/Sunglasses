@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	. "github.com/mvader/mask/error"
-	"github.com/mvader/mask/middleware"
-	"github.com/mvader/mask/models"
+	. "github.com/mvader/sunglasses/error"
+	"github.com/mvader/sunglasses/middleware"
+	"github.com/mvader/sunglasses/models"
 	"labix.org/v2/mgo/bson"
 	"strconv"
 )

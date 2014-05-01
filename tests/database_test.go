@@ -1,7 +1,7 @@
 package tests
 
 import (
-	. "github.com/mvader/mask/services"
+	. "github.com/mvader/sunglasses/services"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )

@@ -1,8 +1,8 @@
 package video
 
 import (
-	"github.com/mvader/mask/models"
-	"github.com/mvader/mask/util"
+	"github.com/mvader/sunglasses/models"
+	"github.com/mvader/sunglasses/util"
 	"net/http"
 	"regexp"
 )

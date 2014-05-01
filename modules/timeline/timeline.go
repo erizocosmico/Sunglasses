@@ -1,9 +1,9 @@
 package timeline
 
 import (
-	"github.com/mvader/mask/middleware"
-	"github.com/mvader/mask/models"
-	"github.com/mvader/mask/services"
+	"github.com/mvader/sunglasses/middleware"
+	"github.com/mvader/sunglasses/models"
+	"github.com/mvader/sunglasses/services"
 	"labix.org/v2/mgo/bson"
 )
 

@@ -8,10 +8,10 @@ import (
 	"github.com/martini-contrib/cors"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/strict"
-	"github.com/mvader/mask/handlers"
-	"github.com/mvader/mask/middleware"
-	"github.com/mvader/mask/services"
-	"github.com/mvader/mask/util"
+	"github.com/mvader/sunglasses/handlers"
+	"github.com/mvader/sunglasses/middleware"
+	"github.com/mvader/sunglasses/services"
+	"github.com/mvader/sunglasses/util"
 	"io/ioutil"
 	"log"
 	"os"
@@ -56,9 +56,9 @@ func NewApp(configPath string) (*App, error) {
 	// Create and setup logger
 	var logFile string
 	if strings.HasSuffix(config.LogsPath, "/") {
-		logFile = config.LogsPath + "mask.log"
+		logFile = config.LogsPath + "sunglasses.log"
 	} else {
-		logFile = config.LogsPath + "/mask.log"
+		logFile = config.LogsPath + "/sunglasses.log"
 	}
 
 	var file *os.File
@@ -66,7 +66,7 @@ func NewApp(configPath string) (*App, error) {
 		return nil, errors.New("unable to open or create log file: " + logFile)
 	}
 
-	logger := log.New(file, "[mask] ", 0)
+	logger := log.New(file, "[sunglasses] ", 0)
 
 	// Map config as *Config
 	m.Map(config)
@@ -74,7 +74,7 @@ func NewApp(configPath string) (*App, error) {
 	// Map conn as *Connection
 	m.Map(conn)
 
-	// Mask ts as *TaskService
+	// sunglasses ts as *TaskService
 	m.Map(ts)
 
 	// Map logger as *log.Logger

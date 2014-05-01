@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	. "github.com/mvader/mask/error"
-	"github.com/mvader/mask/middleware"
-	"github.com/mvader/mask/models"
-	"github.com/mvader/mask/modules/auth"
-	"github.com/mvader/mask/util"
+	. "github.com/mvader/sunglasses/error"
+	"github.com/mvader/sunglasses/middleware"
+	"github.com/mvader/sunglasses/models"
+	"github.com/mvader/sunglasses/modules/auth"
+	"github.com/mvader/sunglasses/util"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"strings"

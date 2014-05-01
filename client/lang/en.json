@@ -1,12 +1,13 @@
 {
     "headline": "Social interaction meets privacy.",
     "signup": "Sign up",
+    "search": "Search...",
     
-    "signup_section_username": "Choose an username. Mask does not require an email, a real name or a profile picture to get you started, you just have to choose an username.",
-    "signup_section_password": "Choose a password to access Mask.",
+    "signup_section_username": "Choose an username. Sunglasses does not require an email, a real name or a profile picture to get you started, you just have to choose an username.",
+    "signup_section_password": "Choose a password to access Sunglasses.",
     "signup_section_recovery": "Choose a recovery method. This will be the method used to recover your password in case you forget it.",
-    "signup_section_privacy": "You have been successfully signed up. Now it is time to setup your privacy. Mask cares a lot about your privacy, because of that by default you are completely private. You can choose between some predefined privacy settings now or setup your privacy settings yourself later.",
-    "signup_section_done": "You have been successfully signed up at Mask!",
+    "signup_section_privacy": "You have been successfully signed up. Now it is time to setup your privacy. Sunglasses cares a lot about your privacy, because of that by default you are completely private. You can choose between some predefined privacy settings now or setup your privacy settings yourself later.",
+    "signup_section_done": "You have been successfully signed up at Sunglasses!",
 
     "signup_step_username": "Username",
     "signup_step_password": "Password",
@@ -33,9 +34,22 @@
     "recovery_method_none": "None",
     "recovery_method_email": "Email",
     "recovery_method_question": "Secret question",
-    "start_using_mask": "Start using Mask!",
+    "start_using_sunglasses": "Start using Sunglasses!",
 
     "login": "Log in",
     "login_invalid_error": "Invalid username or password.",
-    "login_username_error": "Usernames can only contain letters, numbers or underscores and must be between 2 and 30 characters long."
+    "login_username_error": "Usernames can only contain letters, numbers or underscores and must be between 2 and 30 characters long.",
+
+    "no_posts_title": "There are no posts",
+    "no_posts_message": "Follow some users and posts things!",
+    "publish": "Publish",
+    "what_are_you_up_to": "What are you up to?",
+    "enter_link_url": "Enter an URL...",
+    "enter_video_url": "Enter an URL from Youtube or Vimeo...",
+    "error_post_invalid_url": "The submitted URL is not valid!",
+    "error_post_text_empty": "Post text can not be empty!",
+    "error_post_text_too_long": "Status text must not be more than 1500 characters long!",
+    "error_post_invalid_video_url": "The URL is not a valid vimeo or youtube url!",
+    "post_success": "Status posted successfully!",
+    "loading": "Loading..."
 }

@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/mvader/mask/services/interfaces"
+	"github.com/mvader/sunglasses/services/interfaces"
 	"labix.org/v2/mgo/bson"
 )
 

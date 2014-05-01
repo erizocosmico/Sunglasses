@@ -2,9 +2,9 @@ package auth
 
 import (
 	"github.com/gorilla/sessions"
-	"github.com/mvader/mask/models"
-	"github.com/mvader/mask/services/interfaces"
-	"github.com/mvader/mask/util"
+	"github.com/mvader/sunglasses/models"
+	"github.com/mvader/sunglasses/services/interfaces"
+	"github.com/mvader/sunglasses/util"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"time"

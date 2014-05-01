@@ -3,9 +3,9 @@ package tests
 import (
 	"encoding/json"
 	"github.com/gorilla/sessions"
-	. "github.com/mvader/mask/handlers"
-	. "github.com/mvader/mask/middleware"
-	. "github.com/mvader/mask/models"
+	. "github.com/mvader/sunglasses/handlers"
+	. "github.com/mvader/sunglasses/middleware"
+	. "github.com/mvader/sunglasses/models"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/http/httptest"

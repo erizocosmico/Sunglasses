@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/garyburd/redigo/redis"
-	"github.com/mvader/mask/models"
+	"github.com/mvader/sunglasses/models"
 	"labix.org/v2/mgo/bson"
 	"os"
 )

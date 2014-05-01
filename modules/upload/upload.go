@@ -3,9 +3,9 @@ package upload
 import (
 	"code.google.com/p/graphics-go/graphics"
 	"errors"
-	. "github.com/mvader/mask/error"
-	"github.com/mvader/mask/services"
-	"github.com/mvader/mask/util"
+	. "github.com/mvader/sunglasses/error"
+	"github.com/mvader/sunglasses/services"
+	"github.com/mvader/sunglasses/util"
 	"image"
 	"image/gif"
 	"image/jpeg"

@@ -1,11 +1,11 @@
 {
-  "name": "Mask",
+  "name": "Sunglasses",
   "version": "0.0.0",
-  "homepage": "https://github.com/mvader/Mask",
+  "homepage": "https://github.com/mvader/Sunglasses",
   "authors": [
     "José Miguel Molina <hi@mvader.me>"
   ],
-  "description": "Mask is a completely anonymous social platform with a great focus on privacy where you can get in touch with the people you want without having to worry about your data.",
+  "description": "Sunglasses is a social platform with a great focus on privacy where you can get in touch with the people you want without having to worry about your data.",
   "moduleType": [
     "amd",
     "globals",

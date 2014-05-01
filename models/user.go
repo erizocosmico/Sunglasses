@@ -3,8 +3,8 @@ package models
 import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"errors"
-	"github.com/mvader/mask/services/interfaces"
-	"github.com/mvader/mask/util"
+	"github.com/mvader/sunglasses/services/interfaces"
+	"github.com/mvader/sunglasses/util"
 	"labix.org/v2/mgo/bson"
 	"strings"
 )

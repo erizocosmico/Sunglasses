@@ -1,6 +1,6 @@
 package middleware
 
-import . "github.com/mvader/mask/error"
+import . "github.com/mvader/sunglasses/error"
 
 // LoginRequired returns an error if the user is not logged in
 func LoginRequired(c Context) {

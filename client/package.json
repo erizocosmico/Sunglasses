@@ -1,7 +1,7 @@
 {
-  "name": "Mask",
+  "name": "Sunglasses",
   "version": "0.0.0",
-  "description": "Mask is a completely anonymous social platform with a great focus on privacy where you can get in touch with the people you want without having to worry about your data.",
+  "description": "Sunglasses is a social platform with a great focus on privacy where you can get in touch with the people you want without having to worry about your data.",
   "main": "Gulpfile.js",
   "dependencies": {
   },
@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mvader/Mask"
+    "url": "https://github.com/mvader/Sunglasses"
   },
   "keywords": [
     "social",
@@ -34,6 +34,6 @@
   "author": "José Miguel Molina <hi@mvader.me>",
   "license": "GPL v3",
   "bugs": {
-    "url": "https://github.com/mvader/Mask/issues"
+    "url": "https://github.com/mvader/Sunglasses/issues"
   }
 }

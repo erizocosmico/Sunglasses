@@ -1,6 +1,6 @@
 'use strict'
 
-angular.module('mask.services')
+angular.module('sunglasses.services')
 # api is a shortcut to perform api calls
 .factory('api', () ->
     (url, method, params, success, error) ->

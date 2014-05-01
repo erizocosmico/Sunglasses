@@ -2,10 +2,10 @@ package tests
 
 import (
 	"encoding/json"
-	. "github.com/mvader/mask/error"
-	. "github.com/mvader/mask/handlers"
-	. "github.com/mvader/mask/models"
-	"github.com/mvader/mask/util"
+	. "github.com/mvader/sunglasses/error"
+	. "github.com/mvader/sunglasses/handlers"
+	. "github.com/mvader/sunglasses/models"
+	"github.com/mvader/sunglasses/util"
 	. "github.com/smartystreets/goconvey/convey"
 	"labix.org/v2/mgo/bson"
 	"net/http"

@@ -1,8 +1,8 @@
 package tests
 
 import (
-	. "github.com/mvader/mask/modules/upload"
-	. "github.com/mvader/mask/util"
+	. "github.com/mvader/sunglasses/modules/upload"
+	. "github.com/mvader/sunglasses/util"
 	. "github.com/smartystreets/goconvey/convey"
 	_ "image/gif"
 	_ "image/jpeg"

@@ -1,6 +1,6 @@
 'use strict'
 
-angular.module('mask.controllers')
+angular.module('sunglasses.controllers')
 .controller('SignupController', [
     '$scope',
     '$rootScope',

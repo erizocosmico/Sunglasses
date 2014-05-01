@@ -5,17 +5,17 @@ div#login-signup {
     
     .logo {
         margin: 0 auto;
-        height: 40px;
-        width: 89px;
-        background: #fafafa url(../images/mask_logo_gray.png);
-        background-size: cover;
-        opacity: 0.8;
+        font-family: 'Damion', cursive;
+        color: #1b71ad;
+        text-align: center;
+        font-size: 4.8em;
         margin-top: 50px;
         cursor: pointer;
-        transition: opacity 300ms ease-in-out;
+        font-weight: bold;
+        transition: color 300ms ease-in-out;
         
         &:hover {
-            opacity: 1.0;
+            color: darken(#1b71ad, 10%);
         }
     }
 
