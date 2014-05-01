@@ -2,7 +2,7 @@ package tests
 
 import (
 	"encoding/json"
-	"github.com/martini-contrib/sessions"
+	"github.com/gorilla/sessions"
 	. "github.com/mvader/mask/handlers"
 	. "github.com/mvader/mask/middleware"
 	. "github.com/mvader/mask/models"
@@ -100,7 +100,7 @@ func TestLogin(t *testing.T) {
 	Convey("Subject: Logging the user in", t, func() {
 
 		Convey("When we provide valid data the user will be logged in", func() {
-			var sess sessions.Session
+			var sess *sessions.Session
 			testPostHandler(func(c Context) {
 				sess = c.Session
 				Login(c)
@@ -112,13 +112,12 @@ func TestLogin(t *testing.T) {
 				req.PostForm.Add("password", "testing")
 			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
 				So(response.Code, ShouldEqual, 200)
-				So(sess.Get("user_token"), ShouldNotEqual, nil)
-				sess.Set("user_token", nil)
+				So(sess.Values["user_token"], ShouldNotEqual, nil)
 			})
 		})
 
 		Convey("When we request an user token with invalid data the response code will be 400", func() {
-			var sess sessions.Session
+			var sess *sessions.Session
 			testPostHandler(func(c Context) {
 				sess = c.Session
 				Login(c)
@@ -130,7 +129,7 @@ func TestLogin(t *testing.T) {
 				req.PostForm.Add("password", "testing")
 			}, conn, "/", "/", func(response *httptest.ResponseRecorder) {
 				So(response.Code, ShouldEqual, 400)
-				So(sess.Get("user_token"), ShouldEqual, nil)
+				So(sess.Values["user_token"], ShouldEqual, nil)
 				if err := user.Remove(conn); err != nil {
 					panic(err)
 				}

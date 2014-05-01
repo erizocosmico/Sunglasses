@@ -8,7 +8,7 @@
     "static_content_path": "/path/to/static/content",
     "secret_key": "my fancy secret key",
     "encryption_key": "qwertyuiopasdfghjklzxcvbnm123456",
-    "session_name": "mask_test",
+    "session_name": "mask_test_db",
     "secure_cookies": false,
     "store_path": "/path/to/store/dir/",
     "thumbnail_store_path": "/path/to/thumbnail/store/dir/",

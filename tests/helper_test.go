@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/go-martini/martini"
+	"github.com/gorilla/sessions"
 	"github.com/martini-contrib/render"
-	"github.com/martini-contrib/sessions"
 	. "github.com/mvader/mask/middleware"
 	"github.com/mvader/mask/models"
 	. "github.com/mvader/mask/services"
@@ -122,13 +122,8 @@ func testUploadFileHandler(file, key, url string, handler martini.Handler, conn 
 	m.Map(config)
 	m.Map(ts)
 	m.Use(render.Renderer())
-	store := sessions.NewCookieStore([]byte("secret123"))
-	store.Options(sessions.Options{
-		MaxAge:   0,
-		Secure:   false,
-		HttpOnly: true,
-	})
-	m.Use(sessions.Sessions("my_session", store))
+	store := sessions.NewCookieStore([]byte(config.SecretKey))
+	m.Map(store)
 	if middleware != nil {
 		m.Use(middleware)
 	}
@@ -166,13 +161,8 @@ func testHandler(methHandler func(*martini.ClassicMartini), middleware martini.H
 	m.Map(config)
 	m.Map(ts)
 	m.Use(render.Renderer())
-	store := sessions.NewCookieStore([]byte("secret123"))
-	store.Options(sessions.Options{
-		MaxAge:   0,
-		Secure:   false,
-		HttpOnly: true,
-	})
-	m.Use(sessions.Sessions("my_session", store))
+	store := sessions.NewCookieStore([]byte(config.SecretKey))
+	m.Map(store)
 	if middleware != nil {
 		m.Use(middleware)
 	}
