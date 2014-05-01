@@ -81,16 +81,23 @@ angular.module('mask', ['ngRoute', 'ngCookies', 'mask.controllers', 'mask.servic
             callback(elem)
         )
         
-    # display error
-    $rootScope.displayError = (field) ->
+    lastField = null
+    lastTimeout = null
+        
+    # display error or success
+    $rootScope.displayError = (field, success) ->
+        classType = if success? then 'success' else 'error'
         elem = document.getElementById(field)
-        elem.className = 'error animated fadeInUp'
-        window.setTimeout(() ->
+        elem.className = classType + ' animated fadeInUp'
+        lastField = field
+        lastTimeout = window.setTimeout(() ->
+            if lastField == field
+                window.clearTimeout(lastTimeout)
             if elem.className.indexOf('hidden') == -1
                 $rootScope.animateElem(
                     elem,
                     'fadeOutDown',
-                    (el) -> el.className = 'error hidden'
+                    (el) -> el.className = classType + ' hidden'
                 )
         , 6000)
 ])
