@@ -47,6 +47,7 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
                 controller: 'RecoverController'
             )
             .when('/',
+                controller: 'LandingController'
                 templateUrl: 'templates/landing.html'
             )
 
@@ -100,4 +101,35 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
                     (el) -> el.className = classType + ' hidden'
                 )
         , 6000)
+        
+    # returns the relative time
+    $rootScope.relativeTime = (time, dict, callback) ->
+        diff = Math.floor(new Date().getTime() / 1000) - Number(time)
+        unit = 's'
+        num = diff
+
+        # Minutes
+        if diff < 3600
+            num = Math.ceil(diff / 60)
+            unit = 'm'
+        # Hours
+        else if diff < 86400
+            num = Math.floor(diff / 3600)
+            unit = 'h'
+        # Days
+        else
+            num = Math.floor(diff / 86400)
+            unit = 'd'
+                
+        $translate(unit)
+        .then((s) ->
+            $translate('time_format')
+            .then((t) ->
+                str = t.replace('%num%', num).replace('%unit%', s)
+                if dict?
+                    dict.timeFormatted = str
+                else
+                    callback(str)
+            )
+        )
 ])
