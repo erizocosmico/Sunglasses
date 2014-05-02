@@ -50,9 +50,16 @@ func GetUserTimeline(c middleware.Context) {
 
 	iter.Close()
 
+	// Return empty response if there are no posts
+	if len(posts) == 0 {
+		c.Success(200, map[string]interface{}{
+			"posts": []string{},
+			"count": 0,
+		})
+		return
+	}
+
 	udata := models.GetUsersData(users, c.User, c.Conn)
-	// TODO: This would only be an error if there are not any timeline entries
-	// BUG: User data does not come with the post
 	if len(udata) == 0 {
 		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
@@ -71,7 +78,7 @@ func GetUserTimeline(c middleware.Context) {
 			p.Liked = l
 		}
 
-		if u, ok := udata[p.ID]; ok {
+		if u, ok := udata[p.UserID]; ok {
 			p.User = u
 		}
 
