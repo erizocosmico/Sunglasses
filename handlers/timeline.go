@@ -19,14 +19,12 @@ func GetUserTimeline(c middleware.Context) {
 		users       = make([]bson.ObjectId, 0, count)
 		postsResult = make([]models.Post, 0, count)
 		p           models.Post
-		newerThan   float64
+		newerThan   int64
 	)
 
-	n, err := strconv.ParseInt(c.Form("newer_than"), 10, 64)
+	newerThan, err := strconv.ParseInt(c.Form("newer_than"), 10, 64)
 	if err != nil {
 		newerThan = 0
-	} else {
-		newerThan = float64(n)
 	}
 
 	iter := c.Find("timelines", bson.M{
