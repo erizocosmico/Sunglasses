@@ -8,14 +8,24 @@ angular.module('sunglasses.services')
         params.signature = md5(url + csrfToken + timestamp)
         params.timestamp = timestamp
         
+        if method != 'GET'
+            data = new FormData()
+            for key, val of params
+                data.append(key, val)
+        else
+            data = params
+
         $.ajax(
             url: url,
             method: method,
+            cache: false,
             dataType: 'json',
-            data: params
+            processData: method == 'GET',
+            contentType: false,
+            data: data,
             success: (resp) ->
                 success(resp)
-            error: (resp) ->
+            , error: (resp) ->
                 if error?
                     error(resp)
                 else
