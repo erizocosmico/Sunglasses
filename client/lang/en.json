@@ -96,5 +96,7 @@
     "s": "s",
     "m": "m",
     "h": "h",
-    "d": "d"
+    "d": "d",
+    "upload_file": "Upload photo",
+    "picture_caption": "Photo caption"
 }
