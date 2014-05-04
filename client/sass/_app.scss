@@ -1,0 +1,432 @@
+@mixin post {
+    border: 1px solid darken(#fafafa, 2%);
+    border-radius: 5px;
+    background: #fff;
+    box-shadow: 0px 2px 2px rgba(black, .1);
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+div#app {
+    @include fullpage;
+    background-color: #fafafa;
+    
+    a {
+        color: #1b71ad;
+        text-decoration: none;
+        transition: all 200ms ease-in;
+        border-bottom: 1px solid #fff;
+        font-weight: 700;
+        
+        &:hover {
+            color: darken(#1b71ad, 10%);
+            border-bottom: 1px solid #1b71ad;
+        }
+    }
+    
+    #navbar {
+        width: 100%;
+        height: auto !important;
+        min-height: 0;
+        z-index: 9999;
+        position: fixed;
+        background: rgba(white, .8);
+        border-bottom: 1px solid darken(white, 15%);
+        box-shadow: 0px 2px 2px rgba(black, .05);
+        padding: 5px 50px;
+ 
+        .ng-scope {
+            height: auto;
+            width: auto;
+            min-height: 0;
+        }
+        
+        div.logo {
+            display: inline-block;
+            cursor: pointer;
+            font-size: 2.5em;
+            font-family: 'Damion', cursive;
+            color: lighten(#1b71ad, 10%);
+            text-shadow: none;
+            font-weight: bold;
+            vertical-align: middle;
+            transition: color 200ms ease-in;
+            
+            &:hover {
+                color: #1b71ad;
+            }
+        }
+        
+        .search-box {
+            background: darken(#fafafa, 5%);
+            
+            display: inline-block;
+            vertical-align: middle;
+            width: 30%;
+            margin-left: 25px;
+            border: 1px solid rgba(black, .2);
+            border-radius: 25px;
+            padding: 8px 20px;
+            box-shadow: 0px 0px 5px rgba(black, .1) inset;
+            transition: all 200ms ease-in-out;
+            
+            input {
+                font-size: 0.9em;
+                background: transparent;
+                color: darken(white, 80%);
+                vertical-align: middle;
+                padding: 0;
+                margin: 0;
+                border: none;
+                width: calc(100% - 50px);
+                display: inline-block;
+            }
+            
+            .search-button {
+                padding: 0;
+                margin: 0;
+                border: none;
+                background: transparent;
+                font-size: 1.6em;
+                float: right;
+                width: 30px;
+                height: 20px !important;
+                vertical-align: top;
+                
+                span {
+                    padding: 0;
+                    margin: 0;
+                    vertical-align: top;
+                }
+                
+                &:hover {
+                    color: #1b71ad;
+                }
+            }
+            
+            &:hover, &:focus {
+                background-color: #fafafa;
+                color: #000;
+            }
+        }
+        
+        ul {
+            display: inline-block;
+            list-style: none;
+            float: right;
+            padding: 0;
+            margin: 0;
+            text-align: right;
+            height: auto;
+            padding-top: 5px;
+            
+            li {
+                display: inline-block;
+                vertical-align: middle;
+                font-size: 1.2em;
+                height: auto;
+                margin-left: 20px;
+                padding: 5px 10px;
+                cursor: pointer;
+                color: darken(white, 50%);
+                
+                &:hover {
+                    background: #EEE;
+                    border-radius: 6px;
+                    color: #1b71ad;
+                }
+                
+                * {
+                    vertical-align: middle;
+                }
+                
+                .icon {
+                    font-size: 1.6em;
+                }
+            }
+        }
+    }
+    
+    #timeline {
+        width: 90%;
+        max-width: 600px;
+        margin: 70px auto;
+        
+        .post-box {
+            @include post;
+            
+            ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: block;
+                text-align: center;
+                
+                li {
+                    display: inline-block;
+                    width: 24%;
+                    text-align: center;
+                    
+                    span {
+                        font-size: 2.0em;
+                        padding: 7px 0;
+                        width: 100%;
+                        color: lighten(black, 50%);
+                        border-left: 1px solid darken(#fafafa, 6%);
+                        cursor: pointer;
+                        
+                        &.active {
+                            color: #1b71ad;
+                        }
+                    }
+                    
+                    &:first-child span { border-left: none }
+                }
+            }
+            
+            textarea, input {
+                width: 100%;
+                border: none;
+                border-top: 1px solid darken(#fafafa, 8%);
+                margin-top: 6px;
+                padding: 10px 10px 6px 10px;
+                line-height: 1.5em;
+                color: #555;
+            }
+            
+            button {
+                width: 60%;
+                margin: 10px auto;
+                background: #1b71ad;
+                padding: 8px;
+                display: block;
+                max-width: 250px;
+                font-size: 0.9em;
+                text-transform: uppercase;
+                transition: background-color 200ms ease-in-out;
+                border: none;
+                border-radius: 4px;
+                color: #fff;
+                margin-top: 20px;
+        
+                &:hover {
+                    background-color: darken(#1b71ad, 5%);
+                }
+                
+                &:active {
+                    box-shadow: 0px 0px 6px rgba(black, .3) inset;
+                }
+            }
+            
+            .upload-zone {
+                text-align: center;
+                border-top: 1px solid darken(#fafafa, 8%);
+                margin-top: 6px;
+                
+                button {
+                    width: auto;
+                    padding: 5px 15px;
+                    display: inline-block;
+                    font-size: 0.9em;
+                    background: darken(#fafafa, 20%);
+                    color: darken(#fafafa, 70%);
+                    font-weight: bold;
+                    
+                    &:hover {
+                        background-color: darken(#fafafa, 10%);
+                    }
+                    
+                    &:active {
+                        box-shadow: 0px 0px 6px rgba(black, .3) inset;
+                    }
+                }
+                
+                span {
+                    padding-left: 6px;
+                    font-size: 0.9em;
+                    max-width: 350px;
+                    word-wrap: break-word;
+                }
+            }
+        }
+        
+        .loading {
+            @include post;
+            padding: 10px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 400;
+        }
+        
+        .post {
+            @include post;
+            padding: 10px;
+            font-weight: 400;
+            font-size: 1.0em;
+            line-height: 1.5em;
+            
+            .user-data {
+                .default-avatar {
+                    width: 45px;
+                    border-radius: 50%;
+                    height: 45px;
+                    background-color: #1b71ad;
+                    text-align: center;
+                    float: left;
+                    margin-right: 10px;
+                    margin-bottom: 10px;
+                    box-shadow: 0px 0px 5px rgba(black, .1) inset;
+                    
+                    .ion {
+                        font-size: 1.8em;
+                        vertical-align: bottom;
+                        color: lighten(#fafafa, 5%);
+                        padding-top: 8px;
+                    }
+                }
+                
+                .username {
+                    font-weight: 400;
+                    display: inline-block;
+                    font-weight: 700;
+                }
+                
+                .time {
+                    font-size: 0.9em;
+                    display: block;
+                    color: #BBB;
+                }
+            }
+            
+            p.text {
+                padding: 0;
+                margin: 0;
+                padding-bottom: 10px;
+                font-weight: 400;
+                clear: both;
+            }
+            
+            .actions {
+                padding: 0;
+                margin: 0;
+                font-size: 1.1em;
+                
+                ul {
+                    padding: 0;
+                    margin: 0;
+                    list-style: none;
+                    
+                    li {
+                        display: inline-block;
+                        text-align: center;
+                        font-size: 0.8em;
+                        padding: 2px 15px;
+                        color: lighten(black, 50%);
+                        border-radius: 25px;
+                        border: 3px solid darken(#fafafa, 5%);
+                        margin-right: 10px;
+                        transition: all 200ms ease-in-out;
+                        cursor: pointer;
+                        
+                        span.count {
+                            font-size: 1.1em;
+                            vertical-align: middle;
+                            color: darken(#fafafa, 45%);
+                            font-weight: bold;
+                        }
+                        
+                        span.arrow {
+                            font-size: 0.8em !important;
+                        }
+                        
+                        &:hover {
+                            color: #1b71ad;
+                            border-color: #1b71ad;
+                            
+                            span.count {
+                                color: #333;
+                            }
+                        }
+                        
+                        span.ion {
+                            font-size: 1.6em;
+                            vertical-align: middle;
+                            padding-right: 5px;
+                        }
+                        
+                        &.pull-right {
+                            float: right;
+                            .ion {
+                                padding-right: 5px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        .no-posts-message {
+            @include post;
+            padding: 30px 50px;
+            
+            .emoticon {
+                font-size: 5.0em;
+                color: #1b71ad;
+                text-shadow: 0px -1px 0px white;
+                float: right;
+                vertical-align: top;
+                line-height: 0.6em;
+            }
+            
+            .title {
+                font-weight: 400;
+                color: darken(#fafafa, 70%);
+                font-size: 1.5em;
+                display: block;
+            }
+            
+            .message {
+                font-weight: 300;
+                color: darken(#fafafa, 50%);
+                font-size: 1.2em;
+                display: block;
+            }
+        }
+    }
+    
+    div.error, div.success {
+        background: lighten(#FF0000, 10%);
+        color: #FFF;
+        display: block;
+        width: 90%;
+        margin: 10px auto;
+        text-align: center;
+        position: relative;
+        font-size: 0.9em;
+        padding: 8px;
+        border-radius: 5px;
+
+        &:after {
+        	top: 100%;
+        	left: 50%;
+        	border: solid transparent;
+        	content: " ";
+        	height: 0;
+        	width: 0;
+        	position: absolute;
+        	pointer-events: none;
+        	border-color: transparent;
+        	border-top-color: lighten(#FF0000, 10%);
+        	border-width: 5px;
+        	margin-left: -5px;
+        }
+    }
+    
+    div.success {
+        background: #4bb05d !important;
+        
+        &:after {
+            border-top-color: #4bb05d !important;
+        }
+    }
+}
