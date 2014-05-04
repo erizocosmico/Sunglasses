@@ -34,14 +34,17 @@
         <div ng-repeat="post in posts" ng-hide="posts.length == 0">
             <div class="post">
                 <div class="user-data">
-                    <div class="avatar" ng-hide="getAvatarThumb(post.user) == ''"></div>
-                    <div class="default-avatar" ng-hide="getAvatarThumb(post.user) != ''">
+                    <div class="avatar" ng-hide="userService.getAvatarThumb(post.user) == ''"></div>
+                    <div class="default-avatar" ng-hide="userService.getAvatarThumb(post.user) != ''">
                         <span class="ion ion-android-contact"></span>
                     </div>
-                    <a href="#/u/{{ post.user.username.toLowerCase() }}" class="username">{{ getUsername(post.user) }}</a>
+                    <a href="#/u/{{ post.user.username.toLowerCase() }}" class="username">{{ userService.getUsername(post.user) }}</a>
                     <span class="time" ng-click="goTo('/posts/' + post.id)">{{ post.timeFormatted }}</span>
                 </div>
                 <p class="text">{{ post.text }}</p>
+                <div class="post-video" ng-hide="!postService.isKindOf(post, 'video')"><sun-video video-id="{{ post.video_id }}" service="{{ post.video_service }}"></div>
+                <div class="post-photo" ng-hide="!postService.isKindOf(post, 'photo')"></div>
+                <div class="post-link" ng-hide="!postService.isKindOf(post, 'link')"></div>
                 <div class="actions">
                     <ul>
                         <li ng-click="likePost(post)"><span class="ion ion-thumbsup"></span> <span class="count">{{ post.likes }}</span></li>

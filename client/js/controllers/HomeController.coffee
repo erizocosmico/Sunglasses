@@ -7,13 +7,17 @@ angular.module('sunglasses.controllers')
     '$rootScope',
     '$translate',
     'api',
-    ($scope, $rootScope, $translate, api) ->
+    'user',
+    'post',
+    ($scope, $rootScope, $translate, api, user, post) ->
         # number of posts retrieved
         $scope.postCount = 0
         # array of the previously retrieved posts
         $scope.posts = []
         # loading shows the loading dialog when new posts are being loaded
         $scope.loading = true
+        $scope.userService = user
+        $scope.postService = post
         
         # newPost creates a new empty post and changes the post status
         # that means it initializes the post-box to send another post after
@@ -34,28 +38,6 @@ angular.module('sunglasses.controllers')
             $scope.post.picture = e.target.files[0]
             document.getElementById('filename').innerHTML = $scope.post.picture.name
         )
-        
-        # TODO: Move to service
-        # retrieves the user avatar thumbnail (it can be public or private)
-        $scope.getAvatarThumb = (user) ->
-            if !user.avatar_thumbnail?
-                return user.avatar_thumbnail
-            else
-                return user.public_avatar_thumbnail
-        # retrieves the user avatar (it can be public or private)   
-        $scope.getAvatar = (post) ->
-            if !user.avatar?
-                return user.avatar
-            else
-                return user.public_avatar   
-        # retrieves the username (it can be public or private)
-        $scope.getUsername = (user) ->
-            if !user.private_name?
-                return user.private_name
-            else if !user.public_name?
-                return user.public_name
-            else
-                return user.username
             
         # shows an error or a success message
         showMsg = (text, field, success) ->
