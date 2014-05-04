@@ -110,9 +110,8 @@ angular.module('sunglasses.controllers')
                     username: $scope.username
                     password: $scope.password,
                     (resp) ->
-                        console.log(resp)
+                        console.log ":)"
                     (resp) ->
-                        console.log(resp.responseJSON)
                         $scope.errorVisible = true
                 )
               
@@ -145,7 +144,7 @@ angular.module('sunglasses.controllers')
                                 (resp) ->
                                     callback()
                                 , (resp) ->
-                                    console.log(resp)    
+                                    console.log ":("    
                             )
                             submitted = true
                     )
