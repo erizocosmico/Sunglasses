@@ -42,8 +42,15 @@
                     <span class="time" ng-click="goTo('/posts/' + post.id)">{{ post.timeFormatted }}</span>
                 </div>
                 <p class="text">{{ post.text }}</p>
-                <div class="post-video" ng-hide="!postService.isKindOf(post, 'video')"><sun-video video-id="{{ post.video_id }}" service="{{ post.video_service }}"></div>
-                <div class="post-photo" ng-hide="!postService.isKindOf(post, 'photo')"></div>
+                <div class="post-video" ng-hide="!postService.isKindOf(post, 'video')">
+                    <sun-video video-id="{{ post.video_id }}" service="{{ post.video_service }}">
+                </div>
+                <div class="post-photo" ng-hide="!postService.isKindOf(post, 'photo')" style="background-image: url({{ post.photo_url }})">
+                    <div class="photo">
+                        <img src="{{ post.thumbnail }}" title="{{ post.caption }}" ng-click="showPhotoTheater(post)">
+                        <p class="caption" ng-hide="post.caption.length < 1">{{ post.caption }}</p>
+                    </div>
+                </div>
                 <div class="post-link" ng-hide="!postService.isKindOf(post, 'link')"></div>
                 <div class="actions">
                     <ul>

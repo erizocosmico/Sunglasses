@@ -1,6 +1,7 @@
 'use strict'
 
 angular.module('sunglasses')
+# renders a video element from vimeo or youtube
 .directive('sunVideo', () ->
     getVideoWidget = (service, id) ->
         if Number(service) == 1
