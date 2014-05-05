@@ -220,10 +220,10 @@ func addRoutes(m *martini.ClassicMartini) {
 		}
 
 		if c.Session.Values["csrf_time"] == nil {
-			c.Session.Values["csrf_time"] = 0
+			c.Session.Values["csrf_time"] = int64(0)
 		}
 
-		if c.Session.Values["csrf_token"] == nil || time.Now().Unix()-int64(c.Session.Values["csrf_time"].(int)) > 10 {
+		if c.Session.Values["csrf_token"] == nil || time.Now().Unix()-c.Session.Values["csrf_time"].(int64) > 10 {
 			token = util.NewRandomHash()
 			c.Session.Values["csrf_token"] = token
 			c.Session.Values["csrf_time"] = time.Now().Unix()
