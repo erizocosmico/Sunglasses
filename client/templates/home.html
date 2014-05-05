@@ -47,11 +47,14 @@
                 </div>
                 <div class="post-photo" ng-hide="!postService.isKindOf(post, 'photo')" style="background-image: url({{ post.photo_url }})">
                     <div class="photo">
-                        <img src="{{ post.thumbnail }}" title="{{ post.caption }}" ng-click="showPhotoTheater(post)">
+                        <img data-ng-src="{{ post.thumbnail }}" title="{{ post.caption }}" ng-click="showPhotoTheater(post)">
                         <p class="caption" ng-hide="post.caption.length < 1">{{ post.caption }}</p>
                     </div>
                 </div>
-                <div class="post-link" ng-hide="!postService.isKindOf(post, 'link')"></div>
+                <div class="post-link" ng-hide="!postService.isKindOf(post, 'link')">
+                    <a ng-href="{{ post.link_url }}" target="_blank" title="{{ postService.getLinkTitle(post) }}">{{ postService.getLinkTitle(post) }}</a>
+                    <p class="url">{{ post.link_url }}</p>
+                </div>
                 <div class="actions">
                     <ul>
                         <li ng-click="likePost(post)"><span class="ion ion-thumbsup"></span> <span class="count">{{ post.likes }}</span></li>

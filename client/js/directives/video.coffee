@@ -9,7 +9,7 @@ angular.module('sunglasses')
             src="//www.youtube-nocookie.com/embed/'+id+'?rel=0" 
             frameborder="0" allowfullscreen></iframe>'
         else
-            return '<iframe src="//player.vimeo.com/video/'+id+'?color=1b71ad" 
+            return '<iframe src="//player.vimeo.com/video/'+id+'?color=2290d9" 
             width="500" height="281" frameborder="0" 
             webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>'
     
