@@ -70,7 +70,7 @@ angular.module('sunglasses.controllers')
                         $rootScope.relativeTime(post.created, post)
                 , (resp) ->
                     $scope.loading = false
-                    showMsg('error_code_' + resp.code, 'timeline-error')
+                    showMsg('error_code_' + resp.responseJSON.code, 'timeline-error')
             )
             
         # submits a post to the server
@@ -105,7 +105,7 @@ angular.module('sunglasses.controllers')
                             $scope.loadPosts(true)
                         , 4000)
                     , (resp) ->
-                        showMsg('error_code_' + resp.code, 'post-error')
+                        showMsg('error_code_' + resp.responseJSON.code, 'post-error')
                 )
                 
         $scope.handleUpload = () ->
