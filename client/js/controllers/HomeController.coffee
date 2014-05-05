@@ -9,7 +9,8 @@ angular.module('sunglasses.controllers')
     'api',
     'user',
     'post',
-    ($scope, $rootScope, $translate, api, user, post) ->
+    'photo',
+    ($scope, $rootScope, $translate, api, user, post, photo) ->
         # number of posts retrieved
         $scope.postCount = 0
         # array of the previously retrieved posts
@@ -18,6 +19,7 @@ angular.module('sunglasses.controllers')
         $scope.loading = true
         $scope.userService = user
         $scope.postService = post
+        $scope.photoService = photo
         
         # newPost creates a new empty post and changes the post status
         # that means it initializes the post-box to send another post after

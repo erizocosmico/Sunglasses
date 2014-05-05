@@ -79,7 +79,7 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
     $rootScope.animateElem = (elem, animation, callback) ->
         elem.className = 'animated ' + animation
         $(elem).one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', () ->
-            callback(elem)
+            if callback? then callback(elem)
         )
         
     lastField = null
