@@ -16,6 +16,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 // App represents the application, it contains the martini instance and the
@@ -197,6 +198,7 @@ func addRoutes(m *martini.ClassicMartini) {
 			content    []byte
 			strContent string
 			err        error
+			token      string
 		)
 
 		// Read app.html located on the static content path (public)
@@ -217,10 +219,20 @@ func addRoutes(m *martini.ClassicMartini) {
 			strContent = strings.Replace(strContent, "userData = undefined;", "userData = "+string(b)+";", 1)
 		}
 
+		if c.Session.Values["csrf_time"] == nil {
+			c.Session.Values["csrf_time"] = 0
+		}
+
+		if c.Session.Values["csrf_token"] == nil || time.Now().Unix()-int64(c.Session.Values["csrf_time"].(int)) > 10 {
+			token = util.NewRandomHash()
+			c.Session.Values["csrf_token"] = token
+			c.Session.Values["csrf_time"] = time.Now().Unix()
+			c.Session.Save(c.Request, c.ResponseWriter)
+		} else {
+			token = c.Session.Values["csrf_token"].(string)
+		}
+
 		// Set new csrf_token and replace it on the HTML page
-		token := util.NewRandomHash()
-		c.Session.Values["csrf_token"] = token
-		c.Session.Save(c.Request, c.ResponseWriter)
 		strContent = strings.Replace(strContent, "csrfToken = undefined;", "csrfToken = '"+token+"';", 1)
 
 		// Return page content
