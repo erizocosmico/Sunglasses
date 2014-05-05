@@ -23,8 +23,12 @@ func main() {
 	}()
 
 	if a.Config.UseHTTPS {
-		// TODO
+		if err := http.ListenAndServeTLS(a.Config.Port, a.Config.SSLCert, a.Config.SSLKey, a.Martini); err != nil {
+			a.Logger.Fatal(err)
+		}
 	} else {
-		http.ListenAndServe(a.Config.Port, a.Martini)
+		if err := http.ListenAndServe(a.Config.Port, a.Martini); err != nil {
+			a.Logger.Fatal(err)
+		}
 	}
 }

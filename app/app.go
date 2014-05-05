@@ -27,6 +27,7 @@ type App struct {
 	Config     *services.Config
 	Connection *services.Connection
 	LogFile    *os.File
+	Logger     *log.Logger
 }
 
 // NewApp creates a new application given a path to a config file
@@ -111,7 +112,7 @@ func NewApp(configPath string) (*App, error) {
 	// Add NotFound handler
 	m.Router.NotFound(strict.MethodNotAllowed, strict.NotFound)
 
-	return &App{m, config, conn, file}, nil
+	return &App{m, config, conn, file, logger}, nil
 }
 
 // addRoutes adds all necessary routes to a martini instance

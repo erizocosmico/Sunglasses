@@ -25,6 +25,8 @@ type Config struct {
 	WebThumbnailStorePath string `json:"web_thumbnail_store_path"`
 	LogsPath              string `json:"logs_path"`
 	UseHTTPS              bool   `json:"use_https"`
+	SSLCert               string `json:"ssl_cert"`
+	SSLKey                string `json:"ssl_key"`
 }
 
 // NewConfig creates a new config struct

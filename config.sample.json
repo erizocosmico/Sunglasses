@@ -15,5 +15,7 @@
     "web_store_path": "/path/to/store/dir/",
     "web_thumbnail_store_path": "/path/to/thumbnail/store/dir/",
     "logs_path": "../logs/",
-    "use_https": true
+    "use_https": true,
+    "ssl_cert": "/path/to/cert.pem",
+    "ssl_key": "/path/to/key.pem"
 }
