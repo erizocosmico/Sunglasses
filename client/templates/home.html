@@ -57,9 +57,9 @@
                 </div>
                 <div class="actions">
                     <ul>
-                        <li ng-click="likePost(post)"><span class="ion ion-thumbsup"></span> <span class="count">{{ post.likes }}</span></li>
+                        <li ng-click="likePost($index)" ng-class="posts[$index].className"><span class="ion ion-thumbsup"></span> <span class="count" ng-bind="posts[$index].likes"></span></li>
                         <li ng-click="commentPost(post)"><span class="ion ion-chatbubbles"></span> <span class="count">{{ post.comments_num }}</span></li>  
-                        <li ng-click="showSettings(post)" class="pull-right"><span class="ion ion-gear-b"></span><span class="arrow ion ion-arrow-down-b"></span></li>
+                        <li ng-show="postService.isMine(post)" ng-click="showSettings(post)" class="pull-right"><span class="ion ion-gear-b"></span><span class="arrow ion ion-arrow-down-b"></span></li>
                     </ul>
                 </div>
                 <div class="comments" ng-hide="!!post.comments.length">

@@ -399,6 +399,13 @@ div#app {
                             font-weight: bold;
                         }
                         
+                        &.liked {
+                            border-color: $base-blue !important;
+                            color: $base-blue !important;
+                            
+                            span.count { color: $base-blue }
+                        }
+                        
                         span.arrow {
                             font-size: 0.8em !important;
                         }

@@ -16,4 +16,7 @@ angular.module('sunglasses.services')
     # returns the post title or its url in case it does not have a title
     , getLinkTitle: (post) ->
         return if post.title? then post.title else post.link_url
+    # returns if a post belongs to the current user
+    , isMine: (post) ->
+        post.user.id == userData.id
 )

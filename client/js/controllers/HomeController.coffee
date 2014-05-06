@@ -70,6 +70,7 @@ angular.module('sunglasses.controllers')
                     
                     for post in $scope.posts
                         $rootScope.relativeTime(post.created, post)
+                        if post.liked then post.className = 'liked'
                 , (resp) ->
                     $scope.loading = false
                     showMsg('error_code_' + resp.responseJSON.code, 'timeline-error')
@@ -109,6 +110,27 @@ angular.module('sunglasses.controllers')
                     , (resp) ->
                         showMsg('error_code_' + resp.responseJSON.code, 'post-error')
                 )
+                
+        # likes a post
+        $scope.likePost = (index) ->
+            api(
+                '/api/posts/like/' + $scope.posts[index].id,
+                'PUT',
+                null,
+                (resp) ->
+                    $scope.$apply(() ->
+                        $scope.posts[index].liked = resp.liked
+                        $scope.posts[index].likes += if resp.liked then 1 else -1
+                    
+                        if resp.liked
+                            $scope.posts[index].className = 'liked animated bounceIn'
+                        else
+                            $scope.posts[index].className = ''
+                    )
+                , (resp) ->
+                    # TODO default error popup
+                    showMsg('error_code_' + resp.responseJSON.code, 'post-error')
+            )
                 
         $scope.handleUpload = () ->
             e = document.createEvent('Event')

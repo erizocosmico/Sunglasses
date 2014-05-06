@@ -4,6 +4,7 @@ angular.module('sunglasses.services')
 # api is a shortcut to perform api calls
 .factory('api', () ->
     (url, method, params, success, error) ->
+        params = if params? then params else {}
         timestamp = new Date().getTime()
         params.signature = md5(url + csrfToken + timestamp)
         params.timestamp = timestamp
