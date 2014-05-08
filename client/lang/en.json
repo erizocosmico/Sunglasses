@@ -98,5 +98,11 @@
     "h": "h",
     "d": "d",
     "upload_file": "Upload photo",
-    "picture_caption": "Photo caption"
+    "picture_caption": "Photo caption",
+    "privacy": "Privacy",
+    
+    "delete_post_title": "Delete post",
+    "delete_post_message": "Do you really want to delete this post?",
+    "delete": "Delete",
+    "cancel": "Cancel"
 }

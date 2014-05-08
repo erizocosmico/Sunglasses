@@ -10,7 +10,8 @@ angular.module('sunglasses.controllers')
     'user',
     'post',
     'photo',
-    ($scope, $rootScope, $translate, api, user, post, photo) ->
+    'confirm',
+    ($scope, $rootScope, $translate, api, user, post, photo, confirm) ->
         # number of posts retrieved
         $scope.postCount = 0
         # array of the previously retrieved posts
@@ -20,6 +21,7 @@ angular.module('sunglasses.controllers')
         $scope.userService = user
         $scope.postService = post
         $scope.photoService = photo
+        $scope.confirm = confirm
         
         # newPost creates a new empty post and changes the post status
         # that means it initializes the post-box to send another post after
@@ -74,6 +76,24 @@ angular.module('sunglasses.controllers')
                 , (resp) ->
                     $scope.loading = false
                     showMsg('error_code_' + resp.responseJSON.code, 'timeline-error')
+            )
+            
+        # delete a post
+        $scope.deletePost = (post) ->
+            $scope.confirm.showDialog('delete_post_title', 'delete_post_message', 'cancel', 'delete', () ->
+                api(
+                    '/api/posts/destroy/' + post.id,
+                    'DELETE',
+                    null,
+                    (resp) ->
+                        $scope.$apply(() ->
+                            index = $scope.posts.indexOf(post)
+                            $scope.posts.splice(index, 1)
+                        )
+                    , (resp) ->
+                        # TODO: General error handling
+                        console.log(resp)
+                )
             )
             
         # submits a post to the server
@@ -150,4 +170,5 @@ angular.module('sunglasses.controllers')
             $scope.post.url = ''
                 
         $scope.loadPosts()
+        $('.ui.dropdown').dropdown()
 ])

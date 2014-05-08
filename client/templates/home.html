@@ -33,6 +33,7 @@
 
         <div ng-repeat="post in posts" ng-hide="posts.length == 0">
             <div class="post">
+                <div ng-show="postService.isMine(post)" ng-click="deletePost(post)" class="pull-right inline-icon"><span class="ion ion-close-round"></span></div>
                 <div class="user-data">
                     <div class="avatar" ng-hide="userService.getAvatarThumb(post.user) == ''"></div>
                     <div class="default-avatar" ng-hide="userService.getAvatarThumb(post.user) != ''">
@@ -59,7 +60,7 @@
                     <ul>
                         <li ng-click="likePost($index)" ng-class="posts[$index].className"><span class="ion ion-thumbsup"></span> <span class="count" ng-bind="posts[$index].likes"></span></li>
                         <li ng-click="commentPost(post)"><span class="ion ion-chatbubbles"></span> <span class="count">{{ post.comments_num }}</span></li>  
-                        <li ng-show="postService.isMine(post)" ng-click="showSettings(post)" class="pull-right"><span class="ion ion-gear-b"></span><span class="arrow ion ion-arrow-down-b"></span></li>
+                        <li ng-show="postService.isMine(post)" ng-click="changePostPrivacy(post)" class="pull-right"><span class="ion ion-gear-b icon-only"></span></li>
                     </ul>
                 </div>
                 <div class="comments" ng-hide="!!post.comments.length">
@@ -72,6 +73,7 @@
             <span class="title">{{ 'no_posts_title' | translate }}</span>
             <span class="message">{{ 'no_posts_message' | translate }}</span>
         </div>
+        <photo-theater />
     </div> 
-    <photo-theater>
+    <confirm-dialog />
 </div>
