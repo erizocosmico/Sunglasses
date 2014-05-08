@@ -6,6 +6,7 @@ import (
 	"github.com/go-martini/martini"
 	"github.com/gorilla/sessions"
 	"github.com/martini-contrib/cors"
+	"github.com/martini-contrib/gzip"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/strict"
 	"github.com/mvader/sunglasses/handlers"
@@ -82,6 +83,9 @@ func NewApp(configPath string) (*App, error) {
 	// Map logger as *log.Logger
 	m.Map(logger)
 
+	// Setup gzip middleware
+	m.Use(gzip.All())
+
 	// Setup CORS
 	m.Use(cors.Allow(&cors.Options{
 		AllowOrigins:     []string{"https://*"},
@@ -95,8 +99,8 @@ func NewApp(configPath string) (*App, error) {
 	m.Use(render.Renderer())
 
 	// Setup store paths
-	m.Use(martini.Static(config.StorePath))
-	m.Use(martini.Static(config.ThumbnailStorePath))
+	m.Use(martini.Static(config.StorePath, martini.StaticOptions{Prefix: config.WebStorePath}))
+	m.Use(martini.Static(config.ThumbnailStorePath, martini.StaticOptions{Prefix: config.WebThumbnailStorePath}))
 	m.Use(martini.Static(config.StaticContentPath))
 
 	// Setup sessions
