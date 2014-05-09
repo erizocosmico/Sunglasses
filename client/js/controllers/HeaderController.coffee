@@ -16,7 +16,7 @@ angular.module('sunglasses.controllers')
         $scope.toggleMenu = (menuType, closeCallback) ->
             m = menuType + '-menu'
             menu = document.getElementById(m)
-            if menu.className.indexOf('hidden ng-scope') != -1
+            if menu.className.indexOf('hidden') != -1
                 if menuType == 'settings'
                     $scope.settingsMenuOpened = true
                     
