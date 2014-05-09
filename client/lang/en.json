@@ -104,5 +104,8 @@
     "delete_post_title": "Delete post",
     "delete_post_message": "Do you really want to delete this post?",
     "delete": "Delete",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    
+    "logout": "Log out",
+    "settings": "Settings"
 }

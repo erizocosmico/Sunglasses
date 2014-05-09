@@ -1,11 +1,18 @@
-<div class="logo" ng-click="goHome()">Sunglasses</div>
-<div class="search-box">
-    <input type="text" placeholder="{{ 'search' | translate }}" ng-model="query">
-    <button class="search-button" ng-hide="query.trim().length == 0"><span class="ion ion-arrow-right-c"></span></button>
+<div id="navbar">
+    <div class="logo" ng-click="goHome()">Sunglasses</div>
+    <div class="search-box">
+        <input type="text" placeholder="{{ 'search' | translate }}" ng-model="query">
+        <button class="search-button" ng-hide="query.trim().length == 0"><span class="ion ion-arrow-right-c"></span></button>
+    </div>
+    <ul class="rightside-menu">
+        <li><span class="ion icon ion-home"></span></li>
+        <li><span class="ion icon ion-person"></span></li>
+        <li><span class="icon ion ion-ios7-bell"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
+        <li ng-click="toggleSettingsMenu()"><span class="icon ion ion-ios7-gear"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
+    </ul>
 </div>
-<ul class="rightside-menu">
-    <li><span class="ion icon ion-home"></span></li>
-    <li><span class="ion icon ion-person"></span></li>
-    <li><span class="icon ion ion-ios7-bell"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
-    <li><span class="icon ion ion-ios7-gear"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
+
+<ul id="settings-menu" class="hidden">
+    <li><a href="#/settings">{{ 'settings' | translate }}</a></li>
+    <li><a href="/account/logout">{{ 'logout' | translate }}</a></li>
 </ul>
