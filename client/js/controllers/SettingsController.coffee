@@ -8,7 +8,14 @@ angular.module('sunglasses.controllers')
     ($scope, $rootScope, api) ->
         $rootScope.title = 'settings'
         
+        $scope.settings = userData.settings
+        console.log $scope.settings.invisible
+        
         $scope.activeSection = 'account_details'
         $scope.setActiveSection = (section) ->
             $scope.activeSection = section
+            
+        (() ->
+            $('.ui.checkbox').checkbox()
+        )()
 ])

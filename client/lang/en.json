@@ -113,5 +113,19 @@
     "account_info": "Account information",
     "account_details": "Account details",
     "account_privacy": "Privacy settings",
-    "account_recovery": "Recovery settings"
+    "account_recovery": "Recovery settings",
+    
+    "invisible": "Invisible to other users",
+    "can_receive_requests": "Accept follow requests from other users",
+    "follow_approval_required": "Follow approval required before follow",
+    "dislplay_avatar_before_approval": "Display private avatar before approval",
+    "notify_new_comment": "Notify new comments on your posts",
+    "notify_new_comment_others": "Notify new comments on others posts",
+    "notify_posts_in_my_profile": "Notify new posts in your profile",
+    "allow_comments_in_posts": "Allow comments in your posts",
+    "notify_likes": "Notify likes",
+    "allow_posts_in_my_profile": "Allow users to post on your profile",
+    "display_info_followers_only": "Display information to followers only",
+    
+    "update_settings": "Update settings"
 }

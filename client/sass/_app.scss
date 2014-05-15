@@ -7,6 +7,30 @@
     margin-bottom: 10px;
 }
 
+@mixin base-button {
+    width: 60%;
+    margin: 10px auto;
+    background: $base-blue;
+    padding: 8px;
+    display: block;
+    max-width: 250px;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    transition: background-color 200ms ease-in-out;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    margin-top: 20px;
+
+    &:hover {
+        background-color: darken($base-blue, 5%);
+    }
+    
+    &:active {
+        box-shadow: 0px 0px 6px rgba(black, .3) inset;
+    }
+}
+
 div#app {
     @include fullpage;
     background-color: darken(#fafafa, 2%);
@@ -15,6 +39,10 @@ div#app {
         width: 90%;
         max-width: 800px;
         margin: 90px auto;
+    }
+    
+    button {
+        @include base-button;
     }
     
     a {
@@ -253,27 +281,7 @@ div#app {
             }
             
             button {
-                width: 60%;
-                margin: 10px auto;
-                background: $base-blue;
-                padding: 8px;
-                display: block;
-                max-width: 250px;
-                font-size: 0.9em;
-                text-transform: uppercase;
-                transition: background-color 200ms ease-in-out;
-                border: none;
-                border-radius: 4px;
-                color: #fff;
-                margin-top: 20px;
-        
-                &:hover {
-                    background-color: darken($base-blue, 5%);
-                }
-                
-                &:active {
-                    box-shadow: 0px 0px 6px rgba(black, .3) inset;
-                }
+                @include base-button;
             }
             
             .upload-zone {
@@ -666,6 +674,7 @@ div#app {
                         border-radius: 6px;
                         font-weight: bold;
                         box-shadow: 0px 0px 5px rgba(black, .1);
+                        color: $base-blue;
                         
                         &:after {
                         	bottom: 0%;
@@ -701,7 +710,14 @@ div#app {
             }
             
             article {
-                
+                .field {
+                    padding: 15px;
+                    border-bottom: 1px solid #EEE;
+                    
+                    &:last-child {
+                        border-bottom: none;
+                    }
+                }
             }
         }
     }

@@ -20,6 +20,74 @@
             </article>
         
             <article ng-show="activeSection == 'account_settings'">
+                <div class="field">
+                    <div class="ui toggle checkbox">
+                      <input type="checkbox" ng-model="settings.invisible">
+                      <label>{{ 'invisible' | translate }}</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui toggle checkbox">
+                      <input type="checkbox" ng-model="settings.can_receive_requests">
+                      <label>{{ 'can_receive_requests' | translate }}</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui toggle checkbox">
+                      <input type="checkbox" ng-model="settings.follow_approval_required">
+                      <label>{{ 'follow_approval_required' | translate }}</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui toggle checkbox">
+                      <input type="checkbox" ng-model="settings.dislplay_avatar_before_approval">
+                      <label>{{ 'dislplay_avatar_before_approval' | translate }}</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui toggle checkbox">
+                      <input type="checkbox" ng-model="settings.notify_new_comment">
+                      <label>{{ 'notify_new_comment' | translate }}</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui toggle checkbox">
+                      <input type="checkbox" ng-model="settings.notify_new_comment_others">
+                      <label>{{ 'notify_new_comment_others' | translate }}</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui toggle checkbox">
+                      <input type="checkbox" ng-model="settings.notify_posts_in_my_profile">
+                      <label>{{ 'notify_posts_in_my_profile' | translate }}</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui toggle checkbox">
+                      <input type="checkbox" ng-model="settings.notify_likes">
+                      <label>{{ 'notify_likes' | translate }}</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui toggle checkbox">
+                      <input type="checkbox" ng-model="settings.allow_posts_in_my_profile">
+                      <label>{{ 'allow_posts_in_my_profile' | translate }}</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui toggle checkbox">
+                      <input type="checkbox" ng-model="settings.allow_comments_in_posts">
+                      <label>{{ 'allow_comments_in_posts' | translate }}</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui toggle checkbox">
+                      <input type="checkbox" ng-model="settings.display_info_followers_only">
+                      <label>{{ 'display_info_followers_only' | translate }}</label>
+                    </div>
+                </div>
+                
+                <button ng-click="updateSettings()">{{ 'update_settings' | translate }}</button>
             </article>
         
             <article ng-show="activeSection == 'account_info'">
@@ -31,5 +99,6 @@
             <article ng-show="activeSection == 'account_recovery'">
             </article>
         </section>
+        <div class="clear"></div>
     </div>
 </div>
