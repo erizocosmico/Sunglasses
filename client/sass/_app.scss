@@ -11,6 +11,12 @@ div#app {
     @include fullpage;
     background-color: darken(#fafafa, 2%);
     
+    .wrap {
+        width: 90%;
+        max-width: 800px;
+        margin: 90px auto;
+    }
+    
     a {
         color: $base-blue;
         text-decoration: none;
@@ -633,6 +639,69 @@ div#app {
             
             &:hover {
                 background: lighten(black, 20%);
+            }
+        }
+    }
+    
+    .settings {
+        aside {
+            width: 29%;
+            float: left;
+            
+            ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                padding-right: 30px;
+                
+                li {
+                    display: block;
+                    padding: 10px 15px;
+                    font-size: 1.1em;
+                    cursor: pointer;
+                    position: relative;
+
+                    &.active {
+                        background: white;
+                        border-radius: 6px;
+                        font-weight: bold;
+                        box-shadow: 0px 0px 5px rgba(black, .1);
+                        
+                        &:after {
+                        	bottom: 0%;
+                        	left: 100%;
+                        	border: solid transparent;
+                        	content: " ";
+                        	height: 0;
+                        	width: 0;
+                        	position: absolute;
+                        	pointer-events: none;
+                        	border-color: transparent;
+                        	border-left-color: white;
+                        	border-width: 20px;
+                        	margin-left: -3px;
+                        }
+                    }
+                }
+            }
+        }
+        
+        section {
+            background-color: white;
+            padding: 20px;
+            padding-top: 0;
+            border-radius: 5px;
+            box-shadow: 0px 2px 3px rgba(black, .1);
+            width: 70%;
+            float: right;
+
+            h1 {
+                font-weight: 300;
+                font-size: 2.5em;
+            }
+            
+            article {
+                
             }
         }
     }

@@ -25,6 +25,10 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
                 templateUrl: 'templates/profile.html'
                 controller: 'ProfileController'
             )
+            .when('/settings',
+                templateUrl: 'templates/settings.html'
+                controller: 'SettingsController'
+            )
             .when('/',
                 templateUrl: 'templates/home.html'
                 controller: 'HomeController'

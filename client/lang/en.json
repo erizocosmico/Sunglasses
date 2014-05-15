@@ -107,5 +107,11 @@
     "cancel": "Cancel",
     
     "logout": "Log out",
-    "settings": "Settings"
+    "settings": "Settings",
+    
+    "account_settings": "Account settings",
+    "account_info": "Account information",
+    "account_details": "Account details",
+    "account_privacy": "Privacy settings",
+    "account_recovery": "Recovery settings"
 }

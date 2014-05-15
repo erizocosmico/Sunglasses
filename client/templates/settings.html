@@ -1,0 +1,35 @@
+<div id="app">
+    <header ng-controller="HeaderController">
+        <div ng-include="templateUrl"></div>
+    </header>
+    
+    <div class="wrap settings">
+        <aside>
+            <ul>
+                <li ng-class="{active: activeSection == 'account_details'}" ng-click="setActiveSection('account_details')">{{ 'account_details' | translate }}</li>
+                <li ng-class="{active: activeSection == 'account_settings'}" ng-click="setActiveSection('account_settings')">{{ 'account_settings' | translate }}</li>
+                <li ng-class="{active: activeSection == 'account_info'}" ng-click="setActiveSection('account_info')">{{ 'account_info' | translate }}</li>
+                <li ng-class="{active: activeSection == 'account_privacy'}" ng-click="setActiveSection('account_privacy')">{{ 'account_privacy' | translate }}</li>
+                <li ng-class="{active: activeSection == 'account_recovery'}" ng-click="setActiveSection('account_recovery')">{{ 'account_recovery' | translate }}</li>
+            </ul>
+        </aside>
+    
+        <section>
+            <h1>{{ activeSection | translate }}</h1>
+            <article ng-show="activeSection == 'account_details'">
+            </article>
+        
+            <article ng-show="activeSection == 'account_settings'">
+            </article>
+        
+            <article ng-show="activeSection == 'account_info'">
+            </article>
+        
+            <article ng-show="activeSection == 'account_privacy'">
+            </article>
+        
+            <article ng-show="activeSection == 'account_recovery'">
+            </article>
+        </section>
+    </div>
+</div>
