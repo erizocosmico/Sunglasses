@@ -81,27 +81,27 @@ type UserInfo struct {
 
 // UserSettings stores the user preferences
 type UserSettings struct {
-	Invisible                   bool           `json:"invisible,omitempty" bson:"invisible"`
-	CanReceiveRequests          bool           `json:"can_receive_requests,omitempty" bson:"can_receive_requests"`
-	FollowApprovalRequired      bool           `json:"follow_approval_required,omitempty" bson:"follow_approval_required"`
-	DisplayAvatarBeforeApproval bool           `json:"display_avatar_before_approval,omitempty" bson:"display_avatar_before_approval"`
-	NotifyNewComment            bool           `json:"notify_new_comment,omitempty" bson:"notify_new_comment"`
-	NotifyNewCommentOthers      bool           `json:"notify_new_comment_others,omitempty" bson:"notify_new_comment_others"`
-	NotifyPostsInMyProfile      bool           `json:"notify_posts_in_my_profile,omitempty" bson:"notify_posts_in_my_profile"`
-	NotifyLikes                 bool           `json:"notify_likes,omitempty" bson:"notify_likes"`
-	AllowPostsInMyProfile       bool           `json:"allow_posts_in_my_profile,omitempty" bson:"allow_posts_in_my_profile"`
-	AllowCommentsInPosts        bool           `json:"allow_comments_in_posts,omitempty" bson:"allow_comments_in_posts"`
-	DisplayInfoFollowersOnly    bool           `json:"display_info_followers_only,omitempty" bson:"display_info_followers_only"`
-	PasswordRecoveryMethod      RecoveryMethod `json:"recovery_method,omitempty" bson:"recovery_method"`
-	RecoveryQuestion            string         `json:"recovery_question,omitempty" bson:"recovery_question,omitempty"`
-	RecoveryAnswer              string         `json:"recovery_answer,omitempty" bson:"recovery_answer,omitempty"`
+	Invisible                   bool           `json:"invisible" bson:"invisible"`
+	CanReceiveRequests          bool           `json:"can_receive_requests" bson:"can_receive_requests"`
+	FollowApprovalRequired      bool           `json:"follow_approval_required" bson:"follow_approval_required"`
+	DisplayAvatarBeforeApproval bool           `json:"display_avatar_before_approval" bson:"display_avatar_before_approval"`
+	NotifyNewComment            bool           `json:"notify_new_comment" bson:"notify_new_comment"`
+	NotifyNewCommentOthers      bool           `json:"notify_new_comment_others" bson:"notify_new_comment_others"`
+	NotifyPostsInMyProfile      bool           `json:"notify_posts_in_my_profile" bson:"notify_posts_in_my_profile"`
+	NotifyLikes                 bool           `json:"notify_likes" bson:"notify_likes"`
+	AllowPostsInMyProfile       bool           `json:"allow_posts_in_my_profile" bson:"allow_posts_in_my_profile"`
+	AllowCommentsInPosts        bool           `json:"allow_comments_in_posts" bson:"allow_comments_in_posts"`
+	DisplayInfoFollowersOnly    bool           `json:"display_info_followers_only" bson:"display_info_followers_only"`
+	PasswordRecoveryMethod      RecoveryMethod `json:"recovery_method" bson:"recovery_method"`
+	RecoveryQuestion            string         `json:"recovery_question" bson:"recovery_question"`
+	RecoveryAnswer              string         `json:"recovery_answer" bson:"recovery_answer"`
 	// If this is true DefaultStatusPrivacy will override all the other settings
-	OverrideDefaultPrivacy bool            `json:"override_default_privacy,omitempty" bson:"override_default_privacy,omitempty"`
-	DefaultStatusPrivacy   PrivacySettings `json:"default_status_privacy,omitempty" bson:"default_status_privacy,omitempty"`
-	DefaultVideoPrivacy    PrivacySettings `json:"default_video_privacy,omitempty" bson:"default_video_privacy,omitempty"`
-	DefaultPhotoPrivacy    PrivacySettings `json:"default_photo_privacy,omitempty" bson:"default_photo_privacy,omitempty"`
-	DefaultLinkPrivacy     PrivacySettings `json:"default_link_privacy,omitempty" bson:"default_link_privacy,omitempty"`
-	DefaultAlbumPrivacy    PrivacySettings `json:"default_album_privacy,omitempty" bson:"default_album_privacy,omitempty"`
+	OverrideDefaultPrivacy bool            `json:"override_default_privacy" bson:"override_default_privacy"`
+	DefaultStatusPrivacy   PrivacySettings `json:"default_status_privacy" bson:"default_status_privacy"`
+	DefaultVideoPrivacy    PrivacySettings `json:"default_video_privacy" bson:"default_video_privacy"`
+	DefaultPhotoPrivacy    PrivacySettings `json:"default_photo_privacy" bson:"default_photo_privacy"`
+	DefaultLinkPrivacy     PrivacySettings `json:"default_link_privacy" bson:"default_link_privacy"`
+	DefaultAlbumPrivacy    PrivacySettings `json:"default_album_privacy" bson:"default_album_privacy"`
 }
 
 // NewUser returns a new User instance
