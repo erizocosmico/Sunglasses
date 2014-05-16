@@ -714,6 +714,16 @@ div#app {
                     padding: 15px;
                     border-bottom: 1px solid #EEE;
                     
+                    .expanded-label {
+                        width: 45%;
+                        display: inline-block;
+                    }
+                    
+                    .ui.dropdown {
+                        width: 50%;
+                        text-align: center;
+                    }
+                    
                     &:last-child {
                         border-bottom: none;
                     }

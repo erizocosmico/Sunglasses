@@ -352,6 +352,7 @@ func UpdateAccountSettings(c middleware.Context) {
 				return
 			}
 		}
+        // TODO: Recover by email
 	} else {
 		s.PasswordRecoveryMethod = models.RecoveryNone
 	}

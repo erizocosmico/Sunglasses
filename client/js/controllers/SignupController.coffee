@@ -27,7 +27,7 @@ angular.module('sunglasses.controllers')
         $('.ui.dropdown').dropdown(
             onChange: (val) ->
                 $('.error').addClass('hidden')
-                $scope.user.recovery_method = parseInt(val)
+                $scope.user.recovery_method = Number(val)
                 question = document.getElementById('recovery-question')
                 answer = document.getElementById('recovery-answer')
                 email = document.getElementById('recovery-email')

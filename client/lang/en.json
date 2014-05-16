@@ -126,6 +126,21 @@
     "notify_likes": "Notify likes",
     "allow_posts_in_my_profile": "Allow users to post on your profile",
     "display_info_followers_only": "Display information to followers only",
+    "override_default_privacy": "Set default privacy settings for all post types",
+    
+    "select_privacy_type": "Select privacy type",
+    "default_status_privacy": "Default privacy for statuses",
+    "default_photo_privacy": "Default privacy for photos",
+    "default_video_privacy": "Default privacy for videos",
+    "default_link_privacy": "Default privacy for links",
+    "privacy_type_public": "Public",
+    "privacy_type_followers_only": "Followings only",
+    "privacy_type_following_only": "Followers only",
+    "privacy_type_none": "None",
+    "privacy_type_all_but": "All except",
+    "privacy_type_none_but": "None except",
+    "privacy_type_following_but": "All followings except",
+    "privacy_type_followers_but": "All followers except",
     
     "update_settings": "Update settings"
 }
