@@ -3,7 +3,7 @@
     "headline": "Social interaction meets privacy.",
     "signup": "Sign up",
     "search": "Search...",
-    
+
     "signup_section_username": "Choose an username. Sunglasses does not require an email, a real name or a profile picture to get you started, you just have to choose an username.",
     "signup_section_password": "Choose a password to access Sunglasses.",
     "signup_section_recovery": "Choose a recovery method. This will be the method used to recover your password in case you forget it.",
@@ -15,7 +15,7 @@
     "signup_step_recovery": "Recovery method",
     "signup_step_privacy": "Privacy settings",
     "signup_step_done": "Done!",
-    
+
     "signup_username_error": "Invalid username or taken. Usernames can only contain letters, numbers or underscores and must be between 2 and 30 characters long.",
     "signup_password_error": "Invalid password. Passwords must be at least 6 characters long.",
     "signup_password_repeat_error": "Passwords do not match.",
@@ -23,7 +23,7 @@
     "signup_recovery_answer_error": "The recovery answer can not be blank.",
     "signup_recovery_email_error": "Invalid recovery email.",
     "signup_recovery_email_info": "We will not store your email as plain text, we will store a hash.",
-    
+
     "continue": "Continue",
     "username": "Enter your username",
     "password": "Enter your password",
@@ -53,7 +53,7 @@
     "error_post_invalid_video_url": "The URL is not a valid vimeo or youtube url!",
     "post_success": "Status posted successfully!",
     "loading": "Loading...",
-    
+
     "error_code_1": "Invalid access token provided",
     "error_code_2": "Invalid user token provided",
     "error_code_3": "Token not found",
@@ -91,7 +91,7 @@
     "error_code_58": "Invalid link URL",
     "error_code_59": "Invalid user list provided",
     "error_code_60": "Comment text must not be more than 500 characters long or be empty",
-    
+
     "time_format": "%num%%unit% ago",
     "s": "s",
     "m": "m",
@@ -100,25 +100,25 @@
     "upload_file": "Upload photo",
     "picture_caption": "Photo caption",
     "privacy": "Privacy",
-    
+
     "delete_post_title": "Delete post",
     "delete_post_message": "Do you really want to delete this post?",
     "delete": "Delete",
     "cancel": "Cancel",
-    
+
     "logout": "Log out",
     "settings": "Settings",
-    
+
     "account_settings": "Account settings",
     "account_info": "Account information",
     "account_details": "Account details",
     "account_privacy": "Privacy settings",
     "account_recovery": "Recovery settings",
-    
+
     "invisible": "Invisible to other users",
     "can_receive_requests": "Accept follow requests from other users",
     "follow_approval_required": "Follow approval required before follow",
-    "dislplay_avatar_before_approval": "Display private avatar before approval",
+    "display_avatar_before_approval": "Display private avatar before approval",
     "notify_new_comment": "Notify new comments on your posts",
     "notify_new_comment_others": "Notify new comments on others posts",
     "notify_posts_in_my_profile": "Notify new posts in your profile",
@@ -127,7 +127,7 @@
     "allow_posts_in_my_profile": "Allow users to post on your profile",
     "display_info_followers_only": "Display information to followers only",
     "override_default_privacy": "Set default privacy settings for all post types",
-    
+
     "select_privacy_type": "Select privacy type",
     "default_status_privacy": "Default privacy for statuses",
     "default_photo_privacy": "Default privacy for photos",
@@ -141,6 +141,6 @@
     "privacy_type_none_but": "None except",
     "privacy_type_following_but": "All followings except",
     "privacy_type_followers_but": "All followers except",
-    
+
     "update_settings": "Update settings"
 }

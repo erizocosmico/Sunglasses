@@ -328,7 +328,7 @@ func UpdateAccountSettings(c middleware.Context) {
 	s.DisplayAvatarBeforeApproval = c.GetBoolean("display_avatar_before_approval")
 	s.NotifyNewComment = c.GetBoolean("notify_new_comment")
 	s.NotifyNewCommentOthers = c.GetBoolean("notify_new_comment_others")
-	s.NotifyPostsInMyProfile = c.GetBoolean("notify_new_posts_in_my_profile")
+	s.NotifyPostsInMyProfile = c.GetBoolean("notify_posts_in_my_profile")
 	s.NotifyLikes = c.GetBoolean("notify_likes")
 	s.AllowPostsInMyProfile = c.GetBoolean("allow_posts_in_my_profile")
 	s.AllowCommentsInPosts = c.GetBoolean("allow_comments_in_posts")
@@ -352,7 +352,7 @@ func UpdateAccountSettings(c middleware.Context) {
 				return
 			}
 		}
-        // TODO: Recover by email
+		// TODO: Recover by email
 	} else {
 		s.PasswordRecoveryMethod = models.RecoveryNone
 	}
