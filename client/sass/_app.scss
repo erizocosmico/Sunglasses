@@ -393,6 +393,14 @@ div#app {
                 margin: 5px auto;
                 margin-bottom: 15px;
                 max-width: 500px;
+
+                div {
+                    height: 281px !important;
+
+                    iframe {
+                        height: 281px !important;
+                    }
+                }
             }
             
             .post-link {
