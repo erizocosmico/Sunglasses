@@ -27,16 +27,16 @@ const (
 	RoleAdmin = 1
 
 	// Genders
-	Male   = 0
-	Female = 1
-	Other  = 2
+	Male   = 1
+	Female = 2
+	Other  = 3
 
 	// User statuses
-	Single          = 0
-	Married         = 1
-	InARelationship = 2
-	ItsComplicated  = 3
-	OtherStatus     = 4
+	Single          = 1
+	Married         = 2
+	InARelationship = 3
+	ItsComplicated  = 4
+	OtherStatus     = 5
 
 	// Recovery methods
 	RecoveryNone      = 0
