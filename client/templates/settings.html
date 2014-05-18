@@ -9,8 +9,6 @@
                 <li ng-class="{active: activeSection == 'account_details'}" ng-click="setActiveSection('account_details')">{{ 'account_details' | translate }}</li>
                 <li ng-class="{active: activeSection == 'account_settings'}" ng-click="setActiveSection('account_settings')">{{ 'account_settings' | translate }}</li>
                 <li ng-class="{active: activeSection == 'account_info'}" ng-click="setActiveSection('account_info')">{{ 'account_info' | translate }}</li>
-                <li ng-class="{active: activeSection == 'account_privacy'}" ng-click="setActiveSection('account_privacy')">{{ 'account_privacy' | translate }}</li>
-                <li ng-class="{active: activeSection == 'account_recovery'}" ng-click="setActiveSection('account_recovery')">{{ 'account_recovery' | translate }}</li>
             </ul>
         </aside>
     
@@ -169,12 +167,72 @@
             </article>
         
             <article ng-show="activeSection == 'account_info'">
-            </article>
-        
-            <article ng-show="activeSection == 'account_privacy'">
-            </article>
-        
-            <article ng-show="activeSection == 'account_recovery'">
+                <div class="field">
+                    <label>{{ 'info_work' | translate }}</label>
+                    <textarea ng-model="info.work"></textarea>
+                </div>
+                
+                <div class="field">
+                    <label>{{ 'info_education' | translate }}</label>
+                    <textarea ng-model="info.education"></textarea>
+                </div>
+                
+                <div class="field">
+                    <label>{{ 'info_hobbies' | translate }}</label>
+                    <textarea ng-model="info.hobbies"></textarea>
+                </div>
+                
+                <div class="field">
+                    <label>{{ 'info_books' | translate }}</label>
+                    <textarea ng-model="info.books"></textarea>
+                </div>
+                
+                <div class="field">
+                    <label>{{ 'info_movies' | translate }}</label>
+                    <textarea ng-model="info.movies"></textarea>
+                </div>
+                
+                <div class="field">
+                    <label>{{ 'info_tv' | translate }}</label>
+                    <textarea ng-model="info.tv"></textarea>
+                </div>
+                
+                <div class="field">
+                    <label>{{ 'info_about' | translate }}</label>
+                    <textarea ng-model="info.about"></textarea>
+                </div>
+                
+               <div class="field">
+                   <label class="expanded-label">{{ 'info_gender' | translate }}</label>
+                   <div class="ui dropdown selection" id="selector-gender">
+                       <input type="hidden">
+                               <div class="default text">{{ 'select_gender' | translate }}</div>
+                               <i class="dropdown icon"></i>
+                               <div class="menu">
+                                   <div class="item" data-value="1">{{ 'gender_male' | translate }}</div>
+                                   <div class="item" data-value="2">{{ 'gender_female' | translate }}</div>
+                                   <div class="item" data-value="3">{{ 'gender_other' | translate }}</div>
+                               </div>
+                   </div>
+               </div>
+               
+               <div class="field">
+                   <label class="expanded-label">{{ 'info_status' | translate }}</label>
+                   <div class="ui dropdown selection" id="selector-status">
+                       <input type="hidden">
+                               <div class="default text">{{ 'select_status' | translate }}</div>
+                               <i class="dropdown icon"></i>
+                               <div class="menu">
+                                   <div class="item" data-value="1">{{ 'user_status_single' | translate }}</div>
+                                   <div class="item" data-value="2">{{ 'user_status_married' | translate }}</div>
+                                   <div class="item" data-value="3">{{ 'user_status_relationship' | translate }}</div>
+                                   <div class="item" data-value="4">{{ 'user_status_complicated' | translate }}</div>
+                                   <div class="item" data-value="5">{{ 'user_status_other' | translate }}</div>
+                               </div>
+                   </div>
+               </div>
+                
+                <button ng-click="updateInfo()">{{ 'update_info' | translate }}</button>
             </article>
         </section>
         <div class="clear"></div>

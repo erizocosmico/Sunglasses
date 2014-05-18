@@ -10,9 +10,11 @@ angular.module('sunglasses.controllers')
         
         # Settings
         $scope.settings = userData.settings
+        # Info
+        $scope.info = userData.info
         
         # Active section
-        $scope.activeSection = 'account_details'
+        $scope.activeSection = 'account_info'
         $scope.setActiveSection = (section) ->
             $scope.activeSection = section
 
@@ -34,6 +36,21 @@ angular.module('sunglasses.controllers')
 
                     # Update user data
                     userData.settings = $scope.settings
+                , (resp) ->
+                    console.log resp
+            )
+            
+        # update user info
+        $scope.updateInfo = () ->
+            api(
+                '/api/account/info',
+                'PUT',
+                $scope.info,
+                (resp) ->
+                    console.log resp
+
+                    # Update user data
+                    userData.info = $scope.info
                 , (resp) ->
                     console.log resp
             )
@@ -59,5 +76,28 @@ angular.module('sunglasses.controllers')
                     )
                 )(pType)
 
+            for key in ['gender', 'status']
+                ((k) ->
+                    $('#selector-' + k)
+                    .dropdown('set value', $scope.info[k])
+                    .dropdown(
+                        onChange: (val) ->
+                            $scope.$apply(() ->
+                                $scope.info[k] = val
+                                console.log k + ' set to ' + val
+                            )
+                    )
+                )(key)
+                
+            # Fixed menu
+            menu = $('aside').get(0)
+            $('#app').scroll(() ->
+                if $(this).scrollTop() > 30
+                    width = $(menu).width()
+                    menu.style.position = 'fixed'
+                    menu.style.width = width + 'px'
+                else
+                    menu.style.position = 'static'
+            )
         )()
 ])

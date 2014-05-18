@@ -141,6 +141,27 @@
     "privacy_type_none_but": "None except",
     "privacy_type_following_but": "All followings except",
     "privacy_type_followers_but": "All followers except",
+    
+    "info_work": "Work",
+    "info_education": "Education",
+    "info_hobbies": "Hobbies",
+    "info_books": "Books",
+    "info_movies": "Movies",
+    "info_tv": "TV Shows",
+    "info_gender": "Gender",
+    "info_status": "Status",
+    "info_about": "About me",
+    "select_gender": "Select a gender",
+    "select_status": "Select a status",
+    "gender_male": "Male",
+    "gender_female": "Female",
+    "gender_other": "Other",
+    "user_status_single": "Single",
+    "user_status_married": "Married",
+    "user_status_relationship": "In a relationship",
+    "user_status_complicated": "It is complicated",
+    "user_status_other": "Other",
 
-    "update_settings": "Update settings"
+    "update_settings": "Update settings",
+    "update_info": "Update information"
 }

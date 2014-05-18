@@ -722,6 +722,28 @@ div#app {
                     padding: 15px;
                     border-bottom: 1px solid #EEE;
                     
+                    label:not(.expanded-label) {
+                        width: 30%;
+                        display: inline-block;
+                        margin-right: 5%;
+                        vertical-align: top;
+                    }
+                    
+                    textarea {
+                        width: 64%;
+                        display: inline-block;
+                        line-height: 1.4em;
+                        padding: 6px;
+                        font-size: 0.9em;
+                        border: 3px solid darken(#fafafa, 10%);
+                        border-radius: 5px;
+                        transition: border-color 200ms ease-in-out;
+                        
+                        &:hover, &:focus {
+                            border-color: $base-blue;
+                        }
+                    }
+                    
                     .expanded-label {
                         width: 45%;
                         display: inline-block;
