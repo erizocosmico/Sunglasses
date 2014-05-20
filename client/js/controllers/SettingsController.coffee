@@ -14,7 +14,7 @@ angular.module('sunglasses.controllers')
         $scope.info = userData.info
         
         # Active section
-        $scope.activeSection = 'account_info'
+        $scope.activeSection = 'account_details'
         $scope.setActiveSection = (section) ->
             $scope.activeSection = section
 

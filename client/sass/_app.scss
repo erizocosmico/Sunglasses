@@ -722,7 +722,7 @@ div#app {
                     padding: 15px;
                     border-bottom: 1px solid #EEE;
                     
-                    label:not(.expanded-label) {
+                    label:not(.expanded-label):not(.full-width-label) {
                         width: 30%;
                         display: inline-block;
                         margin-right: 5%;
