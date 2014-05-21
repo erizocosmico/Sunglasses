@@ -6,13 +6,23 @@ angular.module('sunglasses.controllers')
     '$rootScope',
     'api',
     ($scope, $rootScope, api) ->
-        # Avoid template caching
-        # TODO: Remove for production
-        $scope.templateUrl = 'templates/header.html?t=' + new Date().getTime()
         $scope.query = ''
+        $scope.queryTimeout = null
         $scope.settingsMenuOpened = false
         $scope.notificationsMenuOpened = false
         
+        # Perform a search 
+        $scope.$watch('query', () ->
+            if $scope.queryTimeout?
+                window.clearTimeout($scope.queryTimeout)
+            
+            $scope.queryTimeout = window.setTimeout(() ->
+                console.log 'searching: ' + $scope.query
+                $scope.queryTimeout = null
+            , 500)
+        )
+        
+        # TODO: Rewrite
         $scope.toggleMenu = (menuType, closeCallback) ->
             m = menuType + '-menu'
             menu = document.getElementById(m)

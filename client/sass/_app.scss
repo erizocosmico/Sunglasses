@@ -127,6 +127,7 @@ div#app {
                     width: 30px;
                     height: 20px !important;
                     vertical-align: top;
+                    color: #555;
                 
                     span {
                         padding: 0;
@@ -136,6 +137,8 @@ div#app {
                 
                     &:hover {
                         color: $base-blue;
+                        background: transparent;
+                        box-shadow: none;
                     }
                 }
             
