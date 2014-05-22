@@ -10,8 +10,11 @@ angular.module('sunglasses.controllers')
         $scope.queryTimeout = null
         $scope.settingsMenuOpened = false
         $scope.notificationsMenuOpened = false
+        $scope.menus = 
+            settings: false
+            notifications: false
         
-        # Perform a search 
+        # Perform a search
         $scope.$watch('query', () ->
             if $scope.queryTimeout?
                 window.clearTimeout($scope.queryTimeout)
@@ -21,38 +24,22 @@ angular.module('sunglasses.controllers')
                 $scope.queryTimeout = null
             , 500)
         )
-        
-        # TODO: Rewrite
+
         $scope.toggleMenu = (menuType, closeCallback) ->
-            m = menuType + '-menu'
-            menu = document.getElementById(m)
-            if menu.className.indexOf('hidden') != -1
-                if menuType == 'settings'
-                    $scope.settingsMenuOpened = true
-                    
-                    if $scope.notificationsMenuOpened
-                        $scope.toggleMenu('notifications', () ->
-                            $rootScope.animateElem(menu, 'bounceInDown')
-                        )
-                        return
-                else
-                    $scope.notificationsMenuOpened = true
-                    
-                    if $scope.settingsMenuOpened
-                        $scope.toggleMenu('settings', () ->
-                            $rootScope.animateElem(menu, 'bounceInDown')
-                        )
-                        return
-                $rootScope.animateElem(menu, 'bounceInDown')
-            else
-                if menuType == 'settings'
-                    $scope.settingsMenuOpened = false
-                else
-                    $scope.notificationsMenuOpened = false
+            otherMenu = if menuType == 'settings' then 'notifications' else 'settings'
+            if $scope.menus[otherMenu]
+                document.getElementById('#' + otherMenu + '-menu').className += ' hidden'
+            
+            menu = document.getElementById(menuType + '-menu')
+            if $scope.menus[menuType]
+                $scope.menus[menuType] = false
                 $rootScope.animateElem(menu, 'bounceOutUp', () ->
                     menu.className = 'hidden ng-scope'
-                        
-                    if closeCallback? then closeCallback()
                 )
+            else
+                $rootScope.animateElem(menu, 'bounceInDown')
+                $scope.menus[menuType] = true
+               
+            # CoffeeScript bad habit 
             return
 ])
