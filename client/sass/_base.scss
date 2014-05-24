@@ -21,10 +21,6 @@ body, html {
     color: lighten(#000000, 40%);
 }
 
-.ng-scope {
-    @include fullpage;
-}
-
 body {
     font-family: $default-font;
 }
