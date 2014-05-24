@@ -163,5 +163,11 @@
     "user_status_other": "Other",
 
     "update_settings": "Update settings",
-    "update_info": "Update information"
+    "update_info": "Update information",
+    
+    "search_no_results": "No results found for your search",
+    "view_profile": "View profile",
+    "follow_user": "Follow user",
+    "user_followed": "Following user",
+    "send_follow_request": "Send follow request"
 }
