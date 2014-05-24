@@ -23,7 +23,7 @@ func Search(c middleware.Context) {
 			return nil
 		}
 
-		regex := bson.M{"$regex": fmt.Sprintf(`(?i)%s`, search)}
+		regex := bson.M{"$regex": fmt.Sprintf(`(?i)^%s(.*)`, search)}
 
 		iter := c.Find("users", bson.M{"$and": []bson.M{
 			bson.M{"$or": []bson.M{
