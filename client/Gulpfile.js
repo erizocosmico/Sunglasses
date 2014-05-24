@@ -4,7 +4,6 @@ var coffee = require('gulp-coffee');
 var concat = require('gulp-concat');
 var imagemin = require('gulp-imagemin');
 var sass = require('gulp-sass');
-var react = require('gulp-react');
 var ngmin = require('gulp-ngmin');
 var shell = require('gulp-shell');
 var jsonminify = require('gulp-jsonminify');
@@ -36,12 +35,10 @@ gulp.task('scripts', function() {
 // Copy all static images
 gulp.task('images', function() {
     return gulp.src(paths.images)
-//        .pipe(imagemin({optimizationLevel: 5}))
         .pipe(gulp.dest('../public/images'));
 });
 
 // Compile scss files
-// TODO reactivate sass
 gulp.task('sass', function() {
     gulp.src(paths.sass)
         .pipe(sass({
@@ -49,13 +46,6 @@ gulp.task('sass', function() {
             errLogToConsole: gulp.env.watch
         }))
         .pipe(gulp.dest('../public/css'));
-});
-
-// Compile react templates
-gulp.task('react', function() {
-    return gulp.src(paths.templates)
-        .pipe(react())
-        .pipe(gulp.dest('../public/templates'));
 });
 
 // HTML templates
@@ -88,7 +78,6 @@ gulp.task('watch', function() {
     gulp.watch(paths.scripts, ['scripts']);
     gulp.watch(paths.images, ['images']);
     gulp.watch(paths.templates, ['react']);
-    // TODO uncomment this as soon as https://github.com/hcatlin/libsass/issues/331 is solved
     gulp.watch(paths.sass, ['sass']);
     gulp.watch('app.html', ['index']);
     gulp.watch('lang/*.json', ['lang']);
@@ -96,4 +85,4 @@ gulp.task('watch', function() {
 });
 
 // The default task (called when you run `gulp` from cli)
-gulp.task('default', ['setup', 'index', 'scripts', 'sass', 'lang', 'images', 'tpls', 'react', 'vendor']);
+gulp.task('default', ['setup', 'index', 'scripts', 'sass', 'lang', 'images', 'tpls', 'vendor']);
