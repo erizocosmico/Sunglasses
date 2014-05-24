@@ -4,8 +4,9 @@ angular.module('sunglasses.controllers')
 .controller('HeaderController', [
     '$scope',
     '$rootScope',
-    'api',
-    ($scope, $rootScope, api) ->
+    'user',
+    ($scope, $rootScope, userService) ->
+        $scope.userService = userService
         $scope.query = ''
         $scope.queryTimeout = null
         $scope.settingsMenuOpened = false
@@ -13,6 +14,8 @@ angular.module('sunglasses.controllers')
         $scope.menus = 
             settings: false
             notifications: false
+        $scope.searchActive = false
+        $scope.searchResults = []
         
         # Perform a search
         $scope.$watch('query', () ->
@@ -20,11 +23,26 @@ angular.module('sunglasses.controllers')
                 window.clearTimeout($scope.queryTimeout)
             
             $scope.queryTimeout = window.setTimeout(() ->
-                console.log 'searching: ' + $scope.query
-                $scope.queryTimeout = null
+                $scope.$apply(() ->
+                    if $scope.query.trim() == ''
+                        $scope.searchActive = false
+                        return
+
+                    $scope.userService.search($scope.query, false, 0, 25, (resp) ->
+                        $scope.$apply(() ->
+                            $scope.searchResults = resp.users
+                        )
+                    , (resp) ->
+                        console.log("Error")
+                    )
+                    
+                    $scope.queryTimeout = null
+                    $scope.searchActive = true
+                )
             , 500)
         )
 
+        # Toggles a menu
         $scope.toggleMenu = (menuType, closeCallback) ->
             otherMenu = if menuType == 'settings' then 'notifications' else 'settings'
             if $scope.menus[otherMenu]
