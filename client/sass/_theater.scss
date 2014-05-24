@@ -28,7 +28,7 @@
     }
     
     button {
-        background: black;
+        background: transparent;
         border-radius: 5px;
         height: 80px;
         width: 80px;
@@ -38,9 +38,5 @@
         top: 20px;
         right: 20px;
         position: fixed;
-        
-        &:hover {
-            background: lighten(black, 20%);
-        }
     }
 }
