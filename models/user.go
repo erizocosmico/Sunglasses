@@ -257,9 +257,14 @@ func GetUsersData(ids []bson.ObjectId, user *User, conn interfaces.Conn) map[bso
 
 	for cursor.Next(&u) {
 		hasAccess := false
+		followed := false
 		for _, v := range follows {
 			if v.From.Hex() == u.ID.Hex() || v.To.Hex() == u.ID.Hex() {
 				hasAccess = true
+
+				if v.To.Hex() == u.ID.Hex() {
+					followed = true
+				}
 				break
 			}
 		}
@@ -270,6 +275,7 @@ func GetUsersData(ids []bson.ObjectId, user *User, conn interfaces.Conn) map[bso
 
 		if _, ok := users[u.ID]; !ok {
 			users[u.ID] = UserForDisplay(u, hasAccess, false)
+			users[u.ID]["followed"] = followed
 		}
 	}
 
@@ -316,6 +322,8 @@ func UserForDisplay(u User, hasAccess, includeInfo bool) map[string]interface{} 
 			"private_name":            "",
 		}
 	}
+
+	user["needs_follow_request"] = u.Settings.FollowApprovalRequired
 
 	return user
 }
