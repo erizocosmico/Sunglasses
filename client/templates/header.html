@@ -2,7 +2,6 @@
     <div class="logo" ng-click="goHome()">Sunglasses</div>
     <div class="search-box">
         <input type="text" placeholder="{{ 'search' | translate }}" ng-model="query">
-        <button class="search-button" ng-hide="query.trim().length == 0"><span class="ion ion-arrow-right-c"></span></button>
     </div>
     <ul class="rightside-menu">
         <li><span class="ion icon ion-home"></span></li>
@@ -10,6 +9,23 @@
         <li><span class="icon ion ion-ios7-bell"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
         <li ng-click="toggleMenu('settings')"><span class="icon ion ion-ios7-gear"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
     </ul>
+    <div class="header-overlay" ng-show="searchActive">
+        <ul class="search-results" ng-show="searchResults.length > 0">
+            <li ng-repeat="user in searchResults" class="user-data">
+                <div class="avatar" ng-hide="userService.getAvatarThumb(user) == ''"></div>
+                <div class="default-avatar" ng-hide="userService.getAvatarThumb(user) != ''">
+                    <span class="ion ion-android-contact"></span>
+                </div>
+                <h3>{{ userService.getUsername(user) }}</h3>
+                <a href="#/u/{{ user.username.toLowerCase() }}" class="btn">{{ 'view_profile' | translate }}</a>
+                <button class="btn">{{ 'follow_user' | translate }}</button>
+            </li>
+        </ul>
+        
+        <div class="search-results" ng-show="searchResults.length == 0">
+            <p>{{ 'search_no_results' | translate }}</p>
+        </div>
+    </div>
 </div>
 
 <ul id="settings-menu" class="hidden">
