@@ -1,0 +1,21 @@
+<div class="post-box">
+    <ul>
+        <li><span id="post-type-status" class="ion ion-document-text active" ng-click="changePostType('status')"></span></li>
+        <li><span id="post-type-photo" class="ion ion-camera" ng-click="changePostType('photo')"></span></li>
+        <li><span id="post-type-video" class="ion ion-ios7-videocam" ng-click="changePostType('video')"></span></li>
+        <li><span id="post-type-link" class="ion ion-link" ng-click="changePostType('link')"></span></li>
+        <div id="post-error" class="error hidden"></div>
+        <div id="post-success" class="success hidden"></div>
+        <input type="url" placeholder="{{ 'enter_video_url' | translate }}" ng-hide="post.type!='video'" ng-model="post.url">
+        <input type="url" placeholder="{{ 'enter_link_url' | translate }}" ng-hide="post.type!='link'" ng-model="post.url">
+        <div ng-hide="post.type!='photo'">
+            <input type="file" id="photo-upload" class="hidden" accept="image/x-png, image/png, image/gif, image/jpeg">
+            <div class="upload-zone">
+                <button ng-click="handleUpload()">{{ 'upload_file' | translate }} <span class="ion ion-arrow-up-a"></span></button> <span id="filename">...</span>
+            </div>
+            <input type="text" placeholder="{{ 'picture_caption' | translate }}" ng-model="post.caption">
+        </div>
+        <textarea ng-model="post.text" placeholder="{{ 'what_are_you_up_to' | translate }}"></textarea>
+        <button ng-click="submitPost()" ng-hide="post.text=='' && post.type=='status'">{{ 'publish' | translate }}</button>
+    </ul>
+</div>
