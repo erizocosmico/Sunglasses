@@ -63,6 +63,8 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
     document.getElementsByTagName('title')[0].innerHTML = '{{ title | translate }}'
     $rootScope.title = 'sunglasses'
     
+    $rootScope.userData = userData
+    
     # changes the language of the application
     $rootScope.changeLang = (lang) ->
         $translate.use(lang);
