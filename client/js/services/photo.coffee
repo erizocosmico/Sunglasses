@@ -6,7 +6,11 @@ angular.module('sunglasses.services')
     $theater = 
         open: (image, caption) ->
             theater = $('#photo-theater').get(0)
-            photo = $('#photo-theater-photo').get(0)
+            photoHolder = $('#photo-theater-photo').get(0).parentNode
+            photoHolder.innerHTML = ''
+            photo = document.createElement('img')
+            photo.id = 'photo-theater-photo'
+            photoHolder.appendChild(photo)
 
             photo.alt = caption
             photo.src = image
