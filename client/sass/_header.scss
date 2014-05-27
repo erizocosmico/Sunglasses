@@ -121,7 +121,7 @@ header {
                 max-height: 90%;
                 margin-top: 2%;
                 margin-left: 15%;
-                width: 60%;
+                width: 40%;
                 overflow-y: auto;
                 text-align: left;
                 border-radius: 6px;
@@ -134,9 +134,53 @@ header {
                     margin: 0;
                     padding: 10px;
                     padding-bottom: 0;
+                    border-radius: 0px;
+                    border-bottom: 1px solid #DDD;
+                    box-shadow: 0px 1px 0px white inset;
+                    
+                    &:last-child {
+                        border-bottom: none;
+                    }
                     
                     &:hover {
                         background-color: transparent;
+                    }
+                    
+                    .user-data {
+                        padding: 0;
+                        margin: 0;
+                        margin-bottom: 6px;
+                    }
+                    
+                    .user-name {
+                        padding: 0;
+                        margin: 0;
+                        font-weight: 400 !important;
+                        color: #555 !important;
+                        vertical-align: top;
+                    }
+                    
+                    .message {
+                        font-size: 0.8em;
+                        color: #666 !important;
+                        text-align: center;
+                        padding: 5px;
+                        margin: 5px;
+                    }
+                    
+                    .search-actions {
+                        padding: 10px 0;
+                        margin: 0;
+                        
+                        a.btn, .btn {
+                            @include base-button;
+                            display: inline-block;
+                            margin: 0;
+                            width: auto;
+                            padding: 6px 20px;
+                            font-size: 0.9em;
+                            font-weight: 400;
+                        }
                     }
                 }
             }

@@ -5,7 +5,8 @@ angular.module('sunglasses.controllers')
     '$scope',
     '$rootScope',
     'user',
-    ($scope, $rootScope, userService) ->
+    'api',
+    ($scope, $rootScope, userService, api) ->
         $scope.userService = userService
         $scope.query = ''
         $scope.queryTimeout = null
@@ -41,6 +42,33 @@ angular.module('sunglasses.controllers')
                 )
             , 500)
         )
+        
+        $scope.sendFollowRequest = (user, isRequest) ->
+            api(
+                '/api/users/follow',
+                'POST',
+                user_to: user.id,
+                (resp) ->
+                    $scope.$apply(() ->
+                        user.followed = true
+                        user.requestSent = !!isRequest
+                    )
+                , (resp) ->
+                    console.log(resp)
+            )
+            
+        $scope.unfollow = (user) ->
+            api(
+                '/api/users/unfollow',
+                'DELETE',
+                user_to: user.id,
+                (resp) ->
+                    $scope.$apply(() ->
+                        user.followed = false
+                    )
+                , (resp) ->
+                    console.log(resp)
+            )
 
         # Toggles a menu
         $scope.toggleMenu = (menuType, closeCallback) ->

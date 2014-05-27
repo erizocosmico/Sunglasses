@@ -17,13 +17,13 @@
                     <div class="default-avatar" ng-hide="userService.getAvatarThumb(user) != ''">
                         <span class="ion ion-android-contact"></span>
                     </div>
-                    <h3>{{ userService.getUsername(user) }}</h3>
+                    <h3 class="user-name">{{ userService.getUsername(user) }}</h3>
                     <div class="search-actions" ng-show="userData.id !== user.id">
-                        {{ user.id }} - {{ userData.id }}
                         <a href="#/u/{{ user.username.toLowerCase() }}" class="btn">{{ 'view_profile' | translate }}</a>
-                        <button class="btn" ng-show="!user.needs_follow_request && !user.followed">{{ 'follow_user' | translate }}</button>
-                        <button class="btn" ng-show="user.followed">{{ 'unfollow_user' | translate }}</button>
-                        <button class="btn" ng-show="user.needs_follow_request">{{ 'send_follow_request' | translate }}</button>
+                        <button class="btn" ng-show="!user.needs_follow_request && !user.followed" ng-click="sendFollowRequest(user)">{{ 'follow_user' | translate }}</button>
+                        <button class="btn" ng-show="user.followed && !user.requestSent" ng-click="unfollow(user)">{{ 'unfollow_user' | translate }}</button>
+                        <button class="btn" ng-show="user.needs_follow_request && !user.followed" ng-click="sendFollowRequest(user, true)">{{ 'send_follow_request' | translate }}</button>
+                        <p class="message" ng-show="user.requestSent">{{ 'follow_request_sent' | translate }}</p>
                     </div>
                 </li>
             </ul>

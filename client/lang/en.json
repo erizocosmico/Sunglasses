@@ -168,7 +168,9 @@
     "search_no_results": "No results found for your search",
     "view_profile": "View profile",
     "follow_user": "Follow user",
+    "unfollow_user": "Unfollow user",
     "user_followed": "Unfollow user",
-    "send_follow_request": "Send follow request"
+    "send_follow_request": "Send follow request",
+    "follow_request_sent": "Follow request sent"
     
 }
