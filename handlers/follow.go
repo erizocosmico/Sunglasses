@@ -55,6 +55,14 @@ func SendFollowRequest(c middleware.Context) {
 			fr.Msg = c.Form("request_message")
 			fr.Time = float64(time.Now().Unix())
 
+			// Check that a follow request hasn't already been sent
+			if count, err := c.Count("requests", bson.M{"user_to": userToID, "user_from": userFrom.ID}); err != nil || count > 0 {
+				c.Success(200, map[string]interface{}{
+					"message": "Follow request already sent",
+				})
+				return
+			}
+
 			if err := fr.Save(c.Conn); err == nil {
 				models.SendNotification(models.NotificationFollowRequest, toUser, blankID, userFrom.ID, c.Conn)
 
