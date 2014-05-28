@@ -237,8 +237,12 @@ func UserExists(conn interfaces.Conn, ID bson.ObjectId) *User {
 
 // GetUserData retrieves basic data from users for responses
 func GetUsersData(ids []bson.ObjectId, user *User, conn interfaces.Conn) map[bson.ObjectId]map[string]interface{} {
-	var u User
-	var follows []Follow
+	var (
+		u        User
+		follows  []Follow
+		requests []FollowRequest
+	)
+
 	users := make(map[bson.ObjectId]map[string]interface{})
 	cursor := conn.C("users").Find(bson.M{"_id": bson.M{"$in": ids}}).Iter()
 
@@ -247,11 +251,23 @@ func GetUsersData(ids []bson.ObjectId, user *User, conn interfaces.Conn) map[bso
 		bson.M{"user_to": user.ID, "user_from": bson.M{"$in": ids}},
 	}}).Iter()
 
+	requestsIter := conn.C("requests").
+		Find(bson.M{"user_from": user.ID, "user_to": bson.M{"$in": ids}}).
+		Iter()
+
 	if err := followsIter.All(&follows); err != nil {
 		return nil
 	}
 
+	if err := requestsIter.All(&requests); err != nil {
+		return nil
+	}
+
 	if err := followsIter.Close(); err != nil {
+		return nil
+	}
+
+	if err := requestsIter.Close(); err != nil {
 		return nil
 	}
 
@@ -276,6 +292,13 @@ func GetUsersData(ids []bson.ObjectId, user *User, conn interfaces.Conn) map[bso
 		if _, ok := users[u.ID]; !ok {
 			users[u.ID] = UserForDisplay(u, hasAccess, false)
 			users[u.ID]["followed"] = followed
+			users[u.ID]["follow_requested"] = false
+			for _, req := range requests {
+				if req.To.Hex() == u.ID.Hex() {
+					users[u.ID]["follow_requested"] = true
+					break
+				}
+			}
 		}
 	}
 
