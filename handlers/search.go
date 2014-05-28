@@ -32,7 +32,7 @@ func Search(c middleware.Context) {
 				bson.M{"private_name": regex},
 			}},
 			bson.M{"active": true},
-		}}).Limit(count).Skip(offset).Iter()
+		}}).Sort("username_lower").Limit(count).Skip(offset).Iter()
 
 		return iter
 	}
