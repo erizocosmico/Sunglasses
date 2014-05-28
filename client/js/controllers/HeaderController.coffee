@@ -16,6 +16,7 @@ angular.module('sunglasses.controllers')
             settings: false
             notifications: false
         $scope.searchActive = false
+        $scope.canLoadMore = false
         $scope.searchResults = []
         
         # Perform a search
@@ -28,10 +29,13 @@ angular.module('sunglasses.controllers')
                     if $scope.query.trim() == ''
                         $scope.searchActive = false
                         return
+                    $scope.canLoadMore = false
 
                     $scope.userService.search($scope.query, false, 0, 25, (resp) ->
                         $scope.$apply(() ->
                             $scope.searchResults = resp.users
+                            if resp.users.length == 25
+                                $scope.canLoadMore = true
                         )
                     , (resp) ->
                         console.log("Error")
@@ -43,6 +47,19 @@ angular.module('sunglasses.controllers')
             , 500)
         )
         
+        $scope.loadMore = () ->
+            $scope.canLoadMore = false
+            $scope.userService.search($scope.query, false, $scope.searchResults.length, 25, (resp) ->
+                $scope.$apply(() ->
+                    $scope.searchResults = $scope.searchResults.concat(resp.users)
+                    if resp.users.length == 25
+                        $scope.canLoadMore = true
+                )
+            , (resp) ->
+                console.log("Error")
+            )
+            $scope.searchActive = true
+        
         $scope.sendFollowRequest = (user, isRequest) ->
             api(
                 '/api/users/follow',
@@ -51,7 +68,7 @@ angular.module('sunglasses.controllers')
                 (resp) ->
                     $scope.$apply(() ->
                         user.followed = true
-                        user.requestSent = !!isRequest
+                        user.follow_requested = !!isRequest
                     )
                 , (resp) ->
                     console.log(resp)

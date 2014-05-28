@@ -21,10 +21,13 @@
                     <div class="search-actions" ng-show="userData.id !== user.id">
                         <a href="#/u/{{ user.username.toLowerCase() }}" class="btn">{{ 'view_profile' | translate }}</a>
                         <button class="btn" ng-show="!user.needs_follow_request && !user.followed" ng-click="sendFollowRequest(user)">{{ 'follow_user' | translate }}</button>
-                        <button class="btn" ng-show="user.followed && !user.requestSent" ng-click="unfollow(user)">{{ 'unfollow_user' | translate }}</button>
-                        <button class="btn" ng-show="user.needs_follow_request && !user.followed" ng-click="sendFollowRequest(user, true)">{{ 'send_follow_request' | translate }}</button>
-                        <p class="message" ng-show="user.requestSent">{{ 'follow_request_sent' | translate }}</p>
+                        <button class="btn" ng-show="user.followed && !user.follow_requested" ng-click="unfollow(user)">{{ 'unfollow_user' | translate }}</button>
+                        <button class="btn" ng-show="user.needs_follow_request && !user.followed && !user.follow_requested" ng-click="sendFollowRequest(user, true)">{{ 'send_follow_request' | translate }}</button>
+                        <p class="message" ng-show="user.follow_requested">{{ 'follow_request_sent' | translate }}</p>
                     </div>
+                </li>
+                <li ng-show="canLoadMore">
+                    <button class="btn" ng-click="loadMore()">{{ 'load_more' | translate }}</button>
                 </li>
             </ul>
         

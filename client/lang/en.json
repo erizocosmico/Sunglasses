@@ -171,6 +171,7 @@
     "unfollow_user": "Unfollow user",
     "user_followed": "Unfollow user",
     "send_follow_request": "Send follow request",
-    "follow_request_sent": "Follow request sent"
+    "follow_request_sent": "Follow request sent",
+    "load_more": "Load more"
     
 }
