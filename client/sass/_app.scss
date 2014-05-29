@@ -10,7 +10,7 @@
 @mixin base-button {
     width: 60%;
     margin: 10px auto;
-    background: $base-blue;
+    background: $base-accent;
     padding: 8px;
     display: block;
     max-width: 250px;
@@ -23,7 +23,7 @@
     margin-top: 20px;
 
     &:hover {
-        background-color: darken($base-blue, 5%);
+        background-color: darken($base-accent, 5%);
     }
     
     &:active {
@@ -33,7 +33,7 @@
 
 div#app {
     @include fullpage;
-    background-color: darken(#fafafa, 2%);
+    background-color: #e3e4e8; //darken(#fafafa, 2%);
     
     .wrap {
         width: 90%;
@@ -46,15 +46,15 @@ div#app {
     }
     
     a {
-        color: $base-blue;
+        color: $base-accent;
         text-decoration: none;
         transition: all 200ms ease-in;
         border-bottom: 1px solid #fff;
         font-weight: 700;
         
         &:hover {
-            color: darken($base-blue, 10%);
-            border-bottom: 1px solid $base-blue;
+            color: darken($base-accent, 10%);
+            border-bottom: 1px solid $base-accent;
         }
     }
     
@@ -105,7 +105,7 @@ div#app {
             width: 45px;
             border-radius: 50%;
             height: 45px;
-            background-color: $base-blue;
+            background-color: $base-accent;
             text-align: center;
             float: left;
             margin-right: 10px;

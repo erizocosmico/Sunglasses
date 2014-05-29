@@ -6,7 +6,7 @@ div#login-signup {
     .logo {
         margin: 0 auto;
         font-family: 'Damion', cursive;
-        color: #1b71ad;
+        color: $base-accent;
         text-align: center;
         font-size: 4.8em;
         margin-top: 50px;
@@ -15,7 +15,7 @@ div#login-signup {
         transition: color 300ms ease-in-out;
         
         &:hover {
-            color: darken(#1b71ad, 10%);
+            color: darken($base-accent, 10%);
         }
     }
 
@@ -72,8 +72,8 @@ div#login-signup {
                 
                 &.active {
                     .circle {
-                        background: lighten(#1b71ad, 10%);
-                        border-color: #1b71ad;
+                        background: lighten($base-accent, 10%);
+                        border-color: $base-accent;
                     }
                     
                     p {
@@ -126,12 +126,12 @@ div#login-signup {
         text-align: center;
         
         &:hover, &:focus {
-            border-color: #1b71ad;
+            border-color: $base-accent;
         }
     }
     
     .btn {
-        background: #1b71ad;
+        background: $base-accent;
         padding: 15px 25px;
         display: block;
         width: 90%;
@@ -150,7 +150,7 @@ div#login-signup {
         }
         
         &:hover {
-            background-color: darken(#1b71ad, 5%);
+            background-color: darken($base-accent, 5%);
         }
     }
 

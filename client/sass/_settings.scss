@@ -21,7 +21,7 @@
                     border-radius: 6px;
                     font-weight: bold;
                     box-shadow: 0px 0px 5px rgba(black, .1);
-                    color: $base-blue;
+                    color: $base-accent;
                     
                     &:after {
                     	bottom: 0%;
@@ -79,7 +79,7 @@
                     transition: border-color 200ms ease-in-out;
                     
                     &:hover, &:focus {
-                        border-color: $base-blue;
+                        border-color: $base-accent;
                     }
                 }
                 

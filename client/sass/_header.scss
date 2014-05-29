@@ -21,14 +21,14 @@ header {
             cursor: pointer;
             font-size: 2.5em;
             font-family: 'Damion', cursive;
-            color: lighten($base-blue, 10%);
+            color: $base-accent;
             text-shadow: none;
             font-weight: bold;
             vertical-align: middle;
             transition: color 200ms ease-in;
         
             &:hover {
-                color: $base-blue;
+                color: darken($base-accent, 10%);
             }
         }
     
@@ -85,7 +85,7 @@ header {
                 &:hover {
                     background: #EEE;
                     border-radius: 6px;
-                    color: $base-blue;
+                    color: $base-accent;
                 }
             
                 * {
@@ -177,8 +177,8 @@ header {
                             display: inline-block;
                             margin: 0;
                             width: auto;
-                            padding: 6px 20px;
-                            font-size: 0.9em;
+                            padding: 6px 30px;
+                            font-size: 0.7em;
                             font-weight: 400;
                         }
                     }

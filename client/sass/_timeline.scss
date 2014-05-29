@@ -27,7 +27,7 @@
                     cursor: pointer;
                     
                     &.active {
-                        color: $base-blue;
+                        color: $base-accent;
                     }
                 }
                 
@@ -166,7 +166,7 @@
                 border: 1px solid rgba(black, .2);
                 border-radius: 5px;
                 box-shadow: 0px 0px 10px rgba(black, .2) inset;
-                background: rgba(white, .4);
+                background: rgba(white, .6);
                 
                 img {
                     padding: 0;
@@ -177,7 +177,7 @@
                     cursor: pointer;
                     
                     &:hover {
-                        border-color: lighten($base-blue, 15%);
+                        border-color: lighten($base-accent, 15%);
                     }
                 }
                 
@@ -186,7 +186,7 @@
                     padding: 15px 10px;
                     padding-bottom: 0;
                     margin: 0;
-                    color: #444;
+                    color: #222;
                 }
             }
         }
@@ -232,8 +232,8 @@
                     }
                     
                     &:hover {
-                        color: $base-blue;
-                        border-color: $base-blue;
+                        color: $base-accent;
+                        border-color: $base-accent;
                         
                         span.count {
                             color: #333;
@@ -267,7 +267,7 @@
         
         .emoticon {
             font-size: 5.0em;
-            color: $base-blue;
+            color: $base-accent;
             text-shadow: 0px -1px 0px white;
             float: right;
             vertical-align: top;
