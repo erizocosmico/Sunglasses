@@ -25,6 +25,35 @@ body {
     font-family: $default-font;
 }
 
+.block {
+    padding: 6px;
+    margin: 5px 0;
+    background: #EEE;
+    border: 1px solid #DDD;
+    border-radius: 5px;
+}
+
+.centered {
+    text-align: center;
+}
+
+.small-btn {
+    display: inline-block !important;
+    font-size: 0.8em !important;
+    padding: 5px 20px !important;
+    margin: 0 !important;
+    width: auto !important;
+}
+
+.btn-white {
+    color: #555 !important;
+    background: #CCC !important;
+    
+    &:hover {
+        background: #BBB !important;
+    }
+}
+
 .hidden {
     visibility: hidden;
     display: none !important;
