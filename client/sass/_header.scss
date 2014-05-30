@@ -236,4 +236,52 @@ header {
         	margin-left: -5px;
         }
     }
+    
+    #notifications-menu {
+        position: fixed;
+        z-index: 9999;
+        margin: 0;
+        top: 65px;
+        right: 10px;
+        background: rgba(white, .7);
+        border: 1px solid rgba(black, .1);
+        border-radius: 5px;
+        list-style: none;
+        padding: 0;
+        width: calc(100% - 20px);
+        max-width: 300px;
+        box-shadow: 0px 0px 5px rgba(black, .1);
+        
+        li {
+            display: block;
+            padding: 10px;
+            border: none;
+            color: lighten(black, 50%);
+            border-bottom: 1px solid #EEE;
+            
+            &.active {
+                background-color: lighten($base-accent, 40%);
+                border-bottom-color: lighten($base-accent, 30%);
+            }
+        }
+        
+        li:last-child {
+            border-bottom: none;
+        }
+        
+        &:after {
+        	bottom: 100%;
+        	left: 50%;
+        	border: solid transparent;
+        	content: " ";
+        	height: 0;
+        	width: 0;
+        	position: fixed;
+        	pointer-events: none;
+        	border-color: transparent;
+        	border-bottom-color: white;
+        	border-width: 5px;
+        	margin-left: -5px;
+        }
+    }
 }
