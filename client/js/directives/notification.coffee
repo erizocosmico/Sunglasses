@@ -9,8 +9,8 @@ angular.module('sunglasses')
                         <div class="block centered">
                             <p ng-show="replied && accepted">{{ \'follow_accepted\' | translate }}</p>
                             <p ng-show="replied && !accepted">{{ \'follow_declined\' | translate }}</p>
-                            <button class="btn small-btn" ng-show="!!!replied" ng-click="replyFollowRequest(\'yes\')">{{ \'accept\' | translate }}</button>
-                            <button class="btn small-btn btn-white" ng-show="!!!replied" ng-click="replyFollowRequest(\'no\')">{{ \'decline\' | translate }}</button>
+                            <button class="btn small-btn" ng-show="!replied" ng-click="replyFollowRequest(\'yes\')">{{ \'accept\' | translate }}</button>
+                            <button class="btn small-btn btn-white" ng-show="!replied" ng-click="replyFollowRequest(\'no\')">{{ \'decline\' | translate }}</button>
                         </div>
                     </div>
                     <div ng-switch-when="2">

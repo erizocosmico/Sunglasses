@@ -122,7 +122,7 @@ header {
                 margin-top: 2%;
                 margin-left: 15%;
                 width: 40%;
-                min-width: 370px;
+                min-width: 425px;
                 overflow-y: auto;
                 text-align: left;
                 border-radius: 6px;
@@ -263,6 +263,10 @@ header {
             &.active {
                 background-color: lighten($base-accent, 40%);
                 border-bottom-color: lighten($base-accent, 30%);
+            }
+            
+            .ng-hide {
+                display: none !important;
             }
         }
         
