@@ -22,8 +22,9 @@ header {
             font-size: 2.5em;
             font-family: 'Rochester', cursive;
             color: $base-accent;
-            text-shadow: none;
-            font-weight: bold;
+            // Hack to display the font bold in webkite/blink-based browsers
+            // looks fine on firefox
+            text-shadow: 1px 0px 0px $base-accent;
             vertical-align: middle;
             transition: color 200ms ease-in;
         

@@ -54,6 +54,10 @@ body {
     }
 }
 
+.ui.toggle.checkbox input:checked~.box:after, .ui.toggle.checkbox input:checked~label:after {
+    background-color: $base-accent !important;
+}
+
 .hidden {
     visibility: hidden;
     display: none !important;
