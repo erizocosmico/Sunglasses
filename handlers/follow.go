@@ -119,8 +119,19 @@ func ReplyFollowRequest(c middleware.Context) {
 	}
 
 	if c.Form("accept") == "yes" {
+		var uFrom models.User
+		if err := c.FindId("users", fr.From).One(&uFrom); err != nil {
+			c.Error(500, CodeUnexpected, MsgUnexpected)
+			return
+		}
+
 		if err := models.FollowUser(fr.From, c.User.ID, c.Conn); err == nil {
-			models.SendNotification(models.NotificationFollowRequestAccepted, c.User, blankID, fr.To, c.Conn)
+
+			models.SendNotification(models.NotificationFollowRequestAccepted, &uFrom, blankID, fr.To, c.Conn)
+			c.Remove("notifications", bson.M{"user_action_id": fr.From, "user_id": fr.To, "notification_type": 1})
+			c.Remove("requests", bson.M{"user_from": fr.From, "user_to": fr.To})
+			c.User = &uFrom
+			go timeline.PropagatePostsOnUserFollow(c, fr.To)
 		} else {
 			c.Error(500, CodeUnexpected, MsgUnexpected)
 			return
