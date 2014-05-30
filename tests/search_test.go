@@ -56,14 +56,14 @@ func TestSearch(t *testing.T) {
 						r.Form = make(url.Values)
 					}
 
-					r.Form.Add("q", "test")
+					r.Form.Add("q", "fancy")
 				}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 					var errResp map[string]interface{}
 					if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 						panic(err)
 					}
 					So(res.Code, ShouldEqual, 200)
-					So(errResp["count"].(float64), ShouldEqual, float64(25))
+					So(errResp["count"].(float64), ShouldEqual, float64(24))
 				})
 			})
 
@@ -76,14 +76,14 @@ func TestSearch(t *testing.T) {
 
 					r.Form.Add("count", "10")
 					r.Form.Add("offset", "20")
-					r.Form.Add("q", "test")
+					r.Form.Add("q", "fancy")
 				}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 					var errResp map[string]interface{}
 					if err := json.Unmarshal(res.Body.Bytes(), &errResp); err != nil {
 						panic(err)
 					}
 					So(res.Code, ShouldEqual, 200)
-					So(errResp["count"].(float64), ShouldEqual, float64(5))
+					So(errResp["count"].(float64), ShouldEqual, float64(4))
 				})
 			})
 		})
@@ -97,7 +97,7 @@ func TestSearch(t *testing.T) {
 						r.Form = make(url.Values)
 					}
 
-					r.Form.Add("q", "test")
+					r.Form.Add("q", "fancy")
 					r.Form.Add("just_followings", "true")
 				}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 					var errResp map[string]interface{}
@@ -118,7 +118,7 @@ func TestSearch(t *testing.T) {
 
 					r.Form.Add("count", "10")
 					r.Form.Add("offset", "20")
-					r.Form.Add("q", "test")
+					r.Form.Add("q", "fancy")
 					r.Form.Add("just_followings", "true")
 				}, conn, "/", "/", func(res *httptest.ResponseRecorder) {
 					var errResp map[string]interface{}
@@ -126,7 +126,7 @@ func TestSearch(t *testing.T) {
 						panic(err)
 					}
 					So(res.Code, ShouldEqual, 200)
-					So(errResp["count"].(float64), ShouldEqual, float64(5))
+					So(errResp["count"].(float64), ShouldEqual, float64(0))
 				})
 			})
 		})

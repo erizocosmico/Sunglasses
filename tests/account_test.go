@@ -258,7 +258,7 @@ func TestUpdateAccountInfo(t *testing.T) {
 				req.PostForm.Add("websites", "http://google.es")
 				req.PostForm.Add("work", "20th Century Fox")
 				req.PostForm.Add("education", "Harvard")
-				req.PostForm.Add("gender", "0")
+				req.PostForm.Add("gender", "1")
 				req.PostForm.Add("status", "0")
 				req.PostForm.Add("tv", "Bones, Game of Thrones")
 			}, conn, "/", "/", func(res *httptest.ResponseRecorder) {

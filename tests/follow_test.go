@@ -281,7 +281,7 @@ func TestReplyFollowRequest(t *testing.T) {
 				})
 		})
 
-		Convey("With invalid request id", func() {
+		Convey("With invalid data", func() {
 			user, token := createRequestUser(conn)
 
 			defer func() {
@@ -302,7 +302,7 @@ func TestReplyFollowRequest(t *testing.T) {
 				})
 		})
 
-		Convey("With a valid request id which does not exist", func() {
+		Convey("With valid data for a request that does not exist", func() {
 			user, token := createRequestUser(conn)
 
 			defer func() {
@@ -314,7 +314,8 @@ func TestReplyFollowRequest(t *testing.T) {
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
-				r.PostForm.Add("request_id", bson.NewObjectId().Hex())
+				r.PostForm.Add("from_user", bson.NewObjectId().Hex())
+				r.PostForm.Add("to_user", bson.NewObjectId().Hex())
 			}, conn, "/", "/",
 				func(resp *httptest.ResponseRecorder) {
 					var errResp errorResponse
@@ -327,7 +328,7 @@ func TestReplyFollowRequest(t *testing.T) {
 				})
 		})
 
-		Convey("With a valid request id that does not belong to the user", func() {
+		Convey("With a valid request that does not belong to the user", func() {
 			user, token := createRequestUser(conn)
 
 			req := new(FollowRequest)
@@ -347,7 +348,8 @@ func TestReplyFollowRequest(t *testing.T) {
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
-				r.PostForm.Add("request_id", req.ID.Hex())
+				r.PostForm.Add("from_user", req.From.Hex())
+				r.PostForm.Add("to_user", req.To.Hex())
 			}, conn, "/", "/",
 				func(resp *httptest.ResponseRecorder) {
 					var errResp errorResponse
@@ -360,7 +362,7 @@ func TestReplyFollowRequest(t *testing.T) {
 				})
 		})
 
-		Convey("With a valid request id and 'accept' != 'yes'", func() {
+		Convey("With a valid request and 'accept' != 'yes'", func() {
 			user, token := createRequestUser(conn)
 
 			req := new(FollowRequest)
@@ -379,7 +381,8 @@ func TestReplyFollowRequest(t *testing.T) {
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
-				r.PostForm.Add("request_id", req.ID.Hex())
+				r.PostForm.Add("from_user", req.From.Hex())
+				r.PostForm.Add("to_user", req.To.Hex())
 			}, conn, "/", "/",
 				func(resp *httptest.ResponseRecorder) {
 					var errResp errorResponse
@@ -392,7 +395,7 @@ func TestReplyFollowRequest(t *testing.T) {
 				})
 		})
 
-		Convey("With a valid request id and 'accept' = 'yes'", func() {
+		Convey("With a valid request and 'accept' = 'yes'", func() {
 			user, token := createRequestUser(conn)
 
 			req := new(FollowRequest)
@@ -411,7 +414,8 @@ func TestReplyFollowRequest(t *testing.T) {
 				if r.PostForm == nil {
 					r.PostForm = make(url.Values)
 				}
-				r.PostForm.Add("request_id", req.ID.Hex())
+				r.PostForm.Add("from_user", req.From.Hex())
+				r.PostForm.Add("to_user", req.To.Hex())
 				r.PostForm.Add("accept", "yes")
 			}, conn, "/", "/",
 				func(resp *httptest.ResponseRecorder) {
