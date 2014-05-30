@@ -84,7 +84,6 @@ angular.module('sunglasses.controllers')
                         onChange: (val) ->
                             $scope.$apply(() ->
                                 $scope.info[k] = val
-                                console.log k + ' set to ' + val
                             )
                     )
                 )(key)
