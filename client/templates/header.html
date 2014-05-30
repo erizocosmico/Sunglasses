@@ -7,7 +7,7 @@
         <ul class="rightside-menu">
             <li><span class="ion icon ion-home"></span></li>
             <li><span class="ion icon ion-person"></span></li>
-            <li><span class="icon ion ion-ios7-bell"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
+            <li ng-click="toggleMenu('notifications')"><span class="icon ion ion-ios7-bell"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
             <li ng-click="toggleMenu('settings')"><span class="icon ion ion-ios7-gear"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
         </ul>
         <div class="header-overlay" ng-show="searchActive">
@@ -40,5 +40,11 @@
     <ul id="settings-menu" class="hidden">
         <li><a href="#/settings">{{ 'settings' | translate }}</a></li>
         <li><a href="/account/logout">{{ 'logout' | translate }}</a></li>
+    </ul>
+    
+    <ul id="notifications-menu" class="hidden" ng-init="loadNotifications()">
+        <li ng-repeat="notification in notifications" ng-class="{'active': !notification.read}">
+            <notification></notification>
+        </li>
     </ul>
 </header>
