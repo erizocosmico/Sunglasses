@@ -7,17 +7,26 @@ angular.module('sunglasses.controllers')
     'user',
     'api',
     ($scope, $rootScope, userService, api) ->
+        # Services
         $scope.userService = userService
+        
+        # Search vars
         $scope.query = ''
         $scope.queryTimeout = null
+        $scope.searchActive = false
+        $scope.canLoadMore = false
+        $scope.searchResults = []
+        
+        # Menu vars
         $scope.settingsMenuOpened = false
         $scope.notificationsMenuOpened = false
         $scope.menus = 
             settings: false
             notifications: false
-        $scope.searchActive = false
-        $scope.canLoadMore = false
-        $scope.searchResults = []
+            
+        # Notification vars
+        $scope.notifications = []
+        $scope.canLoadMoreNotifications = false
         
         # Perform a search
         $scope.$watch('query', () ->
@@ -47,6 +56,7 @@ angular.module('sunglasses.controllers')
             , 500)
         )
         
+        # Load more posts
         $scope.loadMore = () ->
             $scope.canLoadMore = false
             $scope.userService.search($scope.query, false, $scope.searchResults.length, 25, (resp) ->
@@ -60,6 +70,7 @@ angular.module('sunglasses.controllers')
             )
             $scope.searchActive = true
         
+        # Send a follow request
         $scope.sendFollowRequest = (user, isRequest) ->
             api(
                 '/api/users/follow',
@@ -73,7 +84,8 @@ angular.module('sunglasses.controllers')
                 , (resp) ->
                     console.log(resp)
             )
-            
+        
+        # Unfollow an user
         $scope.unfollow = (user) ->
             api(
                 '/api/users/unfollow',
@@ -91,7 +103,7 @@ angular.module('sunglasses.controllers')
         $scope.toggleMenu = (menuType, closeCallback) ->
             otherMenu = if menuType == 'settings' then 'notifications' else 'settings'
             if $scope.menus[otherMenu]
-                document.getElementById('#' + otherMenu + '-menu').className += ' hidden'
+                document.getElementById(otherMenu + '-menu').className += ' hidden'
             
             menu = document.getElementById(menuType + '-menu')
             if $scope.menus[menuType]
@@ -105,4 +117,20 @@ angular.module('sunglasses.controllers')
                
             # CoffeeScript bad habit 
             return
+            
+        # Load notifications
+        $scope.loadNotifications = () ->
+            api(
+                '/api/notifications/list',
+                'GET',
+                count: 25,
+                offset: $scope.notifications.length,
+                (resp) ->
+                    $scope.$apply(() ->
+                        $scope.notifications = $scope.notifications.concat(resp.notifications)
+                        $scope.canLoadMoreNotifications = resp.notifications.length == 25
+                    )
+                , (resp) ->
+                    console.log(resp)
+            )
 ])
