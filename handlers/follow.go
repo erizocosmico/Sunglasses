@@ -86,17 +86,24 @@ func SendFollowRequest(c middleware.Context) {
 func ReplyFollowRequest(c middleware.Context) {
 	var blankID bson.ObjectId
 
-	reqIDStr := c.Form("request_id")
+	fromUserStr := c.Form("from_user")
+	toUserStr := c.Form("to_user")
 
-	if reqIDStr == "" || !bson.IsObjectIdHex(reqIDStr) {
+	if fromUserStr == "" || !bson.IsObjectIdHex(fromUserStr) {
 		c.Error(400, CodeInvalidData, MsgInvalidData)
 		return
 	}
 
-	reqID := bson.ObjectIdHex(reqIDStr)
+	if toUserStr == "" || !bson.IsObjectIdHex(toUserStr) {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
+		return
+	}
+
+	toUser := bson.ObjectIdHex(toUserStr)
+	fromUser := bson.ObjectIdHex(fromUserStr)
 	var fr models.FollowRequest
 
-	if err := c.Query("requests").FindId(reqID).One(&fr); err != nil {
+	if err := c.Query("requests").Find(bson.M{"user_from": fromUser, "user_to": toUser}).One(&fr); err != nil {
 		c.Error(404, CodeFollowRequestDoesNotExist, MsgFollowRequestDoesNotExist)
 		return
 	}
