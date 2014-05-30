@@ -50,7 +50,7 @@ func ListNotifications(c middleware.Context) {
 	var result models.Notification
 	notifications := make([]models.Notification, 0, count)
 
-	cursor := c.Find("notifications", bson.M{"user_id": c.User.ID}).Limit(count).Skip(offset).Iter()
+	cursor := c.Find("notifications", bson.M{"user_id": c.User.ID}).Sort("-time").Limit(count).Skip(offset).Iter()
 	for cursor.Next(&result) {
 		notifications = append(notifications, result)
 	}
