@@ -178,7 +178,7 @@ func addRoutes(m *martini.ClassicMartini) {
 		// Notification routes
 		r.Group("/notifications", func(r martini.Router) {
 			r.Get("/list", handlers.ListNotifications)
-			r.Put("/seen/:id", handlers.MarkNotificationRead)
+			r.Put("/seen", handlers.MarkNotificationRead)
 		}, middleware.LoginRequired)
 
 		// Show user profile
