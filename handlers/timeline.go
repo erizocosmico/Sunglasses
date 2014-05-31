@@ -10,14 +10,12 @@ import (
 
 // GetUserTimeline gets all posts, comments and likes needed to render the timeline for the user
 func GetUserTimeline(c middleware.Context) {
-	count, offset := c.ListCountParams()
-
 	var (
 		t           models.TimelineEntry
 		comments    = make(map[bson.ObjectId][]models.Comment)
-		posts       = make([]bson.ObjectId, 0, count)
-		users       = make([]bson.ObjectId, 0, count)
-		postsResult = make([]models.Post, 0, count)
+		posts       = make([]bson.ObjectId, 0, 25)
+		users       = make([]bson.ObjectId, 0, 25)
+		postsResult = make([]models.Post, 0, 25)
 		p           models.Post
 		newerThan   int64
 	)
@@ -27,13 +25,24 @@ func GetUserTimeline(c middleware.Context) {
 		newerThan = 0
 	}
 
+	olderThan, err := strconv.ParseInt(c.Form("older_than"), 10, 64)
+	if err != nil {
+		olderThan = 0
+	}
+
+	var timeConstraint bson.M
+	if olderThan > 0 {
+		timeConstraint = bson.M{"$lt": olderThan}
+	} else {
+		timeConstraint = bson.M{"$gt": newerThan}
+	}
+
 	iter := c.Find("timelines", bson.M{
 		"user_id": c.User.ID,
-		"time":    bson.M{"$gt": newerThan},
+		"time":    timeConstraint,
 	}).
 		Sort("-time").
-		Limit(count).
-		Skip(offset).
+		Limit(25).
 		Iter()
 
 	for iter.Next(&t) {
