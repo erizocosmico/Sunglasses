@@ -281,7 +281,6 @@ func GetUsersData(ids []bson.ObjectId, user *User, conn interfaces.Conn) map[bso
 				if v.To.Hex() == u.ID.Hex() {
 					followed = true
 				}
-				break
 			}
 		}
 
