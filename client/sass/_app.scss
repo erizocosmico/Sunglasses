@@ -21,13 +21,14 @@
     border-radius: 4px;
     color: #fff;
     margin-top: 20px;
+    box-shadow: 0px -2px 0px darken($base-accent, 10%) inset;
 
     &:hover {
         background-color: darken($base-accent, 5%);
     }
     
     &:active {
-        box-shadow: 0px 0px 6px rgba(black, .3) inset;
+        box-shadow: 0px 0px 8px rgba(black, .4) inset;
     }
 }
 

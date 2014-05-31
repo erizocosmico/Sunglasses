@@ -54,7 +54,7 @@ angular.module('sunglasses')
                         $scope.post = newPost()
                         $rootScope.showMsg('post_success', 'post-success', true)
                         window.setTimeout(() ->
-                            $scope.loadPosts(true)
+                            $scope.loadPosts('newer')
                         , 4000)
                     , (resp) ->
                         $rootScope.showMsg('error_code_' + resp.responseJSON.code, 'post-error')

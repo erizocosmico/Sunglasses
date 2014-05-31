@@ -285,9 +285,10 @@ header {
         	position: fixed;
         	pointer-events: none;
         	border-color: transparent;
-        	border-bottom-color: white;
+        	border-bottom-color: rgba(white, .7);
         	border-width: 5px;
         	margin-left: -5px;
+            margin-top: -1px;
         }
     }
 }

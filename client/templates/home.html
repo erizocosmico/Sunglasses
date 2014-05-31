@@ -24,7 +24,7 @@
                 <div class="post-video" ng-hide="!postService.isKindOf(post, 'video')">
                     <sun-video video-id="{{ post.video_id }}" service="{{ post.video_service }}">
                 </div>
-                <div class="post-photo" ng-hide="!postService.isKindOf(post, 'photo')" style="background-image: url({{ post.photo_url }})">
+                <div class="post-photo" ng-hide="!postService.isKindOf(post, 'photo')" ng-style="{'background-image': post.photo_back}">
                     <div class="photo">
                         <img data-ng-src="{{ post.thumbnail }}" title="{{ post.caption }}" ng-click="photoService.openTheater(post.photo_url, post.caption)">
                         <p class="caption" ng-show="post.caption.length > 0">{{ post.caption }}</p>
@@ -36,7 +36,7 @@
                 </div>
                 <div class="actions">
                     <ul>
-                        <li ng-click="likePost($index)" ng-class="posts[$index].className"><span class="ion ion-thumbsup"></span> <span class="count" ng-bind="posts[$index].likes"></span></li>
+                        <li ng-click="likePost($index)" ng-class="{'liked': post.liked}"><span class="ion ion-thumbsup"></span> <span class="count" ng-bind="post.likes"></span></li>
                         <li ng-click="commentPost(post)"><span class="ion ion-chatbubbles"></span> <span class="count">{{ post.comments_num }}</span></li>  
                         <li ng-show="postService.isMine(post)" ng-click="changePostPrivacy(post)" class="pull-right"><span class="ion ion-gear-b icon-only"></span></li>
                     </ul>
@@ -50,6 +50,9 @@
             <span class="emoticon">:-(</span>
             <span class="title">{{ 'no_posts_title' | translate }}</span>
             <span class="message">{{ 'no_posts_message' | translate }}</span>
+        </div>
+        <div class="load-more" ng-show="canLoadMorePosts">
+            <button class="btn btn-large" ng-click="loadPosts('older')">{{ 'load_more' | translate }}</button>
         </div>
         <photo-theater />
     </div> 

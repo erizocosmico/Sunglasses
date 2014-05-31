@@ -25,6 +25,10 @@ body {
     font-family: $default-font;
 }
 
+a {
+    cursor: pointer !important; 
+}
+
 .block {
     padding: 6px;
     margin: 5px 0;
@@ -45,6 +49,13 @@ body {
     width: auto !important;
 }
 
+.btn-large {
+    width: 100% !important;
+    padding: 15px !important;
+    max-width: 800px !important;
+    margin: 10px 0 !important;
+}
+
 .btn-white {
     color: #555 !important;
     background: #CCC !important;
@@ -52,6 +63,14 @@ body {
     &:hover {
         background: #BBB !important;
     }
+}
+
+.align-center {
+    text-align: center;
+}
+
+.cursor-pointer {
+    cursor: pointer !important;
 }
 
 .ui.toggle.checkbox input:checked~.box:after, .ui.toggle.checkbox input:checked~label:after {

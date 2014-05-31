@@ -22,6 +22,7 @@ angular.module('sunglasses.controllers')
         $scope.postService = post
         $scope.photoService = photo
         $scope.confirm = confirm
+        $scope.canLoadMorePosts = false
             
         # shows an error or a success message
         $rootScope.showMsg = (text, field, success) ->
@@ -30,16 +31,16 @@ angular.module('sunglasses.controllers')
                 $rootScope.displayError(field, success)
         
         # load more posts, uses $scope.postCount to automatically manage pagination
-        $scope.loadPosts = (withoutOffset) ->
-            params = 
-                count: 25,
-                offset: if withoutOffset? then 0 else $scope.postCount
-                
+        $scope.loadPosts = (loadType) ->
+            params = {}   
             $scope.loading = true
                 
-            if $scope.posts.length > 0 and withoutOffset?
-                params.newer_than = $scope.posts[0].created
-                params.count = 50
+            if loadType?
+                switch loadType
+                    when 'older'
+                        params.older_than = $scope.posts[$scope.posts.length - 1].created
+                    else
+                        params.newer_than = $scope.posts[0].created
 
             api(
                 '/api/timeline',
@@ -48,10 +49,16 @@ angular.module('sunglasses.controllers')
                 (resp) ->
                     $scope.loading = false
                     $scope.postCount += resp.count
-                    $scope.posts = resp.posts.concat($scope.posts)
+                    if loadType == 'older'
+                        $scope.posts = $scope.posts.concat(resp.posts)
+                    else
+                        $scope.posts = resp.posts.concat($scope.posts)
+                    
+                    $scope.canLoadMorePosts = (not loadType? or loadType == 'older') and resp.count == 25
                     
                     for post in $scope.posts
                         $rootScope.relativeTime(post.created, post)
+                        if post.photo_url then post.photo_back = 'url(' + post.photo_url + ')'
                         if post.liked then post.className = 'liked'
                 , (resp) ->
                     $scope.loading = false
