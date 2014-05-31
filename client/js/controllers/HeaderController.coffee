@@ -4,9 +4,10 @@ angular.module('sunglasses.controllers')
 .controller('HeaderController', [
     '$scope',
     '$rootScope',
+    '$timeout',
     'user',
     'api',
-    ($scope, $rootScope, userService, api) ->
+    ($scope, $rootScope, $timeout, userService, api) ->
         # Services
         $scope.userService = userService
         
@@ -27,6 +28,7 @@ angular.module('sunglasses.controllers')
         # Notification vars
         $scope.notifications = []
         $scope.canLoadMoreNotifications = false
+        $scope.unreadCount = 0
         
         # Perform a search
         $scope.$watch('query', () ->
@@ -129,8 +131,20 @@ angular.module('sunglasses.controllers')
                     $scope.$apply(() ->
                         $scope.notifications = $scope.notifications.concat(resp.notifications)
                         $scope.canLoadMoreNotifications = resp.notifications.length == 25
+                        for n in resp.notifications
+                            if not n.read
+                                $scope.unreadCount += 1
                     )
                 , (resp) ->
                     console.log(resp)
             )
+            
+        # Load more notifications every 3 minutes
+        notificationInterval = () ->
+            $timeout(() ->
+                $scope.loadNotifications()
+                notificationInterval()
+            , 180000)
+            
+        notificationInterval()
 ])

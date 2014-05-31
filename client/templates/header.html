@@ -7,7 +7,7 @@
         <ul class="rightside-menu">
             <li><span class="ion icon ion-home"></span></li>
             <li><span class="ion icon ion-person"></span></li>
-            <li ng-click="toggleMenu('notifications')"><span class="icon ion ion-ios7-bell"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
+            <li ng-click="toggleMenu('notifications')"><span class="icon ion ion-ios7-bell"></span> <span class="notifications-count" ng-class="{'has-unread': unreadCount > 0}">{{ unreadCount }}</span> <span class="arrow ion ion-arrow-down-b"></span></li>
             <li ng-click="toggleMenu('settings')"><span class="icon ion ion-ios7-gear"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
         </ul>
         <div class="header-overlay" ng-show="searchActive">
@@ -45,6 +45,12 @@
     <ul id="notifications-menu" class="hidden" ng-init="loadNotifications()">
         <li ng-repeat="notification in notifications" ng-class="{'active': !notification.read}">
             <notification></notification>
+        </li>
+        <li ng-show="canLoadMoreNotifications">
+            <button class="btn" ng-click="loadNotifications()">{{ 'load_more' | translate }}</button>
+        </li>
+        <li ng-show="notifications.length == 0" class="align-center">
+            {{ 'no_notifications' | translate }}
         </li>
     </ul>
 </header>

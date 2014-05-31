@@ -174,9 +174,12 @@
     "follow_request_sent": "Follow request sent",
     "load_more": "Load more",
     "has_sent_follow_request": "has sent you a follow request",
+    "has_followed_you": "has followed you",
+    "has_accepted_your_follow_request": "has accepted your follow request",
     "accept": "Accept",
     "decline": "Decline",
     "follow_accepted": "Follow request accepted!",
-    "follow_declined": "Follow request declined!"
+    "follow_declined": "Follow request declined!",
+    "no_notifications": "You have no notifications"
     
 }

@@ -1,9 +1,9 @@
 'use strict'
 
 angular.module('sunglasses')
-.directive('notification', ['api', (api) ->
+.directive('notification', () ->
     restrict: 'E',
-    template: '<div ng-switch="notification.notification_type">
+    template: '<div ng-switch="notification.notification_type" ng-click="performAction()" ng-class="{\'cursor-pointer\': notification.notification_type > 1}">
                     <div ng-switch-when="1">
                         <a ng-href="#/u/{{ notification.user_action.username }}">{{ userService.getUsername(notification.user_action) }}</a> {{ \'has_sent_follow_request\' | translate }}
                         <div class="block centered">
@@ -14,10 +14,10 @@ angular.module('sunglasses')
                         </div>
                     </div>
                     <div ng-switch-when="2">
-                        Follow request accepted
+                        <a>{{ userService.getUsername(notification.user_action) }}</a> {{ \'has_accepted_your_follow_request\' | translate }}
                     </div>
                     <div ng-switch-when="3">
-                        Followed
+                        <a>{{ userService.getUsername(notification.user_action) }}</a> {{ \'has_followed_you\' | translate }}
                     </div>
                     <div ng-switch-when="4">
                         Like
@@ -33,7 +33,7 @@ angular.module('sunglasses')
     link: (scope, elem, attrs) ->
         scope.replied = false
         scope.accepted = false
-    , controller: ['$scope', ($scope) ->
+    , controller: ['$scope', '$location', 'api', ($scope, $location, api) ->
         $scope.replyFollowRequest = (accept) ->
             api(
                 '/api/users/reply_follow_request',
@@ -46,12 +46,33 @@ angular.module('sunglasses')
                         $scope.replied = true
                         $scope.accepted = accept == 'yes'
                         $scope.notification.read = true
+                        $scope.$parent.unreadCount -= 1
                     )
                 , (resp) ->
                     console.log(resp)
             )
             
         $scope.performAction = () ->
-            console.log "Perform action"
+            actionCallback = () ->
+                $scope.notification.read = true
+    
+                switch $scope.notification.notification_type
+                    when 2, 3
+                        $location.path('/u/' + $scope.notification.user_action.username.toLowerCase())
+                    when 4, 5, 6
+                        $location.path('/posts/show/' + $scope.notification.post_id)
+
+            if not $scope.notification.read
+                api(
+                    '/api/notifications/seen',
+                    'PUT',
+                    notification_id: $scope.notification.id,
+                    (resp) ->
+                        $scope.$apply(actionCallback)
+                    , (resp) ->
+                        console.log(resp)
+                )
+            else
+                actionCallback()
     ]
-])
+)
