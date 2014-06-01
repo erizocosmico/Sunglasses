@@ -108,6 +108,12 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
                 )
         , 6000)
         
+    # shows an error or a success message
+    $rootScope.showMsg = (text, field, success) ->
+        $translate(text).then (msg) ->
+            document.getElementById(field).innerHTML = msg
+            $rootScope.displayError(field, success)
+        
     # returns the relative time
     $rootScope.relativeTime = (time, dict, callback) ->
         diff = Math.floor(new Date().getTime() / 1000) - Number(time)
