@@ -136,7 +136,7 @@ func GetCommentsForPost(post bson.ObjectId, user *User, n int, conn interfaces.C
 	uids := make([]bson.ObjectId, 0, n)
 	var comments []Comment
 
-	iter := conn.C("comments").Find(bson.M{"post_id": post}).Limit(n).Sort("-created").Iter()
+	iter := conn.C("comments").Find(bson.M{"post_id": post}).Limit(n).Sort("created").Iter()
 	err := iter.All(&comments)
 	if err != nil {
 		return nil

@@ -30,7 +30,7 @@
         </ul>
     </div>
     <div class="comments" ng-hide="post.comments.length <= 0">
-        <comment ng-repeat="comment in post.comments"></comment>
+        <comment ng-repeat="comment in post.comments | orderBy:'created'"></comment>
     </div>
     <comment-form></comment-form>
 </div>

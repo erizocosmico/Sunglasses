@@ -9,7 +9,7 @@
         
         <div id="timeline-error" class="error hidden"></div>
         
-        <post ng-repeat="post in posts"></post>
+        <post ng-repeat="post in posts | orderBy:'-created'"></post>
 
         <div class="no-posts-message" ng-hide="posts.length != 0">
             <span class="emoticon">:-(</span>

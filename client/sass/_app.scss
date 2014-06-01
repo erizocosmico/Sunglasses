@@ -60,6 +60,39 @@ div#app {
     }
     
     @import '_header';
+    
+    .user-data {
+        .default-avatar {
+            width: 45px;
+            border-radius: 50%;
+            height: 45px;
+            background-color: $base-accent;
+            text-align: center;
+            float: left;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0px 0px 5px rgba(black, .1) inset;
+            
+            .ion {
+                font-size: 1.8em;
+                vertical-align: bottom;
+                color: lighten(#fafafa, 5%);
+                padding-top: 8px;
+            }
+        }
+        
+        .username {
+            font-weight: 700;
+            display: inline-block;
+        }
+        
+        .time {
+            font-size: 0.9em;
+            display: block;
+            color: #BBB;
+        }
+    }
+    
     @import '_timeline';
     
     div.error, div.success {
@@ -100,36 +133,4 @@ div#app {
     
     @import '_theater';
     @import '_settings';
-    
-    .user-data {
-        .default-avatar {
-            width: 45px;
-            border-radius: 50%;
-            height: 45px;
-            background-color: $base-accent;
-            text-align: center;
-            float: left;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0px 0px 5px rgba(black, .1) inset;
-            
-            .ion {
-                font-size: 1.8em;
-                vertical-align: bottom;
-                color: lighten(#fafafa, 5%);
-                padding-top: 8px;
-            }
-        }
-        
-        .username {
-            font-weight: 700;
-            display: inline-block;
-        }
-        
-        .time {
-            font-size: 0.9em;
-            display: block;
-            color: #BBB;
-        }
-    }
 }

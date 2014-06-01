@@ -52,6 +52,9 @@ angular.module('sunglasses.controllers')
                     
                     for post in $scope.posts
                         $rootScope.relativeTime(post.created, post)
+                        if post.comments?
+                            for comment in post.comments
+                                $rootScope.relativeTime(comment.created, comment)
                         if post.photo_url then post.photo_back = 'url(' + post.photo_url + ')'
                         if post.liked then post.className = 'liked'
                 , (resp) ->

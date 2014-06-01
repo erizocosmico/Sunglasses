@@ -18,8 +18,10 @@ angular.module('sunglasses')
                 (resp) ->
                     if not resp.error
                         $scope.$apply(() ->
+                            $rootScope.relativeTime(resp.comment.created, resp.comment)
                             $scope.post.comments.push(resp.comment)
                             $scope.post.comments_num += 1
+                            $scope.commentText = ''
                         )
                 , (resp) ->
                     console.log(resp)

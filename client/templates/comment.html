@@ -1,0 +1,12 @@
+<div class="comment">
+    <div class="user-data">
+        <div class="avatar" ng-hide="userService.getAvatarThumb(comment.user) == ''"></div>
+        <div class="default-avatar" ng-hide="userService.getAvatarThumb(comment.user) != ''">
+            <span class="ion ion-android-contact"></span>
+        </div>
+        <a href="#/u/{{ comment.user.username.toLowerCase() }}" class="username">{{ userService.getUsername(comment.user) }}</a>
+        <span class="time">{{ comment.timeFormatted }}</span>
+    </div>
+    <p class="comment-text">{{ comment.message }}</p>
+    <div class="clear"></div>
+</div>
