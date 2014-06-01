@@ -49,6 +49,9 @@ func CreateComment(c middleware.Context) {
 
 	go timeline.PropagatePostOnNewComment(c, post.ID, comment.ID)
 
+	// Append user
+	comment.User = models.UserForDisplay(*c.User, true, false)
+
 	c.Success(201, map[string]interface{}{
 		"created": true,
 		"message": "Comment posted successfully",
