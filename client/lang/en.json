@@ -183,6 +183,8 @@
     "no_notifications": "You have no notifications",
     
     "comment_placeholder": "Comment...",
-    "comment_btn": "Post comment"
+    "comment_btn": "Post comment",
+    "delete_comment_message": "Do you really want to delete this comment?",
+    "delete_comment_title": "Delete comment"
     
 }

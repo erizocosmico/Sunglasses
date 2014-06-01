@@ -1,5 +1,5 @@
 <div class="post">
-    <div ng-show="postService.isMine(post)" ng-click="deletePost(post)" class="pull-right inline-icon"><span class="ion ion-close-round"></span></div>
+    <div ng-show="postService.isMine(post)" ng-click="deletePost()" class="pull-right inline-icon"><span class="ion ion-close-round"></span></div>
     <div class="user-data">
         <div class="avatar" ng-hide="userService.getAvatarThumb(post.user) == ''"></div>
         <div class="default-avatar" ng-hide="userService.getAvatarThumb(post.user) != ''">
@@ -24,13 +24,14 @@
     </div>
     <div class="actions">
         <ul>
-            <li ng-click="likePost($index)" ng-class="{'liked': post.liked}"><span class="ion ion-thumbsup"></span> <span class="count" ng-bind="post.likes"></span></li>
-            <li ng-click="commentPost(post)"><span class="ion ion-chatbubbles"></span> <span class="count">{{ post.comments_num }}</span></li>  
-            <li ng-show="postService.isMine(post)" ng-click="changePostPrivacy(post)" class="pull-right"><span class="ion ion-gear-b icon-only"></span></li>
+            <li ng-click="likePost()" ng-class="{'liked': post.liked}"><span class="ion ion-thumbsup"></span> <span class="count" ng-bind="post.likes"></span></li>
+            <li ng-click="commentPost()"><span class="ion ion-chatbubbles"></span> <span class="count">{{ post.comments_num }}</span></li>  
+            <li ng-show="postService.isMine(post)" ng-click="changePostPrivacy()" class="pull-right"><span class="ion ion-gear-b icon-only"></span></li>
         </ul>
     </div>
     <div class="comments" ng-hide="post.comments.length <= 0">
         <comment ng-repeat="comment in post.comments | orderBy:'created'"></comment>
+        <button class="btn btn-slim" ng-click="loadMoreComments()" ng-show="post.comments_num > post.comments.length - commentsDirty">{{ 'load_more' | translate }}</button>
     </div>
     <comment-form></comment-form>
 </div>

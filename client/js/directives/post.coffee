@@ -5,6 +5,8 @@ angular.module('sunglasses')
     restrict: 'E',
     templateUrl: 'templates/post.html',
     controller: ['$scope', '$rootScope', 'api', ($scope, $rootScope, api) ->
+        $scope.post.commentsDirty = 0
+
         # delete a post
         $scope.deletePost = () ->
             $scope.confirm.showDialog('delete_post_title', 'delete_post_message', 'cancel', 'delete', () ->
@@ -41,6 +43,33 @@ angular.module('sunglasses')
                     )
                 , (resp) ->
                     $rootScope.showMsg('error_code_' + resp.responseJSON.code, 'post-error')
+            )
+            
+        $scope.commentPost = () ->
+            commentArea = $('#comment-area-' + $scope.post.id).focus()
+            return
+            
+        $scope.loadMoreComments = () ->
+            api(
+                '/api/comments/for_post/' + $scope.post.id,
+                'GET',
+                older_than: $scope.post.comments[$scope.post.comments.length - 1 - $scope.post.commentsDirty].created,
+                (resp) ->
+                    $scope.$apply(() ->
+                        for c in resp.comments
+                            found = false
+                            for cTmp in $scope.post.comments
+                                if cTmp.id == c.id
+                                    found = true
+                                    break
+                                    
+                            if not found
+                                $rootScope.relativeTime(c.created, c)
+                                $scope.post.comments.push(c)
+                        $scope.post.commentsDirty = 0
+                    )
+                , (resp) ->
+                    console.log(resp)
             )
     ]
 )

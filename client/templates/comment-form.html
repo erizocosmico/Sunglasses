@@ -1,4 +1,4 @@
 <div class="comment-form">
-    <textarea ng-model="commentText" placeholder="{{ 'comment_placeholder' | translate }}"></textarea>
+    <textarea ng-model="commentText" id="comment-area-{{ post.id }}" placeholder="{{ 'comment_placeholder' | translate }}"></textarea>
     <button ng-show="commentText.trim().length > 0" class="btn btn-slim" ng-click="postComment()">{{ 'comment_btn' | translate }}</button>
 </div>

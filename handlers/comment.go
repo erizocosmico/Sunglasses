@@ -8,6 +8,7 @@ import (
 	"github.com/mvader/sunglasses/modules/timeline"
 	"github.com/mvader/sunglasses/util"
 	"labix.org/v2/mgo/bson"
+	"strconv"
 )
 
 // CreateComment adds a comment to a post
@@ -116,7 +117,11 @@ func CommentsForPost(c middleware.Context, params martini.Params) {
 		post   models.Post
 		result models.Comment
 	)
-	count, offset := c.ListCountParams()
+
+	olderThan, err := strconv.ParseInt(c.Form("older_than"), 10, 64)
+	if err != nil {
+		olderThan = 0
+	}
 
 	postID := params["post_id"]
 	if !bson.IsObjectIdHex(postID) {
@@ -134,8 +139,8 @@ func CommentsForPost(c middleware.Context, params martini.Params) {
 		return
 	}
 
-	comments := make([]models.Comment, 0, count)
-	cursor := c.Find("comments", bson.M{"post_id": post.ID}).Sort("-created").Limit(count).Skip(offset).Iter()
+	comments := make([]models.Comment, 0, 25)
+	cursor := c.Find("comments", bson.M{"post_id": post.ID, "created": bson.M{"$gt": olderThan}}).Sort("created").Limit(25).Iter()
 	for cursor.Next(&result) {
 		comments = append(comments, result)
 	}

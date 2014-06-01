@@ -1,4 +1,5 @@
 <div class="comment">
+    <div ng-show="postService.isMine(comment)" ng-click="deleteComment()" class="pull-right inline-icon"><span class="ion ion-close-round"></span></div>
     <div class="user-data">
         <div class="avatar" ng-hide="userService.getAvatarThumb(comment.user) == ''"></div>
         <div class="default-avatar" ng-hide="userService.getAvatarThumb(comment.user) != ''">
