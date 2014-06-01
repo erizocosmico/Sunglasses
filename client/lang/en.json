@@ -180,6 +180,9 @@
     "decline": "Decline",
     "follow_accepted": "Follow request accepted!",
     "follow_declined": "Follow request declined!",
-    "no_notifications": "You have no notifications"
+    "no_notifications": "You have no notifications",
+    
+    "comment_placeholder": "Comment...",
+    "comment_btn": "Post comment"
     
 }
