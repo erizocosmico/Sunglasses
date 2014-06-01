@@ -1,0 +1,77 @@
+.post-box {
+    @include post;
+    
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: block;
+        text-align: center;
+        
+        li {
+            display: inline-block;
+            width: 24%;
+            text-align: center;
+            
+            span {
+                font-size: 2.0em;
+                padding: 7px 0;
+                width: 100%;
+                color: lighten(black, 50%);
+                border-left: 1px solid darken(#fafafa, 6%);
+                cursor: pointer;
+                
+                &.active {
+                    color: $base-accent;
+                }
+            }
+            
+            &:first-child span { border-left: none }
+        }
+    }
+    
+    textarea, input {
+        width: 100%;
+        border: none;
+        border-top: 1px solid darken(#fafafa, 8%);
+        margin-top: 6px;
+        padding: 10px 10px 6px 10px;
+        line-height: 1.5em;
+        color: #555;
+    }
+    
+    button {
+        @include base-button;
+    }
+    
+    .upload-zone {
+        text-align: center;
+        border-top: 1px solid darken(#fafafa, 8%);
+        margin-top: 6px;
+        
+        button {
+            width: auto;
+            padding: 5px 15px;
+            display: inline-block;
+            font-size: 0.9em;
+            background: darken(#fafafa, 20%);
+            color: darken(#fafafa, 70%);
+            font-weight: bold;
+            
+            &:hover {
+                background-color: darken(#fafafa, 10%);
+            }
+            
+            &:active {
+                box-shadow: 0px 0px 6px rgba(black, .3) inset;
+            }
+        }
+        
+        span {
+            padding-left: 6px;
+            font-size: 0.9em;
+            max-width: 350px;
+            word-wrap: break-word;
+        }
+    }
+}
