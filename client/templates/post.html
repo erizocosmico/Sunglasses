@@ -29,8 +29,8 @@
             <li ng-show="postService.isMine(post)" ng-click="changePostPrivacy(post)" class="pull-right"><span class="ion ion-gear-b icon-only"></span></li>
         </ul>
     </div>
-    <div class="comments" ng-hide="post.comments.length > 0">
-        <comment ng-repeat="comment in comments"></comment>
+    <div class="comments" ng-hide="post.comments.length <= 0">
+        <comment ng-repeat="comment in post.comments"></comment>
     </div>
     <comment-form></comment-form>
 </div>
