@@ -82,6 +82,25 @@ header {
                 padding: 5px 10px;
                 cursor: pointer;
                 color: darken(white, 50%);
+                
+                span.notifications-count {
+                    display: none;
+                    padding: 1px 4px;
+                    font-size: 0.6em;
+                    border-radius: 4px;
+                    position: relative;
+                    z-index: 9999;
+                    float: right;
+                    right: 23px;
+                    top: 15px;
+                    
+                    &.has-unread {
+                        display: block;
+                        background-color: rgba($base-accent, .7);
+                        color: #FFF;
+                        font-weight: bold;
+                    }
+                }
             
                 &:hover {
                     background: #EEE;
