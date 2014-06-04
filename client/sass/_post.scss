@@ -111,17 +111,7 @@
             list-style: none;
             
             li {
-                display: inline-block;
-                text-align: center;
-                font-size: 0.8em;
-                padding: 2px 15px;
-                color: lighten(black, 50%);
-                border-radius: 25px;
-                border: 3px solid darken(#fafafa, 5%);
-                margin-right: 10px;
-                transition: all 200ms ease-in-out;
-                cursor: pointer;
-                
+                @include rounded-button;
                 span.count {
                     font-size: 1.1em;
                     vertical-align: middle;
@@ -136,34 +126,8 @@
                     span.count { color: #17b57c }
                 }
                 
-                span.arrow {
-                    font-size: 0.8em !important;
-                }
-                
-                &:hover {
+                &:hover span.count {
                     color: $base-accent;
-                    border-color: $base-accent;
-                    
-                    span.count {
-                        color: #333;
-                    }
-                }
-                
-                span.ion {
-                    font-size: 1.6em;
-                    vertical-align: middle;
-                    padding-right: 5px;
-                }
-                
-                span.ion.icon-only {
-                    padding-right: 0;
-                }
-                
-                &.pull-right {
-                    float: right;
-                    .ion {
-                        padding-right: 5px;
-                    }
                 }
             }
         }

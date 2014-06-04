@@ -16,6 +16,16 @@
             <input type="text" placeholder="{{ 'picture_caption' | translate }}" ng-model="post.caption">
         </div>
         <textarea ng-model="post.text" placeholder="{{ 'what_are_you_up_to' | translate }}"></textarea>
+        <div class="rounded-button pull-right" ng-click="privacyOpened = !privacyOpened">
+            <span class="ion ion-gear-b icon-only"></span>
+            <ul class="dropdown-box" ng-hide="!privacyOpened">
+                <li ng-click="privacySelect(1)" ng-class="{'selected': privacySelected == 1}">{{ 'privacy_type_public' | translate }}</li>
+                <li ng-click="privacySelect(2)" ng-class="{'selected': privacySelected == 2}">{{ 'privacy_type_following_only' | translate }}</li>
+                <li ng-click="privacySelect(3)" ng-class="{'selected': privacySelected == 3}">{{ 'privacy_type_followers_only' | translate }}</li>
+                <li ng-click="privacySelect(4)" ng-class="{'selected': privacySelected == 4}">{{ 'privacy_type_none' | translate }}</li>
+            </ul>
+        </div>
         <button ng-click="submitPost()" ng-hide="post.text=='' && post.type=='status'">{{ 'publish' | translate }}</button>
+        <div class="clear"></div>
     </ul>
 </div>

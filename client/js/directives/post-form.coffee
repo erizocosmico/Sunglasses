@@ -4,13 +4,31 @@ angular.module('sunglasses')
 .directive('postForm', () ->
     restrict: 'E',
     templateUrl: 'templates/post-form.html',
-    controller: ['$scope', 'api', '$rootScope', ($scope, api, $rootScope) ->
+    controller: ['$scope', 'api', '$rootScope', '$timeout', ($scope, api, $rootScope, $timeout) ->
+        $scope.privacyOpened = false
+        $scope.privacySelected = 4
+        
+        getUserPrivacy = (t) ->
+            if t? and not userData.settings['override_default_privacy'] and ['status', 'photo', 'video', 'link'].indexOf(t) != -1
+                return userData.settings['default_' + t + '_privacy'].privacy_type
+                
+            return userData.settings['default_status_privacy'].privacy_type
+        
+        $scope.privacySelect = (p) ->
+            $scope.privacySelected = p
+            $timeout(() ->
+                $scope.privacyOpened = true
+            , 0)
+        
         # newPost creates a new empty post and changes the post status
         # that means it initializes the post-box to send another post after
         # submitting a post
         newPost = () ->
             if 'changePostType' in $scope then $scope.changePostType('status')
             document.getElementById('photo-upload').value = ''
+            
+            $scope.privacySelected = getUserPrivacy()
+            
             text: '',
             url: '',
             type: 'status',
@@ -28,6 +46,7 @@ angular.module('sunglasses')
         # submits a post to the server
         # TODO: privacy handling
         $scope.submitPost = () ->
+            $scope.privacyOpened = false
             urlRegex = /^https?:\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/
             vimeoReg = /^https?:\/\/(www.)?vimeo.com\/([0-9]+)$/
             ytReg = /^https?:\/\/(www.)?youtube.com\/watch?(.*)v=(.+)$/
@@ -49,6 +68,7 @@ angular.module('sunglasses')
                     post_url: $scope.post.url,
                     post_picture: $scope.post.picture,
                     caption: $scope.post.caption,
+                    privacy_type: $scope.privacySelected,
                     (resp) ->
                         $scope.loading = true
                         $scope.post = newPost()
@@ -68,6 +88,7 @@ angular.module('sunglasses')
         # changes the post type
         $scope.changePostType = (type) ->
             if ['status', 'photo', 'video', 'link'].indexOf(type) == -1 then type = 'status'
+            $scope.privacySelected = getUserPrivacy(type)
             if $scope.post.type != type then $scope.post.url = ''
             $scope.post.type = type
             btns = document.querySelectorAll('.post-box ul li span')

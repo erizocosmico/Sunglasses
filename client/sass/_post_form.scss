@@ -44,6 +44,21 @@
         @include base-button;
     }
     
+    .rounded-button {
+        position: relative;
+        font-size: 0.9em;
+        float: right;
+        
+        .dropdown-box {
+            right: -40%;
+            top: 140%;
+            
+            li.selected {
+                background-color: #EEE;
+            }
+        }
+    }
+    
     .upload-zone {
         text-align: center;
         border-top: 1px solid darken(#fafafa, 8%);
