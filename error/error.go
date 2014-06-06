@@ -32,6 +32,7 @@ const (
 	CodeInvalidWebsites           = 32
 	CodeInvalidInfoLength         = 33
 	CodeInvalidPrivacySettings    = 34
+	CodePasswordCurrentError      = 35
 
 	// Post Codes [50-70]
 	CodeInvalidStatusText     = 50
@@ -77,6 +78,7 @@ const (
 	MsgInvalidWebsites           = "One or more of the provided websites is not a valid url"
 	MsgInvalidInfoLength         = "One or more of the provided fields is more than 500 characters long"
 	MsgInvalidPrivacySettings    = "Invalid privacy settings provided"
+	MsgPasswordCurrentError      = "Invalid current password provided"
 
 	// Post messages
 	MsgInvalidStatusText     = "Status text must not be more than 1500 characters long"

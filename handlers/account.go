@@ -236,6 +236,73 @@ func GetAccountSettings(c middleware.Context) {
 	})
 }
 
+// UpdateAccountData updates some data about the user like the names and the preferred language
+func UpdateAccountData(c middleware.Context) {
+	var (
+		publicName    = c.Form("public_name")
+		privateName   = c.Form("private_name")
+		preferredLang = c.Form("preferred_lang")
+	)
+
+	if util.Strlen(publicName) > 35 || util.Strlen(privateName) > 35 {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
+		return
+	}
+
+	// TODO: Check lang is available
+
+	c.User.PublicName = publicName
+	c.User.PrivateName = privateName
+	c.User.PreferredLanguage = preferredLang
+
+	if err := c.User.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+		return
+	}
+
+	c.Success(200, map[string]interface{}{
+		"message": "Data updated successfully",
+	})
+}
+
+// UpdateAccountPassword updates the user password
+func UpdateAccountPassword(c middleware.Context) {
+	var (
+		password        = c.Form("password")
+		passwordRepeat  = c.Form("password_repeat")
+		currentPassword = c.Form("current_password")
+	)
+
+	if !c.User.CheckPassword(currentPassword) {
+		c.Error(400, CodePasswordCurrentError, MsgPasswordCurrentError)
+		return
+	}
+
+	if util.Strlen(password) < 6 {
+		c.Error(400, CodePasswordLength, MsgPasswordLength)
+		return
+	}
+
+	if password != passwordRepeat {
+		c.Error(400, CodePasswordMatch, MsgPasswordMatch)
+		return
+	}
+
+	if err := c.User.SetPassword(password); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+		return
+	}
+
+	if err := c.User.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+		return
+	}
+
+	c.Success(200, map[string]interface{}{
+		"message": "Password updated successfully",
+	})
+}
+
 // UpdateAccountSettings updates the user's settings
 func UpdateAccountSettings(c middleware.Context) {
 	s := c.User.Settings
