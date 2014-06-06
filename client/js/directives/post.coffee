@@ -6,6 +6,8 @@ angular.module('sunglasses')
     templateUrl: 'templates/post.html',
     controller: ['$scope', '$rootScope', 'api', ($scope, $rootScope, api) ->
         $scope.post.commentsDirty = 0
+        
+        if not $scope.post.comments? then $scope.post.comments = []
 
         # delete a post
         $scope.deletePost = () ->
