@@ -1,7 +1,9 @@
 <div class="post">
     <div ng-show="postService.isMine(post)" ng-click="deletePost()" class="pull-right inline-icon"><span class="ion ion-close-round"></span></div>
     <div class="user-data">
-        <div class="avatar" ng-hide="userService.getAvatarThumb(post.user) == ''"></div>
+        <div class="avatar" ng-hide="userService.getAvatarThumb(post.user) == ''">
+            <img ng-src="{{ userService.getAvatarThumb(post.user) }}" alt="{{ userService.getUsername(post.user) }}">
+        </div>
         <div class="default-avatar" ng-hide="userService.getAvatarThumb(post.user) != ''">
             <span class="ion ion-android-contact"></span>
         </div>

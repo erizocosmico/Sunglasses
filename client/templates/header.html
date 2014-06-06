@@ -13,7 +13,9 @@
         <div class="header-overlay" ng-show="searchActive">
             <ul class="search-results" ng-show="searchResults.length > 0">
                 <li ng-repeat="user in searchResults" class="user-data">
-                    <div class="avatar" ng-hide="userService.getAvatarThumb(user) == ''"></div>
+                    <div class="avatar" ng-hide="userService.getAvatarThumb(user) == ''">
+                        <img ng-src="{{ userService.getAvatarThumb(user) }}" alt="{{ userService.getUsername(user) }}">
+                    </div>
                     <div class="default-avatar" ng-hide="userService.getAvatarThumb(user) != ''">
                         <span class="ion ion-android-contact"></span>
                     </div>
@@ -25,6 +27,7 @@
                         <button class="btn" ng-show="user.needs_follow_request && !user.followed && !user.follow_requested" ng-click="sendFollowRequest(user, true)">{{ 'send_follow_request' | translate }}</button>
                         <p class="message" ng-show="user.follow_requested">{{ 'follow_request_sent' | translate }}</p>
                     </div>
+                    <div class="clear"></div>
                 </li>
                 <li ng-show="canLoadMore">
                     <button class="btn" ng-click="loadMore()">{{ 'load_more' | translate }}</button>
