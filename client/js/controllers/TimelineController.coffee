@@ -1,8 +1,7 @@
 'use strict'
 
 angular.module('sunglasses.controllers')
-.controller('LandingController', ['$rootScope', ($rootScope) -> $rootScope.title = 'sunglasses'])
-.controller('HomeController', [
+.controller('TimelineController', [
     '$scope',
     '$rootScope',
     '$translate',

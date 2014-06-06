@@ -1,0 +1,22 @@
+<div id="timeline">
+    <post-form></post-form>
+    
+    <div ng-hide="!loading" class="loading">
+        <span class="ion ion-loading-c"></span> {{ 'loading' | translate }}
+    </div>
+    
+    <div id="timeline-error" class="error hidden"></div>
+    
+    <post ng-repeat="post in posts | orderBy:'-created'"></post>
+
+    <div class="no-posts-message" ng-hide="posts.length != 0">
+        <span class="emoticon">:-(</span>
+        <span class="title">{{ 'no_posts_title' | translate }}</span>
+        <span class="message">{{ 'no_posts_message' | translate }}</span>
+    </div>
+    <div class="load-more" ng-show="canLoadMorePosts">
+        <button class="btn btn-large" ng-click="loadPosts('older')">{{ 'load_more' | translate }}</button>
+    </div>
+    <photo-theater></photo-theater> 
+    <confirm-dialog></confirm-dialog>
+</div>

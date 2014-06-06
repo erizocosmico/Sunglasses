@@ -31,7 +31,6 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
             )
             .when('/',
                 templateUrl: 'templates/home.html'
-                controller: 'HomeController'
             )
             .otherwise(
                 redirectTo: '/'
