@@ -4,19 +4,87 @@ angular.module('sunglasses.controllers')
 .controller('SettingsController', [
     '$scope',
     '$rootScope',
+    '$translate',
     'api',
-    ($scope, $rootScope, api) ->
+    ($scope, $rootScope, $translate, api) ->
         $rootScope.title = 'settings'
         
         # Settings
         $scope.settings = userData.settings
         # Info
         $scope.info = userData.info
+        # Profile data
+        $scope.profileData = 
+            public_name: $rootScope.userData.public_name
+            private_name: $rootScope.userData.private_name
+        # Password change model
+        $scope.passwordChange = 
+            password: ''
+            password_repeat: ''
+            current_password: ''
+        # Avatars
+        $scope.avatars = 
+            public: null
+            private: null
         
         # Active section
         $scope.activeSection = 'account_details'
         $scope.setActiveSection = (section) ->
             $scope.activeSection = section
+        
+        for t in ['private', 'public']
+            ((type) ->
+                document.getElementById(type + '-avatar').addEventListener('change', (e) ->
+                    $scope.avatars[type] = e.target.files[0]
+                    $scope.uploadAvatar(type)
+                )
+            )(t)
+            
+        $scope.handleUpload = (type) ->
+            if ['private', 'public'].indexOf(type) == -1 then return
+            
+            e = document.createEvent('Event')
+            e.initEvent('click', true, true)
+            document.getElementById(type + '-avatar').dispatchEvent(e)
+            
+        $scope.uploadAvatar = (type) ->
+            $translate('confirm_avatar_upload')
+            .then((text) ->
+                if confirm(text)
+                    api(
+                        '/api/account/update_picture',
+                        'PUT',
+                        account_picture: $scope.avatars[type],
+                        picture_type: type,
+                        (resp) ->
+                            # TODO: backend should return thumbnail url
+                            console.log(resp)
+                        , (resp) ->
+                            console.log(resp)
+                    )
+            )
+            
+        $scope.updatePassword = () ->
+            api(
+                '/api/account/password',
+                'PUT',
+                $scope.passwordChange,
+                (resp) ->
+                    console.log(resp)
+                , (resp) ->
+                    console.log(resp)
+            )
+            
+        $scope.updateData = () ->
+            api(
+                '/api/account/data',
+                'PUT',
+                $scope.profileData,
+                (resp) ->
+                    console.log(resp)
+                , (resp) ->
+                    console.log(resp)
+            )
 
         # update user settings
         $scope.updateSettings = () ->

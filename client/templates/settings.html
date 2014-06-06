@@ -13,6 +13,60 @@
         <section>
             <h1>{{ activeSection | translate }}</h1>
             <article ng-show="activeSection == 'account_details'">
+                <h3>{{ 'profile_data' | translate }}</h3>
+                
+                <div class="field">
+                    <label>{{ 'public_name' | translate }}</label>
+                    <input type="text" ng-model="profileData.public_name" placeholder="{{ 'public_name' | translate }}" maxlength="35">
+                </div>
+                
+                <div class="field">
+                    <label>{{ 'private_name' | translate }}</label>
+                    <input type="text" ng-model="profileData.private_name" placeholder="{{ 'private_name' | translate }}" maxlength="35">
+                </div>
+                
+                <!-- TODO preferred lang -->
+                
+                <button ng-click="updateData()">{{ 'update_data' | translate }}</button>
+                
+                <h3>{{ 'avatars' | translate }}</h3>
+                
+                <div class="col-50-50 pull-left centered">
+                    <h4>Public avatar</h4>
+                    <img ng-src="{{ userData.public_avatar_thumbnail }}" alt="{{ public_avatar | translate }}" ng-hide="userData.public_avatar_thumbnail.length == 0">
+                    <input type="file" id="public-avatar" class="hidden" accept="image/x-png, image/png, image/gif, image/jpeg">
+                    <div class="upload-zone">
+                        <button ng-click="handleUpload('public')">{{ 'set_public_avatar' | translate }} <span class="ion ion-arrow-up-a"></span></button>
+                    </div>
+                </div>
+                
+                <div class="col-50-50 pull-right centered">
+                    <h4>Private avatar</h4>
+                    <img ng-src="{{ userData.avatar_thumbnail }}" alt="{{ private_avatar | translate }}" ng-hide="userData.avatar_thumbnail.length == 0">
+                    <input type="file" id="private-avatar" class="hidden" accept="image/x-png, image/png, image/gif, image/jpeg">
+                    <div class="upload-zone">
+                        <button ng-click="handleUpload('private')">{{ 'set_private_avatar' | translate }} <span class="ion ion-arrow-up-a"></span></button>
+                    </div>
+                </div>
+                
+                <h3 class="clear">{{ 'change_password' | translate }}</h3>
+                
+                <div class="field">
+                    <label>{{ 'password' | translate }}</label>
+                    <input type="password" ng-model="passwordChange.password" placeholder="{{ 'password' | translate }}">
+                </div>
+                
+                <div class="field">
+                    <label>{{ 'password_repeat' | translate }}</label>
+                    <input type="password" ng-model="passwordChange.password_repeat" placeholder="{{ 'password_repeat' | translate }}">
+                </div>
+                
+                <div class="field">
+                    <label>{{ 'current_password' | translate }}</label>
+                    <input type="password" ng-model="passwordChange.current_password" placeholder="{{ 'current_password' | translate }}">
+                </div>
+                
+                <button ng-click="updatePassword()" ng-show="passwordChange.password.length > 0 && passwordChange.password_repeat.length > 0 && passwordChange.current_password.length > 0">{{ 'update_password' | translate }}</button>
             </article>
         
             <article ng-show="activeSection == 'account_settings'">

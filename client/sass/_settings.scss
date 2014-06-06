@@ -68,7 +68,7 @@
                     vertical-align: top;
                 }
                 
-                textarea {
+                textarea, input[type="text"], input[type="password"] {
                     width: 64%;
                     display: inline-block;
                     line-height: 1.4em;

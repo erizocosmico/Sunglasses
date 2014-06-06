@@ -128,6 +128,10 @@ a {
     float: right;
 }
 
+.pull-left {
+    float: left;
+}
+
 .small-btn {
     display: inline-block !important;
     font-size: 0.8em !important;
@@ -168,6 +172,10 @@ a {
 
 .ui.toggle.checkbox input:checked~.box:after, .ui.toggle.checkbox input:checked~label:after {
     background-color: $base-accent !important;
+}
+
+.col-50-50 {
+    width: 50%;
 }
 
 .hidden {

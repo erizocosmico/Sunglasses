@@ -44,7 +44,6 @@ angular.module('sunglasses')
         )
         
         # submits a post to the server
-        # TODO: privacy handling
         $scope.submitPost = () ->
             $scope.privacyOpened = false
             urlRegex = /^https?:\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/
