@@ -6,6 +6,7 @@ import (
 	"github.com/mvader/sunglasses/middleware"
 	"github.com/mvader/sunglasses/models"
 	"labix.org/v2/mgo/bson"
+	"strconv"
 	"strings"
 )
 
@@ -28,7 +29,24 @@ func ShowUserProfile(c middleware.Context, params martini.Params) {
 		hasAccess = true
 	}
 
-	posts := getPostsFromUser(c, u.ID, 25, 0)
+	newerThan, err := strconv.ParseInt(c.Form("newer_than"), 10, 64)
+	if err != nil {
+		newerThan = 0
+	}
+
+	olderThan, err := strconv.ParseInt(c.Form("older_than"), 10, 64)
+	if err != nil {
+		olderThan = 0
+	}
+
+	var timeConstraint bson.M
+	if olderThan > 0 {
+		timeConstraint = bson.M{"$lt": olderThan}
+	} else {
+		timeConstraint = bson.M{"$gt": newerThan}
+	}
+
+	posts := getPostsFromUser(c, u.ID, timeConstraint)
 	c.Success(200, map[string]interface{}{
 		"user":        models.UserForDisplay(u, hasAccess, true),
 		"posts":       posts,
@@ -44,8 +62,24 @@ func GetUserPosts(c middleware.Context) {
 		return
 	}
 
-	count, offset := c.ListCountParams()
-	posts := getPostsFromUser(c, bson.ObjectIdHex(userID), count, offset)
+	newerThan, err := strconv.ParseInt(c.Form("newer_than"), 10, 64)
+	if err != nil {
+		newerThan = 0
+	}
+
+	olderThan, err := strconv.ParseInt(c.Form("older_than"), 10, 64)
+	if err != nil {
+		olderThan = 0
+	}
+
+	var timeConstraint bson.M
+	if olderThan > 0 {
+		timeConstraint = bson.M{"$lt": olderThan}
+	} else {
+		timeConstraint = bson.M{"$gt": newerThan}
+	}
+
+	posts := getPostsFromUser(c, bson.ObjectIdHex(userID), timeConstraint)
 	if posts == nil {
 		c.Error(404, CodeNotFound, MsgNotFound)
 		return
@@ -59,15 +93,15 @@ func GetUserPosts(c middleware.Context) {
 
 // The main reason to not retrieve the posts from the user's generated timeline is that
 // the timeline for the user may have not been processed yet when the user browses the profile
-func getPostsFromUser(c middleware.Context, user bson.ObjectId, limit, offset int) []models.Post {
+func getPostsFromUser(c middleware.Context, user bson.ObjectId, constraint bson.M) []models.Post {
 	var (
-		posts = make([]models.Post, 0, limit)
-		ids   = make([]bson.ObjectId, 0, limit)
+		posts = make([]models.Post, 0, 25)
+		ids   = make([]bson.ObjectId, 0, 25)
 		p     models.Post
 	)
 
-	iter := c.Find("posts", bson.M{"user_id": user}).Sort("-created").Skip(offset).Iter()
-	for len(posts) < limit && iter.Next(&p) {
+	iter := c.Find("posts", bson.M{"user_id": user, "created": constraint}).Sort("-created").Iter()
+	for len(posts) < 25 && iter.Next(&p) {
 		if (&p).CanBeAccessedBy(c.User, c.Conn) {
 			comments := models.GetCommentsForPost(p.ID, c.User, 5, c.Conn)
 			if comments != nil {
@@ -88,11 +122,12 @@ func getPostsFromUser(c middleware.Context, user bson.ObjectId, limit, offset in
 	}
 
 	likes := models.GetLikesForPosts(ids, c.User.ID, c.Conn)
-	if likes != nil {
-		for i, v := range posts {
+
+	for i, v := range posts {
+		posts[i].User = udata[v.UserID]
+		if likes != nil {
 			if l, ok := likes[v.ID]; ok {
 				posts[i].Liked = l
-				posts[i].User = udata[v.ID]
 			}
 		}
 	}
