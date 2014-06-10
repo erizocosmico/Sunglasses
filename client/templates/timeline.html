@@ -1,5 +1,5 @@
 <div id="timeline">
-    <post-form></post-form>
+    <post-form ng-show="userData.username_lower == profileName || isHome"></post-form>
     
     <div ng-hide="!loading" class="loading">
         <span class="ion ion-loading-c"></span> {{ 'loading' | translate }}
