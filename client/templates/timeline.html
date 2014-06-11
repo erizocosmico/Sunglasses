@@ -1,4 +1,4 @@
-<div id="timeline">
+<div id="timeline" ng-class="{'without-margin': !isHome}">
     <post-form ng-show="userData.username_lower == profileName || isHome"></post-form>
     
     <div ng-hide="!loading" class="loading">

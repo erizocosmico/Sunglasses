@@ -1,0 +1,7 @@
+.profile-box {
+    @include post;
+    width: 90%;
+    max-width: 600px;
+    margin: 70px auto;
+    margin-bottom: 0;
+}

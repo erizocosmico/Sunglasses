@@ -5,12 +5,13 @@ angular.module('sunglasses.controllers')
     '$scope',
     '$rootScope',
     '$translate',
+    '$routeParams'
     'api',
     'user',
     'post',
     'photo',
     'confirm',
-    ($scope, $rootScope, $translate, api, user, post, photo, confirm) ->
+    ($scope, $rootScope, $translate, $routeParams, api, user, post, photo, confirm) ->
         # number of posts retrieved
         $scope.postCount = 0
         # array of the previously retrieved posts
@@ -22,6 +23,9 @@ angular.module('sunglasses.controllers')
         $scope.photoService = photo
         $scope.confirm = confirm
         $scope.canLoadMorePosts = false
+        $scope.apiUrl = if $routeParams.username? then 'u/' + $routeParams.username else 'timeline'
+        $scope.isHome = (not $routeParams.username?)
+        $scope.profileName = $routeParams.username
         
         # load more posts, uses $scope.postCount to automatically manage pagination
         $scope.loadPosts = (loadType) ->
@@ -36,18 +40,25 @@ angular.module('sunglasses.controllers')
                         params.newer_than = $scope.posts[0].created
 
             api(
-                '/api/timeline',
+                '/api/' + $scope.apiUrl,
                 'GET',
                 params,
                 (resp) ->
                     $scope.loading = false
                     $scope.postCount += resp.count
+                    
+                    if loadType == 'older' and resp.posts.length < 25
+                        $scope.canLoadMorePosts = false
+                    else if $scope.posts.length == 0 and resp.posts.length == 25
+                        $scope.canLoadMorePosts = true
+                    
                     if loadType == 'older'
                         $scope.posts = $scope.posts.concat(resp.posts)
                     else
                         $scope.posts = resp.posts.concat($scope.posts)
                     
-                    $scope.canLoadMorePosts = (not loadType? or loadType == 'older') and resp.count == 25
+                    if not $scope.isHome
+                        $rootScope.userProfile = resp.user
                     
                     for post in $scope.posts
                         $rootScope.relativeTime(post.created, post)

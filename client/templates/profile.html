@@ -1,0 +1,31 @@
+<div id="app">
+    <header-bar></header-bar>
+    <div class="profile-box" ng-show="userProfile.username">
+        <div class="avatar-box">
+            <div class="avatar" ng-hide="userService.getAvatarThumb(userProfile) == ''">
+                <img ng-src="{{ userService.getAvatarThumb(userProfile) }}" alt="{{ userService.getUsername(userProfile) }}">
+            </div>
+            <div class="default-avatar" ng-hide="userService.getAvatarThumb(userProfile) != ''">
+                <span class="ion ion-android-contact"></span>
+            </div>
+        </div>
+        
+        <div class="user-data">
+            <h2>{{ userService.getUsername(userProfile) }}</h2>
+            <h3>{{ userProfile.username }}</h3>
+            <p class="about" ng-show="userProfile.info.about">{{ userProfile.info.about }}</p>
+        </div>
+        
+        <div class="info-box">
+            <button ng-click="toggleInfo()">{{ (infoVisible)?'hide_info':'show_info' | translate }} <span class="ion "></span></button>
+            
+            <div class="info-content" ng-show="infoVisible">
+                <div ng-repeat="field in ['work', 'education', 'hobbies', 'books', 'movies', 'tv']" class="info-field" ng-show="userProfile.info[field]">
+                    <h4>{{ 'info_' + field | translate }}</h4>
+                    <p>{{ userProfile.info[field] }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <timeline></timeline>
+</div>

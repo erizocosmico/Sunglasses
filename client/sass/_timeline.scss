@@ -3,6 +3,10 @@
     max-width: 600px;
     margin: 70px auto;
     
+    &.without-margin {
+        margin-top: 10px;
+    }
+    
     @import '_post_form';
     @import '_post';
     

@@ -21,7 +21,7 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
 
         if userData?
             $routeProvider
-            .when('/profile',
+            .when('/u/:username',
                 templateUrl: 'templates/profile.html'
                 controller: 'ProfileController'
             )
