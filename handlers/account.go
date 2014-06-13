@@ -572,3 +572,28 @@ func DestroyAccount(c middleware.Context) {
 		c.Success(200, map[string]interface{}{"message": "User account has not been destroyed"})
 	}
 }
+
+// ChangeLanguage changes the default language for the user
+func ChangeLanguage(c middleware.Context) {
+	preferredLang := ""
+	lang := c.Form("lang")
+
+	for _, l := range models.AvailableLanguages {
+		if lang == l {
+			preferredLang = l
+		}
+	}
+
+	if preferredLang == "" {
+		c.Error(400, CodeInvalidData, MsgInvalidData)
+		return
+	}
+
+	c.User.PreferredLanguage = preferredLang
+	if err := c.User.Save(c.Conn); err != nil {
+		c.Error(500, CodeUnexpected, MsgUnexpected)
+		return
+	}
+
+	c.Success(200, map[string]interface{}{"message": "Language changed successfully"})
+}

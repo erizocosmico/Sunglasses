@@ -176,6 +176,7 @@ func addRoutes(m *martini.ClassicMartini) {
 
 			r.Get("/followers", handlers.ListFollowers)
 			r.Get("/following", handlers.ListFollowing)
+			r.Put("/change_lang", handlers.ChangeLanguage)
 		}, middleware.LoginRequired)
 
 		// Notification routes

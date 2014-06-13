@@ -44,6 +44,10 @@ const (
 	RecoverByQuestion = 2
 )
 
+var (
+	AvailableLanguages = []string{"en", "es"}
+)
+
 // User represents an application user
 type User struct {
 	ID                    bson.ObjectId `json:"id,omitempty" bson:"_id"`
