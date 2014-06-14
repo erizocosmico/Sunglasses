@@ -147,4 +147,11 @@ angular.module('sunglasses.controllers')
             , 180000)
             
         notificationInterval()
+        
+        document.getElementsByClassName('header-overlay')[0].addEventListener('click', (e) ->
+            if e.target.id == 'header-overlay'
+                $scope.$apply(() ->
+                    $scope.query = ''
+                )
+        )
 ])

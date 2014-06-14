@@ -10,7 +10,7 @@
             <li ng-click="toggleMenu('notifications')"><span class="icon ion ion-ios7-bell"></span> <span class="notifications-count" ng-class="{'has-unread': unreadCount > 0}">{{ unreadCount }}</span> <span class="arrow ion ion-arrow-down-b"></span></li>
             <li ng-click="toggleMenu('settings')"><span class="icon ion ion-ios7-gear"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
         </ul>
-        <div class="header-overlay" ng-show="searchActive">
+        <div class="header-overlay" id="header-overlay" ng-show="searchActive">
             <ul class="search-results" ng-show="searchResults.length > 0">
                 <li ng-repeat="user in searchResults" class="user-data">
                     <div class="avatar" ng-hide="userService.getAvatarThumb(user) == ''">
