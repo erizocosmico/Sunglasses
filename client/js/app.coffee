@@ -14,7 +14,7 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
             prefix: 'lang/',
             suffix: '.json'
         )
-        $translateProvider.preferredLanguage('en')
+        $translateProvider.preferredLanguage(userData.preferred_lang || 'en')
         $translateProvider.useSanitizeValueStrategy('escaped')
         $translateProvider.useLocalStorage()
         $translateProvider.fallbackLanguage('en')

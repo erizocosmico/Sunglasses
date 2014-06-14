@@ -1,0 +1,12 @@
+<footer>
+    <ul class="credits">
+        <li>Powered by <a target="_blank" href="https://github.com/mvader/Sunglasses" title="Sunglasses">Sunglasses</a></li>
+        <li><a href="#/pages/privacy" title="{{ 'privacy' | translate }}">{{ 'privacy' | translate }}</a></li>
+        <li><a href="#/pages/about" title="{{ 'about' | translate }}">{{ 'about' | translate }}</a></li>
+    </ul>
+
+    <select class="language-selector" ng-model="preferredLang" ng-change="changeLanguage()" ng-options="k as v for (k, v) in languages">
+    </select>
+    
+    <div class="clear"></div>
+</footer>

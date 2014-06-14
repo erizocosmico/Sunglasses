@@ -50,7 +50,7 @@ div#app {
         color: $base-accent;
         text-decoration: none;
         transition: all 200ms ease-in;
-        border-bottom: 1px solid #fff;
+        border-bottom: 1px solid transparent;
         font-weight: 700;
         
         &:hover {
@@ -149,4 +149,47 @@ div#app {
     @import '_theater';
     @import '_settings';
     @import '_profile';
+    
+    footer {
+        width: 90%;
+        max-width: 600px;
+        margin: 0px auto;
+        margin-bottom: 60px;
+        
+        ul.credits {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: auto;
+            float: left;
+            
+            li {
+                display: inline-block;
+                padding-right: 15px;
+                margin-left: 15px;
+                border-right: 1px solid rgba(black, .1);
+                
+                &:first-child {
+                    margin-left: 0;
+                }
+                
+                &:last-child {
+                    border-right: none;
+                }
+                
+                a {
+                    color: darken($base-accent, 10%);
+                    font-weight: normal;
+                }
+            }
+        }
+
+        select.language-selector {
+            background: rgba(white, .8);
+            border: 1px solid rgba(black, .3);
+            border-radius: 4px;
+            padding: 4px 15px;
+            float: right;
+        }
+    }
 }
