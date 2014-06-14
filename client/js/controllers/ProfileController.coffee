@@ -7,13 +7,11 @@ angular.module('sunglasses.controllers')
     '$scope',
     'user',
     'api',
-    ($routeParams, $rootScope, $scope, user, api) ->
-        $scope.userService = user
+    ($routeParams, $rootScope, $scope, userService, api) ->
+        $scope.userService = userService
         $rootScope.userProfile = {}
         $scope.infoVisible = false
         
         $scope.toggleInfo = () ->
             $scope.infoVisible = !$scope.infoVisible
-        
-        # Get user info
 ])

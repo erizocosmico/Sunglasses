@@ -293,7 +293,7 @@ func GetUsersData(ids []bson.ObjectId, user *User, conn interfaces.Conn) map[bso
 		}
 
 		if _, ok := users[u.ID]; !ok {
-			users[u.ID] = UserForDisplay(u, hasAccess, false)
+			users[u.ID] = UserForDisplay(u, hasAccess, hasAccess)
 			users[u.ID]["followed"] = followed
 			users[u.ID]["follow_requested"] = false
 			for _, req := range requests {

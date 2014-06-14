@@ -20,15 +20,6 @@ func ShowUserProfile(c middleware.Context, params martini.Params) {
 		return
 	}
 
-	hasAccess := false
-	if c.User.ID.Hex() == u.ID.Hex() {
-		hasAccess = true
-	} else if models.Follows(c.User.ID, u.ID, c.Conn) {
-		hasAccess = true
-	} else if models.FollowedBy(c.User.ID, u.ID, c.Conn) {
-		hasAccess = true
-	}
-
 	newerThan, err := strconv.ParseInt(c.Form("newer_than"), 10, 64)
 	if err != nil {
 		newerThan = 0
@@ -46,9 +37,15 @@ func ShowUserProfile(c middleware.Context, params martini.Params) {
 		timeConstraint = bson.M{"$gt": newerThan}
 	}
 
+	users := models.GetUsersData([]bson.ObjectId{u.ID}, c.User, c.Conn)
+	if len(users) != 1 {
+		c.Error(404, CodeNotFound, MsgNotFound)
+		return
+	}
+
 	posts := getPostsFromUser(c, u.ID, timeConstraint)
 	c.Success(200, map[string]interface{}{
-		"user":        models.UserForDisplay(u, hasAccess, true),
+		"user":        users[u.ID],
 		"posts":       posts,
 		"posts_count": len(posts),
 	})

@@ -57,8 +57,8 @@ angular.module('sunglasses.controllers')
                 )
             , 500)
         )
-        
-        # Load more posts
+    
+        # Load more search results
         $scope.loadMore = () ->
             $scope.canLoadMore = false
             $scope.userService.search($scope.query, false, $scope.searchResults.length, 25, (resp) ->
@@ -71,35 +71,6 @@ angular.module('sunglasses.controllers')
                 console.log("Error")
             )
             $scope.searchActive = true
-        
-        # Send a follow request
-        $scope.sendFollowRequest = (user, isRequest) ->
-            api(
-                '/api/users/follow',
-                'POST',
-                user_to: user.id,
-                (resp) ->
-                    $scope.$apply(() ->
-                        user.followed = true
-                        user.follow_requested = !!isRequest
-                    )
-                , (resp) ->
-                    console.log(resp)
-            )
-        
-        # Unfollow an user
-        $scope.unfollow = (user) ->
-            api(
-                '/api/users/unfollow',
-                'DELETE',
-                user_to: user.id,
-                (resp) ->
-                    $scope.$apply(() ->
-                        user.followed = false
-                    )
-                , (resp) ->
-                    console.log(resp)
-            )
 
         # Toggles a menu
         $scope.toggleMenu = (menuType, closeCallback) ->

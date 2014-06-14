@@ -138,6 +138,10 @@ a {
     padding: 5px 20px !important;
     margin: 0 !important;
     width: auto !important;
+    
+    &.ng-hide {
+        display: none !important;
+    }
 }
 
 .btn-large {

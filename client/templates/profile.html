@@ -16,7 +16,14 @@
             <p class="about" ng-show="userProfile.info.about">{{ userProfile.info.about }}</p>
         </div>
         
-        <div class="info-box clear">
+        <div class="actions-box clear" ng-show="userProfile.id != userData.id">
+            <button class="btn small-btn" ng-show="!userProfile.needs_follow_request && !userProfile.followed" ng-click="userService.sendFollowRequest(userProfile)">{{ 'follow_user' | translate }}</button>
+            <button class="btn small-btn" ng-show="userProfile.followed && !userProfile.follow_requested" ng-click="userService.unfollow(userProfile)">{{ 'unfollow_user' | translate }}</button>
+            <button class="btn small-btn" ng-show="userProfile.needs_follow_request && !userProfile.followed && !userProfile.follow_requested" ng-click="userService.sendFollowRequest(userProfile, true)">{{ 'send_follow_request' | translate }}</button>
+            <p class="message" ng-show="userProfile.follow_requested">{{ 'follow_request_sent' | translate }}</p>
+        </div>
+        
+        <div class="info-box">
             <button ng-click="toggleInfo()">{{ (infoVisible)?'hide_info':'show_info' | translate }} <span class="ion "></span></button>
             
             <div class="info-content" ng-show="infoVisible">

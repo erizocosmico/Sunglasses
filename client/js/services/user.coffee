@@ -2,7 +2,7 @@
 
 angular.module('sunglasses.services')
 # gives functionality to interact with user entities
-.factory('user', ['api', (api) ->
+.factory('user', ['$rootScope', 'api', ($rootScope, api) ->
     # retrieves the user avatar thumbnail (it can be public or private)
     user =
         getAvatarThumb: (user) ->
@@ -42,6 +42,29 @@ angular.module('sunglasses.services')
                     successCallback(resp)
                 , (resp) ->
                     errorCallback(resp.responseJSON)
+            )
+        # Send a follow request
+        , sendFollowRequest: (user, isRequest) ->
+            api(
+                '/api/users/follow',
+                'POST',
+                user_to: user.id,
+                (resp) ->
+                    $rootScope.$apply(() ->
+                        user.followed = true
+                        user.follow_requested = !!isRequest
+                    )
+            )
+        # Unfollow an user
+        , unfollow: (user) ->
+            api(
+                '/api/users/unfollow',
+                'DELETE',
+                user_to: user.id,
+                (resp) ->
+                    $rootScope.$apply(() ->
+                        user.followed = false
+                    )
             )
                 
     return user
