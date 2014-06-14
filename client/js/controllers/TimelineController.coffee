@@ -74,4 +74,12 @@ angular.module('sunglasses.controllers')
                 
         $scope.loadPosts()
         $('.ui.dropdown').dropdown()
+        
+        app = document.getElementById('app')
+        app.addEventListener('scroll', () ->
+            if app.scrollHeight * 0.75 < app.scrollTop
+                $scope.$apply(() ->
+                    if $scope.canLoadMorePosts then $scope.loadPosts('older')
+                )
+        )
 ])
