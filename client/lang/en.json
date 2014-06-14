@@ -86,7 +86,7 @@
     "error_code_52": "The maximum file size allowed is 10MB",
     "error_code_53": "No file was uploaded",
     "error_code_54": "Invalid file format",
-    "error_code_55": "Invalid file dimensiones",
+    "error_code_55": "Invalid file dimensions",
     "error_code_56": "Invalid file",
     "error_code_57": "Invalid video URL",
     "error_code_58": "Invalid link URL",
@@ -203,5 +203,12 @@
     "confirm_avatar_upload": "Are you sure you want to set that picture as your avatar?",
     
     "show_info": "Show information",
-    "hide_info": "Hide information"
+    "hide_info": "Hide information",
+    
+    "password_changed": "Password updated successfully!",
+    "data_updated": "Data updated successfully!",
+    "public_avatar_changed": "Public avatar changed successfully!",
+    "private_avatar_changed": "Private avatar changed successfully!",
+    "settings_updated": "Settings updated successfully!",
+    "info_updated": "Account info updated successfully!"
 }

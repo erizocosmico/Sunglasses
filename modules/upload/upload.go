@@ -62,8 +62,8 @@ func DefaultUploadOptions(config *services.Config) UploadOptions {
 // ProfileUploadOptions returns the default configuration options for uploading profile pictures
 func ProfileUploadOptions(config *services.Config) UploadOptions {
 	return UploadOptions{
-		MaxHeight:             500,
-		MaxWidth:              500,
+		MaxHeight:             1000,
+		MaxWidth:              1000,
 		ThumbnailHeight:       150,
 		ThumbnailWidth:        150,
 		StorePath:             config.StorePath,

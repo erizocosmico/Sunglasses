@@ -112,6 +112,27 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
         $translate(text).then (msg) ->
             document.getElementById(field).innerHTML = msg
             $rootScope.displayError(field, success)
+    
+    # shows the alert box
+    $rootScope.showAlert = (text, translate, danger) ->
+        displayAlert = (msg, danger) ->
+            alertBox = document.getElementById('alert-box')
+            alertBox.getElementsByTagName('p')[0].innerHTML = msg
+
+            alertBox.className = 'alert-box'
+            if danger?
+                alertBox.className += ' danger'
+            
+            window.setTimeout(() ->
+                alertBox.className += ' hidden'
+            , 3000)
+        
+        if translate?
+            $translate(text).then (msg) ->
+                console.log(msg)
+                displayAlert(msg, danger)
+        else
+            displayAlert(text, danger)
         
     # returns the relative time
     $rootScope.relativeTime = (time, dict, callback) ->

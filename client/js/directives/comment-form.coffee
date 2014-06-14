@@ -24,8 +24,6 @@ angular.module('sunglasses')
                             $scope.post.commentsDirty += 1
                             $scope.commentText = ''
                         )
-                , (resp) ->
-                    console.log(resp)
             )
     ]
 )

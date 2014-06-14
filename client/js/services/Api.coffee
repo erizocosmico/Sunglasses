@@ -2,7 +2,7 @@
 
 angular.module('sunglasses.services')
 # api is a shortcut to perform api calls
-.factory('api', () ->
+.factory('api', ['$rootScope', ($rootScope) ->
     (url, method, params, success, error) ->
         params = if params? then params else {}
         timestamp = new Date().getTime()
@@ -30,7 +30,6 @@ angular.module('sunglasses.services')
                 if error?
                     error(resp)
                 else
-                    # TODO: Default error handler
-                    console.log('Error')
+                    $rootScope.showAlert('error_code_' + resp.responseJSON.code, true, true)
         )
-)
+])

@@ -69,7 +69,7 @@ angular.module('sunglasses.controllers')
                         if post.liked then post.className = 'liked'
                 , (resp) ->
                     $scope.loading = false
-                    $rootScope.showMsg('error_code_' + resp.responseJSON.code, 'timeline-error')
+                    $rootScope.showAlert('error_code_' + resp.responseJSON.code, true, true)
             )
                 
         $scope.loadPosts()

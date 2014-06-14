@@ -489,7 +489,8 @@ func UpdateProfilePicture(c middleware.Context) {
 	}
 
 	c.Success(200, map[string]interface{}{
-		"message": "User settings updated successfully",
+		"message":   "User settings updated successfully",
+		"thumbnail": thumbnailPath,
 	})
 }
 

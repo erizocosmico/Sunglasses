@@ -21,9 +21,6 @@ angular.module('sunglasses')
                             index = $scope.posts.indexOf($scope.post)
                             $scope.posts.splice(index, 1)
                         )
-                    , (resp) ->
-                        # TODO: General error handling
-                        console.log(resp)
                 )
             )
                 
@@ -43,8 +40,6 @@ angular.module('sunglasses')
                         else
                             $scope.post.className = ''
                     )
-                , (resp) ->
-                    $rootScope.showMsg('error_code_' + resp.responseJSON.code, 'post-error')
             )
             
         $scope.commentPost = () ->
@@ -70,8 +65,6 @@ angular.module('sunglasses')
                                 $scope.post.comments.push(c)
                         $scope.post.commentsDirty = 0
                     )
-                , (resp) ->
-                    console.log(resp)
             )
     ]
 )

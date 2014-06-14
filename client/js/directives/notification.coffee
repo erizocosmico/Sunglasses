@@ -48,8 +48,6 @@ angular.module('sunglasses')
                         $scope.notification.read = true
                         $scope.$parent.unreadCount -= 1
                     )
-                , (resp) ->
-                    console.log(resp)
             )
             
         $scope.performAction = () ->
@@ -69,8 +67,6 @@ angular.module('sunglasses')
                     notification_id: $scope.notification.id,
                     (resp) ->
                         $scope.$apply(actionCallback)
-                    , (resp) ->
-                        console.log(resp)
                 )
             else
                 actionCallback()

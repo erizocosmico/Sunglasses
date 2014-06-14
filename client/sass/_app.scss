@@ -192,4 +192,30 @@ div#app {
             float: right;
         }
     }
+    
+    .alert-box {
+        position: fixed;
+        z-index: 9998 !important;
+        top: 55px;
+        width: 100%;
+        height: auto;
+        left: 0;
+        background: rgba(#17b57c, .9);
+        
+        p {
+            text-align: center;
+            line-height: 1.6em;
+            padding: 0 15px;
+            color: white;
+            text-shadow: 0px 1px 0px darken(#17b57c, 10%);
+        }
+        
+        &.danger {
+            background: rgba(#fb3c56, .9);
+            
+            p {
+                text-shadow: 0px 1px 0px darken(#fb3c56, 10%);
+            }
+        }
+    }
 }

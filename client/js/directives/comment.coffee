@@ -18,9 +18,6 @@ angular.module('sunglasses')
                                 $scope.post.comments.splice(index, 1)
                                 $scope.post.comments_num -= 1
                         )
-                    , (resp) ->
-                        # TODO: General error handling
-                        console.log(resp)
                 )
             )
     ]

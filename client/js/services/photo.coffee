@@ -20,6 +20,7 @@ angular.module('sunglasses.services')
         
             photo.style.marginTop = '0px'
             if photo.width > w then photo.width = w
+
             if photo.height > h
                 photo.height = h
             else

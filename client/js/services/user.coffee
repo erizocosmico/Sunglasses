@@ -18,9 +18,9 @@ angular.module('sunglasses.services')
                 return user.public_avatar   
         # retrieves the username (it can be public or private)
         , getUsername: (user) ->
-            if user.private_name?
+            if user.private_name? and user.private_name != ''
                 return user.private_name
-            else if user.public_name?
+            else if user.public_name? and user.public_name != ''
                 return user.public_name
             else
                 return user.username

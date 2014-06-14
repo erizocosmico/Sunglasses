@@ -57,10 +57,10 @@ angular.module('sunglasses.controllers')
                         account_picture: $scope.avatars[type],
                         picture_type: type,
                         (resp) ->
-                            # TODO: backend should return thumbnail url
-                            console.log(resp)
-                        , (resp) ->
-                            console.log(resp)
+                            $scope.$apply(() ->
+                                $rootScope.userData[type + '_avatar_thumbnail'] = resp.thumbnail
+                            )
+                            $rootScope.showAlert(type + '_avatar_changed', true)
                     )
             )
             
@@ -70,9 +70,13 @@ angular.module('sunglasses.controllers')
                 'PUT',
                 $scope.passwordChange,
                 (resp) ->
-                    console.log(resp)
-                , (resp) ->
-                    console.log(resp)
+                    $rootScope.showAlert('password_changed', true)
+                    $scope.$apply(() ->
+                        $scope.passwordChange = 
+                            password: ''
+                            password_repeat: ''
+                            current_password: ''
+                    )
             )
             
         $scope.updateData = () ->
@@ -81,9 +85,7 @@ angular.module('sunglasses.controllers')
                 'PUT',
                 $scope.profileData,
                 (resp) ->
-                    console.log(resp)
-                , (resp) ->
-                    console.log(resp)
+                    $rootScope.showAlert('data_updated', true)
             )
 
         # update user settings
@@ -100,12 +102,10 @@ angular.module('sunglasses.controllers')
                 'PUT',
                 data,
                 (resp) ->
-                    console.log resp
+                    $rootScope.showAlert('settings_updated', true)
 
                     # Update user data
                     userData.settings = $scope.settings
-                , (resp) ->
-                    console.log resp
             )
             
         # update user info
@@ -115,12 +115,10 @@ angular.module('sunglasses.controllers')
                 'PUT',
                 $scope.info,
                 (resp) ->
-                    console.log resp
+                    $rootScope.showAlert('info_updated', true)
 
                     # Update user data
                     userData.info = $scope.info
-                , (resp) ->
-                    console.log resp
             )
 
         # Workaround for Semantic's problems with Angular

@@ -16,9 +16,6 @@ angular.module('sunglasses')
         
         $scope.privacySelect = (p) ->
             $scope.privacySelected = p
-            $timeout(() ->
-                $scope.privacyOpened = true
-            , 0)
         
         # newPost creates a new empty post and changes the post status
         # that means it initializes the post-box to send another post after
@@ -71,12 +68,11 @@ angular.module('sunglasses')
                     (resp) ->
                         $scope.loading = true
                         $scope.post = newPost()
-                        $rootScope.showMsg('post_success', 'post-success', true)
+                        $rootScope.showAlert('post_success', true)
+                        #$rootScope.showMsg('post_success', 'post-success', true)
                         window.setTimeout(() ->
                             $scope.loadPosts('newer')
                         , 4000)
-                    , (resp) ->
-                        $rootScope.showMsg('error_code_' + resp.responseJSON.code, 'post-error')
                 )
                 
         $scope.handleUpload = () ->
