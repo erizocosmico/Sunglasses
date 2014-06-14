@@ -25,6 +25,9 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
                 templateUrl: 'templates/profile.html'
                 controller: 'ProfileController'
             )
+            .when('/posts/show/:postid',
+                templateUrl: 'templates/home.html'
+            )
             .when('/settings',
                 templateUrl: 'templates/settings.html'
                 controller: 'SettingsController'
