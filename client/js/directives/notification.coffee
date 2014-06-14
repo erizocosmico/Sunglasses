@@ -4,6 +4,14 @@ angular.module('sunglasses')
 .directive('notification', () ->
     restrict: 'E',
     template: '<div ng-switch="notification.notification_type" ng-click="performAction()" ng-class="{\'cursor-pointer\': notification.notification_type > 1}">
+                    <div class="user-data">
+                        <div class="avatar" ng-hide="userService.getAvatarThumb(notification.user_action) == \'\'">
+                            <img ng-src="{{ userService.getAvatarThumb(notification.user_action) }}" alt="{{ userService.getUsername(notification.user_action) }}">
+                        </div>
+                        <div class="default-avatar" ng-hide="userService.getAvatarThumb(notification.user_action) != \'\'">
+                            <span class="ion ion-android-contact"></span>
+                        </div>
+                    </div>
                     <div ng-switch-when="1">
                         <a ng-href="#/u/{{ notification.user_action.username }}">{{ userService.getUsername(notification.user_action) }}</a> {{ \'has_sent_follow_request\' | translate }}
                         <div class="block centered">
@@ -28,6 +36,7 @@ angular.module('sunglasses')
                     <div ng-switch-when="6">
                         Wall post
                     </div>
+                    <span class="time">{{ notification.timeFormatted }}</div>
                 </div>
     ',
     link: (scope, elem, attrs) ->

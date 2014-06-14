@@ -75,6 +75,7 @@ header {
         
             li {
                 display: inline-block;
+                position: relative;
                 vertical-align: middle;
                 font-size: 1.2em;
                 height: auto;
@@ -88,14 +89,13 @@ header {
                     padding: 1px 4px;
                     font-size: 0.6em;
                     border-radius: 4px;
-                    position: relative;
+                    position: absolute;
                     z-index: 9999;
-                    float: right;
                     right: 23px;
                     top: 15px;
                     
                     &.has-unread {
-                        display: block;
+                        display: inline;
                         background-color: rgba($base-accent, .7);
                         color: #FFF;
                         font-weight: bold;
@@ -277,6 +277,8 @@ header {
         list-style: none;
         padding: 0;
         width: calc(100% - 20px);
+        max-height: calc(95% - 65px) !important;
+        overflow-y: auto;
         max-width: 300px;
         box-shadow: 0px 0px 5px rgba(black, .1);
         
@@ -294,6 +296,11 @@ header {
             
             .ng-hide {
                 display: none !important;
+            }
+            
+            span.time {
+                font-size: 0.8em;
+                color: lighten(black, 60%);
             }
         }
         

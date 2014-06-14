@@ -103,7 +103,9 @@ angular.module('sunglasses.controllers')
                     $scope.$apply(() ->
                         $scope.notifications = $scope.notifications.concat(resp.notifications)
                         $scope.canLoadMoreNotifications = resp.notifications.length == 25
+                        
                         for n in resp.notifications
+                            $rootScope.relativeTime(n.time, n)
                             if not n.read
                                 $scope.unreadCount += 1
                     )

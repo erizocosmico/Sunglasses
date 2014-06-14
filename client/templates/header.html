@@ -5,7 +5,7 @@
             <input type="text" placeholder="{{ 'search' | translate }}" ng-model="query">
         </div>
         <ul class="rightside-menu">
-            <li><span class="ion icon ion-home"></span></li>
+            <li ng-click="goHome()"><span class="ion icon ion-home"></span></li>
             <li ng-click="redirect('/u/' + userData.username_lower)"><span class="ion icon ion-person"></span></li>
             <li ng-click="toggleMenu('notifications')"><span class="icon ion ion-ios7-bell"></span> <span class="notifications-count" ng-class="{'has-unread': unreadCount > 0}">{{ unreadCount }}</span> <span class="arrow ion ion-arrow-down-b"></span></li>
             <li ng-click="toggleMenu('settings')"><span class="icon ion ion-ios7-gear"></span> <span class="arrow ion ion-arrow-down-b"></span></li>
