@@ -105,6 +105,7 @@ angular.module('sunglasses.controllers')
         $scope.toggleMenu = (menuType, closeCallback) ->
             otherMenu = if menuType == 'settings' then 'notifications' else 'settings'
             if $scope.menus[otherMenu]
+                $scope.menus[otherMenu] = false
                 document.getElementById(otherMenu + '-menu').className += ' hidden'
             
             menu = document.getElementById(menuType + '-menu')
