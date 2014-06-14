@@ -30,6 +30,19 @@ const (
 	NotificationPostOnMyWall          = 6
 )
 
+// Save inserts the Notification instance if it hasn't been created yet or updates it if it has
+func (n *Notification) Save(conn interfaces.Saver) error {
+	if n.ID.Hex() == "" {
+		n.ID = bson.NewObjectId()
+	}
+
+	if err := conn.Save("notifications", n.ID, n); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // SendNotification sends a new notification to the user
 func SendNotification(notificationType NotificationType, user *User, postID, userActionID bson.ObjectId, conn interfaces.Saver) error {
 	switch int(notificationType) {
