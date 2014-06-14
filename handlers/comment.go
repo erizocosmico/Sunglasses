@@ -48,6 +48,23 @@ func CreateComment(c middleware.Context) {
 	post.CommentsNum++
 	(&post).Save(c.Conn)
 
+	if post.UserID.Hex() != c.User.ID.Hex() {
+		var n models.Notification
+		c.Find("notifications", bson.M{"notification_type": models.NotificationPostCommented, "post_id": post.ID, "user_id": post.UserID}).One(&n)
+		if n.ID.Hex() == "" {
+			var user models.User
+			if err := c.FindId("users", post.UserID).One(&user); err != nil {
+				c.Error(500, CodeUnexpected, MsgUnexpected)
+				return
+			}
+
+			models.SendNotification(models.NotificationPostCommented, &user, post.ID, c.User.ID, c.Conn)
+		} else {
+			n.UserActionID = c.User.ID
+			(&n).Save(c.Conn)
+		}
+	}
+
 	go timeline.PropagatePostOnNewComment(c, post.ID, comment.ID)
 
 	// Append user

@@ -185,7 +185,7 @@ func LikePost(c middleware.Context, params martini.Params) {
 
 	if post.UserID.Hex() != c.User.ID.Hex() {
 		var n models.Notification
-		c.Find("notifications", bson.M{"post_id": post.ID, "user_id": post.UserID, "user_action_id": c.User.ID}).One(&n)
+		c.Find("notifications", bson.M{"notification_type": models.NotificationPostLiked, "post_id": post.ID, "user_id": post.UserID}).One(&n)
 		if n.ID.Hex() == "" {
 			var user models.User
 			if err := c.FindId("users", post.UserID).One(&user); err != nil {
