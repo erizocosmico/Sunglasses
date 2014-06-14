@@ -20,10 +20,10 @@ angular.module('sunglasses')
                         <a>{{ userService.getUsername(notification.user_action) }}</a> {{ \'has_followed_you\' | translate }}
                     </div>
                     <div ng-switch-when="4">
-                        Like
+                        <a>{{ userService.getUsername(notification.user_action) }}</a> {{ \'has_liked_your_post\' | translate }}
                     </div>
                     <div ng-switch-when="5">
-                        Comment
+                        <a>{{ userService.getUsername(notification.user_action) }}</a> {{ \'has_commented_your_post\' | translate }}
                     </div>
                     <div ng-switch-when="6">
                         Wall post
