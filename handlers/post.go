@@ -146,6 +146,10 @@ func LikePost(c middleware.Context, params martini.Params) {
 			return
 		}
 
+		if post.UserID.Hex() != c.User.ID.Hex() {
+			c.RemoveAll("notifications", bson.M{"post_id": post.ID, "user_id": post.UserID, "user_action_id": c.User.ID})
+		}
+
 		if _, err := c.RemoveAll("likes", bson.M{"post_id": post.ID, "user_id": c.User.ID}); err != nil {
 			post.Likes++
 			(&post).Save(c.Conn)
@@ -177,6 +181,23 @@ func LikePost(c middleware.Context, params martini.Params) {
 
 		c.Error(500, CodeUnexpected, MsgUnexpected)
 		return
+	}
+
+	if post.UserID.Hex() != c.User.ID.Hex() {
+		var n models.Notification
+		c.Find("notifications", bson.M{"post_id": post.ID, "user_id": post.UserID, "user_action_id": c.User.ID}).One(&n)
+		if n.ID.Hex() == "" {
+			var user models.User
+			if err := c.FindId("users", post.UserID).One(&user); err != nil {
+				c.Error(500, CodeUnexpected, MsgUnexpected)
+				return
+			}
+
+			models.SendNotification(models.NotificationPostLiked, &user, post.ID, c.User.ID, c.Conn)
+		} else {
+			n.UserActionID = c.User.ID
+			(&n).Save(c.Conn)
+		}
 	}
 
 	go timeline.PropagatePostOnLike(c, post.ID, true)
