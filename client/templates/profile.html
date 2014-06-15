@@ -27,6 +27,10 @@
             <button ng-click="toggleInfo()">{{ (infoVisible)?'hide_info':'show_info' | translate }} <span class="ion "></span></button>
             
             <div class="info-content" ng-show="infoVisible">
+                <div ng-repeat="field in ['gender', 'status']" class="info-field inline-field" ng-show="userProfile.info[field]">
+                    <h4>{{ 'info_' + field | translate }}</h4>
+                    <span>{{ 'user_' + field + '_' + userProfile.info[field] | translate }}</span>
+                </div>
                 <div ng-repeat="field in ['work', 'education', 'hobbies', 'books', 'movies', 'tv']" class="info-field" ng-show="userProfile.info[field]">
                     <h4>{{ 'info_' + field | translate }}</h4>
                     <p>{{ userProfile.info[field] }}</p>
@@ -35,4 +39,5 @@
         </div>
     </div>
     <timeline></timeline>
+    <footer-bar></footer-bar>
 </div>
