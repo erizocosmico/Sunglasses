@@ -3,11 +3,17 @@
 angular.module('sunglasses')
 .directive('post', () ->
     restrict: 'E',
-    templateUrl: 'templates/post.html',
+    templateUrl: 'templates/post.html?' + new Date().getTime(),
     controller: ['$scope', '$rootScope', 'api', ($scope, $rootScope, api) ->
         $scope.post.commentsDirty = 0
+        $scope.privacyOpened = false
+        $scope.privacySelected = $scope.post.privacy.privacy_type
         
         if not $scope.post.comments? then $scope.post.comments = []
+        
+        # toggles the privacy selector
+        $scope.togglePrivacy = () ->
+            $scope.privacyOpened = not $scope.privacyOpened
 
         # delete a post
         $scope.deletePost = () ->
@@ -39,6 +45,19 @@ angular.module('sunglasses')
                             $scope.post.className = 'liked animated bounceIn'
                         else
                             $scope.post.className = ''
+                    )
+            )
+            
+        # changes the privacy of the post
+        $scope.changePostPrivacy = (type) ->
+            api(
+                '/api/posts/change_privacy/' + $scope.post.id,
+                'PUT',
+                privacy_type: type,
+                (resp) ->
+                    $scope.$apply(() ->
+                        $scope.post.privacy.privacy_type = type
+                        $scope.privacySelected = type
                     )
             )
             

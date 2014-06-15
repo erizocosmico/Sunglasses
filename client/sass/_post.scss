@@ -129,6 +129,22 @@
                 &:hover span.count {
                     color: $base-accent;
                 }
+                
+                .dropdown-box {
+                    right: -40%;
+                    top: 140%;
+                    
+                    li {
+                        border: none;
+                        font-size: 1.0em;
+                        border-radius: 0;
+                        padding: 8px;
+                    }
+            
+                    li.selected {
+                        background-color: #EEE;
+                    }
+                }
             }
         }
     }

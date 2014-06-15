@@ -28,7 +28,15 @@
         <ul>
             <li ng-click="likePost()" ng-class="{'liked': post.liked}"><span class="ion ion-thumbsup"></span> <span class="count" ng-bind="post.likes"></span></li>
             <li ng-click="commentPost()"><span class="ion ion-chatbubbles"></span> <span class="count">{{ post.comments_num }}</span></li>  
-            <li ng-show="postService.isMine(post)" ng-click="changePostPrivacy()" class="pull-right"><span class="ion ion-gear-b icon-only"></span></li>
+            <li ng-show="postService.isMine(post)" ng-click="togglePrivacy()" class="pull-right position-relative">
+                <span class="ion ion-gear-b icon-only"></span>
+                <ul class="dropdown-box" ng-hide="!privacyOpened">
+                    <li ng-click="changePostPrivacy(1)" ng-class="{'selected': privacySelected == 1}">{{ 'privacy_type_public' | translate }}</li>
+                    <li ng-click="changePostPrivacy(2)" ng-class="{'selected': privacySelected == 2}">{{ 'privacy_type_following_only' | translate }}</li>
+                    <li ng-click="changePostPrivacy(3)" ng-class="{'selected': privacySelected == 3}">{{ 'privacy_type_followers_only' | translate }}</li>
+                    <li ng-click="changePostPrivacy(4)" ng-class="{'selected': privacySelected == 4}">{{ 'privacy_type_none' | translate }}</li>
+                </ul>
+            </li>
         </ul>
     </div>
     <div class="comments" ng-hide="post.comments.length <= 0">
