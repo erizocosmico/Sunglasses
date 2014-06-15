@@ -3,7 +3,7 @@
 angular.module('sunglasses')
 .directive('post', () ->
     restrict: 'E',
-    templateUrl: 'templates/post.html?' + new Date().getTime(),
+    templateUrl: 'templates/post.html',
     controller: ['$scope', '$rootScope', 'api', ($scope, $rootScope, api) ->
         $scope.post.commentsDirty = 0
         $scope.privacyOpened = false
