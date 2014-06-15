@@ -1,14 +1,3 @@
-<!--<div id="landing">
-    <div id="wrap">
-        <h1 ng-click="goHome()">Sunglasses</h1>
-    
-        <h2>{{ 'headline' | translate }}</h2>
-        
-        <button class="btn-signup" ng-click="redirect('/signup')">{{ 'signup' | translate }}</button>
-        <button class="btn-login" ng-click="redirect('/login')">{{ 'login' | translate }}</button>
-    </div>
-</div>-->
-
 <div id="landing">
     <div class="layer layer-intro">
         <div class="overlay">
@@ -17,8 +6,8 @@
             <h2>{{ 'headline' | translate }}</h2>
         
             <div class="buttons">
-                <button class="btn-signup" ng-click="redirect('/signup')">{{ 'signup' | translate }}</button>
-                <button class="btn-login" ng-click="redirect('/login')">{{ 'login' | translate }}</button>
+                <button class="btn-signup" ng-click="animateRedirect('/signup')">{{ 'signup' | translate }}</button>
+                <button class="btn-login" ng-click="animateRedirect('/login')">{{ 'login' | translate }}</button>
             </div>
         </div>
     </div>

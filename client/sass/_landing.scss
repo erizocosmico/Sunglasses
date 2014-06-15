@@ -1,4 +1,10 @@
 // Landing scope
+
+.animated {
+    -webkit-animation-duration: 500ms !important;
+    animation-duration: 500ms !important;
+}
+
 div#landing {
     @include fullpage;
     
