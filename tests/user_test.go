@@ -52,11 +52,6 @@ func TestUser(t *testing.T) {
 
 					user.ID = uid
 				})
-
-				Convey("Deleting the user should not produce any errors", func() {
-					err := user.Remove(conn)
-					So(err, ShouldEqual, nil)
-				})
 			})
 		})
 	})
