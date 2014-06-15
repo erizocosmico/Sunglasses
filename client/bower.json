@@ -39,8 +39,5 @@
     "angular-translate-storage-local": "latest",
     "angular-cookies": "latest",
     "animate.css": "latest"
-  },
-  "resolutions": {
-    "angular-translate": "2.1.0"
   }
 }

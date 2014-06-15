@@ -1,84 +1,173 @@
 // Landing scope
 div#landing {
     @include fullpage;
-    background: black url(../images/landing_bg.jpg) center center no-repeat;
-    background-size: cover;
-
-    div#wrap {
-        @include fullpage;
-        background-color: lighten(rgba(0, 0, 0, 0.7), 30%);
-        padding-bottom: 50px;
-        
-        h1 {
-            cursor: pointer;
-            font-size: 4.8em;
-            font-family: 'Rochester', cursive;
-            color: white;
-            text-shadow: 0px 2px 0px rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            text-align: center;
-            margin-top: 50px;
-        }
     
+    .layer {
+        margin: 0;
+        overflow: hidden;
+        background: white;
+        padding: 40px;
+        
         h2 {
             font-weight: 300;
-            font-size: 3.2em;
-            color: white;
-            text-shadow: 0px 2px 0px rgba(0, 0, 0, 0.7);
+            font-size: 2.5em;
+            color: lighten(black, 30%);
             padding: 15px;
-            text-align: center;
-        }
-        
-        .btn-signup {
-            margin: 0 auto;
-            display: block;
-            width: 90%;
-            max-width: 350px;
-            padding: 15px 50px;
-            text-align: center;
-            font-weight: 400;
-            text-transform: uppercase;
-            background: rgba($base-accent, 1.0);
-            color: white;
-            font-size: 1.4em;
-            border: none;
-            border-radius: 5px;
-            transition: all 300ms ease-in-out;
-            
-            &:hover {
-                background-color: lighten($base-accent, 10%);
-            }
-            
-            &:active {
-                background-color: darken($base-accent, 10%);
-                color: darken(white, 30%);
+            margin: 0;
+            @media all and (max-width: $mobile-bp) {
+                text-align: center;
             }
         }
         
-        .btn-login {
-            margin: 0 auto;
-            display: block;
-            width: 90%;
-            max-width: 350px;
-            padding: 15px 50px;
-            text-align: center;
-            text-align: center;
-            font-weight: 400;
-            text-transform: uppercase;
-            background: transparent;
-            color: white;
-            text-shadow: 0px 0px 0px rgba(black, .7);
-            font-size: 1.4em;
-            background: rgba(white, .2);
-            border: none;
-            border-radius: 3px;
-            transition: all 300ms ease-in-out;
-            box-shadow: 0px -1px 0px rgba(black, .6) inset;
-            margin-top: 30px;
+        p {
+            font-weight: 300;
+            font-size: 1.7em;
+            color: lighten(black, 50%);
+            padding: 15px;
+            margin: 0;
+            @media all and (max-width: $mobile-bp) {
+                text-align: center;
+            }
+        }
+        
+        .giga-icon {
+            font-size: 10.0em;
+            color: darken(white, 20%);
+            padding: 40px;
+            @media all and (max-width: $mobile-bp) {
+                float: none !important;
+                text-align: center;
+                display: block;
+                padding: 40px !important;
+            }
+        }
+        
+        .no-top {
+            padding-top: 20px;
+        }
+        
+        .extended {
+            padding-left: 60px;
+            padding-right: 60px;
+        }
+        
+        .separator {
+            width: 100%;
+            height: 1px;
+            background: darken(white, 6%);
+            clear: both;
+            margin: 15px 0;
+        }
+        
+        &.layer-footer {
+            background: black url(../images/background_2.jpg) center bottom no-repeat;
+            background-size: cover;
+            min-height: 400px;
+            padding: 0;
             
-            &:hover {
-                background-color: rgba(white, .5);
+            .overlay {
+                width: 100%;
+                height: 100%;
+                min-height: 400px;
+                background-color: rgba(lighten(black, 30%), .2);
+                z-index: 1000;
+                overflow: hidden;
+                padding-bottom: 15px;
+            }
+        }
+        
+        &.layer-intro {
+            padding: 0;
+            background: black url(../images/background.jpg) center center no-repeat;
+            background-size: cover;
+            
+            .overlay {
+                width: 100%;
+                height: 100%;
+                background-color: rgba(darken($base-accent, 20%), .7);
+                z-index: 1000;
+                overflow: hidden;
+                padding-bottom: 15px;
+            }
+            
+            h1 {
+                cursor: pointer;
+                font-size: 5.0em;
+                font-family: 'Rochester', cursive;
+                color: white;
+                padding: 15px;
+                text-align: center;
+                margin-top: 50px;
+                -webkit-font-smoothing: antialiased;
+            }
+    
+            h2 {
+                font-weight: 300;
+                font-size: 2.5em;
+                color: white;
+                padding: 15px;
+                text-align: center;
+                margin: 0 auto;
+                max-width: 700px;
+                -webkit-font-smoothing: antialiased;
+            }
+            
+            .buttons {
+                max-width: 700px;
+                margin: 30px auto;
+                text-align: center;
+                
+                .btn-signup {
+                    font-weight: 400;
+                    color: #FFF;
+                    background: $base-accent;
+                    -webkit-font-smoothing: antialiased;
+                    font-size: 1.5em;
+                    padding: 10px 50px;
+                    border-radius: 4px;
+                    border: none;
+                    margin-right: 15px;
+                    box-shadow: 0px 0px 5px rgba(black, .3);
+                    transition: all 200ms ease-in-out;
+                    
+                    &:hover {
+                        background: lighten($base-accent, 10%);
+                        box-shadow: 0px 0px 10px rgba(black, .3);
+                    }
+                }
+            
+                .btn-login {
+                    font-weight: 400;
+                    color: rgba(white, .8);
+                    background: transparent;
+                    font-size: 1.5em;
+                    padding: 10px 50px;
+                    border-radius: 4px;
+                    border: 1px solid rgba(white, .5);
+                    -webkit-font-smoothing: antialiased;
+                    transition: all 200ms ease-in-out;
+                    
+                    &:hover {
+                        border-color: white;
+                        color: white;
+                    }
+                }
             }
         }
     }
 }
+
+a {
+    color: $base-accent;
+    text-decoration: none;
+    transition: all 200ms ease-in;
+    border-bottom: 1px solid transparent;
+    font-weight: 700;
+    
+    &:hover {
+        color: darken($base-accent, 10%);
+        border-bottom: 1px solid $base-accent;
+    }
+}
+
+@import '_footer';

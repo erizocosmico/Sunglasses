@@ -85,4 +85,4 @@ gulp.task('watch', function() {
 });
 
 // The default task (called when you run `gulp` from cli)
-gulp.task('default', ['setup', 'index', 'scripts', 'sass', 'lang', 'images', 'tpls', 'vendor']);
+gulp.task('default', ['setup', 'vendor', 'index', 'scripts', 'sass', 'lang', 'images', 'tpls']);

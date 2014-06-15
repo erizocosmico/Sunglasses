@@ -166,7 +166,7 @@ header {
                 float: left;
                 height: auto;
                 max-height: 90%;
-                margin-top: 5%;
+                margin-top: 2%;
                 margin-left: 15%;
                 width: 40%;
                 min-width: 425px;
@@ -178,6 +178,7 @@ header {
                 @media all and (max-width: $mobile-bp) {
                     width: 90%;
                     margin-left: 5%;
+                    margin-top: 5%;
                     min-width: 0;
                 }
         

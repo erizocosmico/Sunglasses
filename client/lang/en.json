@@ -1,8 +1,15 @@
 {
     "sunglasses": "Sunglasses",
-    "headline": "Social interaction meets privacy.",
+    "headline": "Connect with people around the world, be in control of your data.",
     "signup": "Sign up",
     "search": "Search...",
+    
+    "landing_title_1": "Your data is yours",
+    "landing_title_3": "Share your memories",
+    "landing_title_2": "Mobile ready",
+    "landing_text_2": "Sunglasses provides the same experience for mobile and desktop users without losing any functionality. All you can do with a desktop browser you can also do it with your mobile phone.",
+    "landing_text_1": "You can set a different privacy for everything you post. You are in control of your data, people will only be able to see what you want them to see about you.",
+    "landing_text_3": "You can share photos, text statuses, links and videos from Youtube and Vimeo and receive feedback as comments and likes from your followers.",
 
     "signup_section_username": "Choose an username. Sunglasses does not require an email, a real name or a profile picture to get you started, you just have to choose an username.",
     "signup_section_password": "Choose a password to access Sunglasses.",

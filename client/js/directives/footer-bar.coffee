@@ -10,7 +10,7 @@ angular.module('sunglasses')
         '$translate',
         'api',
         ($scope, $rootScope, $translate,  api) ->
-            $scope.preferredLang = $rootScope.userData.preferred_lang || 'en'
+            $scope.preferredLang = $rootScope?.userData?.preferred_lang || 'en'
             $scope.languages =
                 es: 'Español',
                 en: 'English'

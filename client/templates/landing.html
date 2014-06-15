@@ -1,4 +1,4 @@
-<div id="landing">
+<!--<div id="landing">
     <div id="wrap">
         <h1 ng-click="goHome()">Sunglasses</h1>
     
@@ -6,5 +6,50 @@
         
         <button class="btn-signup" ng-click="redirect('/signup')">{{ 'signup' | translate }}</button>
         <button class="btn-login" ng-click="redirect('/login')">{{ 'login' | translate }}</button>
+    </div>
+</div>-->
+
+<div id="landing">
+    <div class="layer layer-intro">
+        <div class="overlay">
+            <h1 ng-click="goHome()">Sunglasses</h1>
+    
+            <h2>{{ 'headline' | translate }}</h2>
+        
+            <div class="buttons">
+                <button class="btn-signup" ng-click="redirect('/signup')">{{ 'signup' | translate }}</button>
+                <button class="btn-login" ng-click="redirect('/login')">{{ 'login' | translate }}</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="layer">
+        <span class="giga-icon ion ion-chatbox-working pull-right"></span>
+        <h2>{{ 'landing_title_1' | translate }}</h2>
+
+        <p>{{ 'landing_text_1' | translate }}</p>
+        
+        <div class="separator"></div>
+        
+        <span class="giga-icon ion ion-iphone pull-left no-top extended"></span>
+        <h2>{{ 'landing_title_2' | translate }}</h2>
+
+        <p>{{ 'landing_text_2' | translate }}</p>
+        
+        <div class="separator"></div>
+        
+        <span class="giga-icon ion ion-paper-airplane pull-right"></span>
+        <h2>{{ 'landing_title_3' | translate }}</h2>
+
+        <p>{{ 'landing_text_3' | translate }}</p>
+    </div>
+    
+    <div class="layer layer-footer">
+        <div class="overlay">
+        </div>
+    </div>
+    
+    <div class="layer">
+        <footer-bar></footer-bar>
     </div>
 </div>
