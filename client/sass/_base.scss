@@ -1,5 +1,6 @@
 $default-font: 'Open Sans', 'Helvetica Neue', Helvetica, sans-serif;
 $base-accent: #655ab9;
+$mobile-bp: 760px;
 
 @mixin fullpage {
     width: 100%;

@@ -162,6 +162,12 @@ div#app {
             margin: 0;
             width: auto;
             float: left;
+            @media all and (max-width: $mobile-bp) {
+                float: none;
+                margin: 0 auto;
+                padding-bottom: 15px;
+                text-align: center;
+            }
             
             li {
                 display: inline-block;
@@ -190,6 +196,11 @@ div#app {
             border-radius: 4px;
             padding: 4px 15px;
             float: right;
+            @media all and (max-width: $mobile-bp) {
+                float: none;
+                display: block;
+                margin: 0px auto;
+            }
         }
     }
     
@@ -219,3 +230,5 @@ div#app {
         }
     }
 }
+
+@import '_intro';

@@ -2,6 +2,9 @@
     width: 90%;
     max-width: 600px;
     margin: 70px auto;
+    @media all and (max-width: $mobile-bp) {
+        margin-top: 118px;
+    }
     
     &.without-margin {
         margin-top: 10px;
