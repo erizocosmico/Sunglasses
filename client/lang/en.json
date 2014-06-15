@@ -163,6 +163,14 @@
     "user_status_relationship": "In a relationship",
     "user_status_complicated": "It is complicated",
     "user_status_other": "Other",
+    "user_gender_1": "Male",
+    "user_gender_2": "Female",
+    "user_gender_3": "Other",
+    "user_status_1": "Single",
+    "user_status_2": "Married",
+    "user_status_3": "In a relationship",
+    "user_status_4": "It is complicated",
+    "user_status_5": "Other",
 
     "update_settings": "Update settings",
     "update_info": "Update information",
@@ -212,5 +220,6 @@
     "public_avatar_changed": "Public avatar changed successfully!",
     "private_avatar_changed": "Private avatar changed successfully!",
     "settings_updated": "Settings updated successfully!",
-    "info_updated": "Account info updated successfully!"
+    "info_updated": "Account info updated successfully!",
+    "privacy_updated": "Post privacy updated successfully!"
 }

@@ -167,6 +167,10 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
                     callback(str)
             )
         )
+        
+    $rootScope.displayIntro = false
+    if window.localStorage?
+        $rootScope.displayIntro = window.localStorage.getItem('just_signed_up')
 ])
 .directive('compile', ['$compile', ($compile) ->
     (scope, element, attrs) ->

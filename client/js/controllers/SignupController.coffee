@@ -151,5 +151,7 @@ angular.module('sunglasses.controllers')
                 else
                     validators[currentSection](callback)
             else
+                if window.localStorage?
+                    window.localStorage.setItem('just_signed_up', true)
                 $rootScope.fullRefresh()
 ])

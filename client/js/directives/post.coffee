@@ -59,6 +59,7 @@ angular.module('sunglasses')
                         $scope.post.privacy.privacy_type = type
                         $scope.privacySelected = type
                     )
+                    $rootScope.showAlert('privacy_updated', true)
             )
             
         $scope.commentPost = () ->

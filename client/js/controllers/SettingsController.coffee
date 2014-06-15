@@ -157,12 +157,14 @@ angular.module('sunglasses.controllers')
             # Fixed menu
             menu = $('aside').get(0)
             $('#app').scroll(() ->
-                if $(this).scrollTop() > 30
-                    width = $(menu).width()
-                    menu.style.position = 'fixed'
-                    menu.style.width = width + 'px'
-                else
-                    menu.style.position = 'static'
+                if window.innerWidth >= 760
+                    if $(this).scrollTop() > 60
+                        width = $(menu).width()
+                        menu.style.position = 'fixed'
+                        menu.style.width = width + 'px'
+                        menu.style.top = '30px'
+                    else
+                        menu.style.position = 'static'
             )
         )()
 ])
