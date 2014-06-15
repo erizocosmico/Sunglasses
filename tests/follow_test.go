@@ -397,9 +397,20 @@ func TestReplyFollowRequest(t *testing.T) {
 
 		Convey("With a valid request and 'accept' = 'yes'", func() {
 			user, token := createRequestUser(conn)
+			userTmp := NewUser()
+			userTmp.Username = "testing_very_hard"
+			if err := userTmp.Save(conn); err != nil {
+				panic(err)
+			}
+			userTmp.Settings.Invisible = false
+			userTmp.Settings.CanReceiveRequests = true
+			userTmp.Settings.FollowApprovalRequired = true
+			if err := userTmp.Save(conn); err != nil {
+				panic(err)
+			}
 
 			req := new(FollowRequest)
-			req.From = bson.NewObjectId()
+			req.From = userTmp.ID
 			req.To = user.ID
 			if err := req.Save(conn); err != nil {
 				panic(err)
@@ -408,6 +419,7 @@ func TestReplyFollowRequest(t *testing.T) {
 			defer func() {
 				user.Remove(conn)
 				token.Remove(conn)
+				userTmp.Remove(conn)
 			}()
 			testPostHandler(ReplyFollowRequest, func(r *http.Request) {
 				r.Header.Add("X-User-Token", token.Hash)

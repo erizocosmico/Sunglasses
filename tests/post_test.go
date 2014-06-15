@@ -66,47 +66,6 @@ func TestPostStatus(t *testing.T) {
 	})
 }
 
-/*
-Wercker does not like this test :-(
-
-func TestPostCrazyness(t *testing.T) {
-	conn := getConnection()
-	user, token := createRequestUser(conn)
-	var wg sync.WaitGroup
-
-	defer func() {
-		conn.Db.C("posts").RemoveAll(nil)
-		user.Remove(conn)
-		token.Remove(conn)
-		conn.Session.Close()
-	}()
-
-	for j := 1; j < 100; j++ {
-		wg.Add(100)
-		for i := 0; i < 100; i++ {
-
-			go func() {
-				cn := new(Connection)
-				cn.Session = conn.Session.Copy()
-				cn.Db = cn.Session.DB("sunglasses_test")
-
-				testPostHandler(CreatePost, func(r *http.Request) {
-						if r.PostForm == nil {
-							r.PostForm = make(url.Values)
-						}
-						r.Header.Add("X-User-Token", token.Hash)
-						r.PostForm.Add("post_text", "A test status")
-					}, cn, "/", "/", func(res *httptest.ResponseRecorder) {
-						cn.Session.Close()
-						wg.Done()
-					})
-			}()
-		}
-		wg.Wait()
-	}
-}
-*/
-
 func TestPostVideo(t *testing.T) {
 	conn := getConnection()
 	user, token := createRequestUser(conn)
@@ -356,7 +315,7 @@ func TestDeletePost(t *testing.T) {
 	user, token := createRequestUser(conn)
 
 	userTmp := NewUser()
-	userTmp.Username = "testing_very_hard"
+	userTmp.Username = "testing_very_hardy"
 	if err := userTmp.Save(conn); err != nil {
 		panic(err)
 	}
