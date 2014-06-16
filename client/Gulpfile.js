@@ -7,6 +7,7 @@ var sass = require('gulp-sass');
 var ngmin = require('gulp-ngmin');
 var shell = require('gulp-shell');
 var jsonminify = require('gulp-jsonminify');
+var uglify = require('gulp-uglify');
 
 var paths = {
     scripts: ['js/**/*.coffee', '!vendor/**/*.coffee'],
@@ -29,6 +30,7 @@ gulp.task('scripts', function() {
         .pipe(coffee())
         .pipe(ngmin())
         .pipe(concat('app.min.js'))
+        .pipe(uglify())
         .pipe(gulp.dest('../public/js'));
 });
 
@@ -46,6 +48,39 @@ gulp.task('sass', function() {
             errLogToConsole: gulp.env.watch
         }))
         .pipe(gulp.dest('../public/css'));
+});
+
+// Copies ionicons font
+gulp.task('icons', function() {
+    gulp.src(['vendor/ionicons/fonts/*'])
+        .pipe(gulp.dest('../public/fonts'));
+});
+
+// Generates a single css file with all vendor and site styles
+gulp.task('prod-css', function() {
+    gulp.src(['vendor/normalize.css/normalize.css',
+        'vendor/semantic-ui/build/packaged/css/semantic.min.css',
+        'vendor/ionicons/css/ionicons.min.css',
+        'vendor/animate.css/animate.min.css',
+        '../public/css/style.css'])
+        .pipe(concat('style.min.css'))
+        .pipe(gulp.dest('../public/css'));
+});
+
+// Generates a vendor.min.js file with all vendor dependencies
+gulp.task('prod-js', function() {
+    gulp.src(['vendor/angular/angular.min.js',
+        'vendor/angular-route/angular-route.min.js',
+        'vendor/angular-cookies/angular-cookies.min.js',
+        'vendor/angular-translate/angular-translate.min.js',
+        'vendor/angular-translate-storage-cookie/angular-translate-storage-cookie.min.js',
+        'vendor/angular-translate-storage-local/angular-translate-storage-local.min.js',
+        'vendor/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js',
+        'vendor/js-md5/js/md5.min.js',
+        'vendor/jquery/dist/jquery.min.js',
+        'vendor/semantic-ui/build/packaged/javascript/semantic.min.js'])
+        .pipe(concat('vendor.min.js'))
+        .pipe(gulp.dest('../public/js'));
 });
 
 // HTML templates
@@ -85,4 +120,4 @@ gulp.task('watch', function() {
 });
 
 // The default task (called when you run `gulp` from cli)
-gulp.task('default', ['setup', 'vendor', 'index', 'scripts', 'sass', 'lang', 'images', 'tpls']);
+gulp.task('default', ['setup', 'vendor', 'index', 'scripts', 'sass', 'lang', 'images', 'tpls', 'icons', 'prod-css', 'prod-js']);
