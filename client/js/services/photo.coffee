@@ -26,11 +26,11 @@ angular.module('sunglasses.services')
             else
                 photo.style.marginTop = ((h - photo.height) / 2) + 'px'
 
-            $rootScope.animateElem(theater, 'bounceIn')  
+            $rootScope.animateElem(theater, 'fadeInDown')  
             return
         , close: () ->
             theater = $('#photo-theater').get(0)
-            $rootScope.animateElem(theater, 'bounceOut', () ->
+            $rootScope.animateElem(theater, 'fadeOutUp', () ->
                 theater.className = 'hidden'
             )
             return
