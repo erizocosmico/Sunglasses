@@ -8,6 +8,7 @@ var ngmin = require('gulp-ngmin');
 var shell = require('gulp-shell');
 var jsonminify = require('gulp-jsonminify');
 var uglify = require('gulp-uglify');
+var minifyCSS = require('gulp-minify-css');
 
 var paths = {
     scripts: ['js/**/*.coffee', '!vendor/**/*.coffee'],
@@ -64,6 +65,7 @@ gulp.task('prod-css', function() {
         'vendor/animate.css/animate.min.css',
         '../public/css/style.css'])
         .pipe(concat('style.min.css'))
+        .pipe(minifyCSS({keepBreaks:false}))
         .pipe(gulp.dest('../public/css'));
 });
 

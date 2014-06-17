@@ -3,8 +3,6 @@
   "version": "0.0.0",
   "description": "Sunglasses is a social platform with a great focus on privacy where you can get in touch with the people you want without having to worry about your data.",
   "main": "Gulpfile.js",
-  "dependencies": {
-  },
   "devDependencies": {
     "gulp": "latest",
     "gulp-react": "latest",
@@ -15,7 +13,9 @@
     "gulp-ngmin": "latest",
     "gulp-shell": "latest",
     "bower": "latest",
-    "gulp-jsonminify": "latest"
+    "gulp-jsonminify": "latest",
+    "gulp-uglify": "latest",
+    "gulp-minify-css": "latest"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
