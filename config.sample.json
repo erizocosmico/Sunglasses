@@ -7,7 +7,6 @@
     "redis_address": ":6379",
     "static_content_path": "/path/to/static/content",
     "secret_key": "my fancy secret key",
-    "encryption_key": "qwertyuiopasdfghjklzxcvbnm123456",
     "session_name": "sunglasses_test_db",
     "secure_cookies": false,
     "store_path": "/path/to/store/dir/",

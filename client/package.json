@@ -5,7 +5,6 @@
   "main": "Gulpfile.js",
   "devDependencies": {
     "gulp": "latest",
-    "gulp-react": "latest",
     "gulp-coffee": "latest",
     "gulp-concat": "latest",
     "gulp-imagemin": "latest",
