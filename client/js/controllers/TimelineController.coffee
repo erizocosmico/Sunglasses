@@ -82,8 +82,9 @@ angular.module('sunglasses.controllers')
                         else
                             $scope.posts = resp.posts.concat($scope.posts)
                     
-                        if not $scope.isHome
+                        if not $scope.isHome and not $scope.isSingle
                             $rootScope.userProfile = resp.user
+                            $rootScope.userProfile.showInfo = (Object.keys(resp.user.info).length > 0)
                     
                         for post in $scope.posts
                             $rootScope.relativeTime(post.created, post)

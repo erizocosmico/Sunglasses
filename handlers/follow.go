@@ -199,7 +199,7 @@ func listFollows(c middleware.Context, listFollowers bool) {
 		outputKey = "followers"
 	} else {
 		key = "user_from"
-		outputKey = "followings"
+		outputKey = "following"
 	}
 
 	cursor := c.Find("follows", bson.M{key: c.User.ID}).Limit(count).Skip(offset).Iter()

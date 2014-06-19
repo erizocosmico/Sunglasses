@@ -150,7 +150,7 @@ header {
                 top: 98px;
             }
             
-            p {
+            p:not(.message) {
                 text-align: center;
                 color: white;
                 padding: 20px;

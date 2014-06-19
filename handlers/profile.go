@@ -43,6 +43,28 @@ func ShowUserProfile(c middleware.Context, params martini.Params) {
 		return
 	}
 
+	if !users[u.ID]["protected"].(bool) {
+		followers, err := c.Count("follows", bson.M{"user_to": u.ID})
+		if err != nil {
+			followers = 0
+		}
+
+		following, err := c.Count("follows", bson.M{"user_from": u.ID})
+		if err != nil {
+			following = 0
+		}
+
+		users[u.ID]["followers"] = followers
+		users[u.ID]["following"] = following
+	}
+
+	numPosts, err := c.Count("posts", bson.M{"user_id": u.ID})
+	if err != nil {
+		numPosts = 0
+	}
+
+	users[u.ID]["num_posts"] = numPosts
+
 	posts := getPostsFromUser(c, u.ID, timeConstraint)
 	c.Success(200, map[string]interface{}{
 		"user":        users[u.ID],

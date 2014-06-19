@@ -115,6 +115,13 @@
     "delete_post_message": "Do you really want to delete this post?",
     "delete": "Delete",
     "cancel": "Cancel",
+    
+    "followers": "followers",
+    "following": "following",
+    "posts": "posts",
+    "no_followers": "You have no followers",
+    "no_following": "You do not follow any user",
+    "go_back_tl": "View posts",
 
     "logout": "Log out",
     "settings": "Settings",

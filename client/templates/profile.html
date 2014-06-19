@@ -23,7 +23,14 @@
             <p class="message" ng-show="userProfile.follow_requested">{{ 'follow_request_sent' | translate }}</p>
         </div>
         
-        <div class="info-box clear">
+        <div class="follow-count-box clear" ng-show="!userProfile.protected">
+            <ul>
+                <li ng-click="showTimeline = true" ng-class="{'touchable': userProfile.id == userData.id}"><strong>{{ userProfile.num_posts }}</strong> {{ 'posts' | translate }}</li>
+                <li ng-click="loadFollows('followers')" ng-class="{'touchable': userProfile.id == userData.id}"><strong>{{ userProfile.followers }}</strong> {{ 'followers' | translate }}</li>
+                <li ng-click="loadFollows('following')" ng-class="{'touchable': userProfile.id == userData.id}"><strong>{{ userProfile.following }}</strong> {{ 'following' | translate }}</li>
+            </ul>
+        </div>
+        <div class="info-box clear" ng-show="userProfile.showInfo">
             <button ng-click="toggleInfo()">{{ (infoVisible)?'hide_info':'show_info' | translate }} <span class="ion "></span></button>
             
             <div class="info-content" ng-show="infoVisible">
@@ -38,6 +45,35 @@
             </div>
         </div>
     </div>
-    <timeline></timeline>
+    
+    <div ng-show="!showTimeline" class="follow-list">
+        <ul ng-show="follows.length > 0">
+            <li ng-repeat="f in follows" class="user-data">
+                <div class="avatar" ng-hide="userService.getAvatarThumb(f.user) == ''">
+                    <img ng-src="{{ userService.getAvatarThumb(f.user) }}" alt="{{ userService.getUsername(f.user) }}">
+                </div>
+                <div class="default-avatar" ng-hide="userService.getAvatarThumb(f.user) != ''">
+                    <span class="ion ion-android-contact"></span>
+                </div>
+                <h3 class="user-name">{{ userService.getUsername(f.user) }} <span class="time" translate="time_format" translate-value-unit="{{ f.user.timeUnit | translate }}" translate-value-num="{{ f.user.timeNumber }}"></span></h3>
+                <div class="search-actions" ng-show="userData.id !== f.userid">
+                    <a href="#/u/{{ f.username.toLowerCase() }}" class="btn">{{ 'view_profile' | translate }}</a>
+                    <button class="btn" ng-show="!f.user.needs_follow_request && !f.user.followed" ng-click="userService.sendFollowRequest(f.user)">{{ 'follow_user' | translate }}</button>
+                    <button class="btn" ng-show="f.user.followed && !f.user.follow_requested" ng-click="userService.unfollow(f.user)">{{ 'unfollow_user' | translate }}</button>
+                    <button class="btn" ng-show="f.user.needs_follow_request && !f.user.followed && !f.user.follow_requested" ng-click="userService.sendFollowRequest(f, true)">{{ 'send_follow_request' | translate }}</button>
+                    <p class="message" ng-show="f.user.follow_requested">{{ 'follow_request_sent' | translate }}</p>
+                </div>
+                <div class="clear"></div>
+            </li>
+        </ul>
+        
+        <div class="load-more" ng-show="loadMoreFollows">
+            <button class="btn btn-large" ng-click="loadFollows(followType)">{{ 'load_more' | translate }}</button>
+        </div>
+        
+        <p ng-show="follows.length == 0">{{ 'no_' + followType | translate }}</p>
+    </div>
+    
+    <timeline ng-show="showTimeline"></timeline>
     <footer-bar></footer-bar>
 </div>

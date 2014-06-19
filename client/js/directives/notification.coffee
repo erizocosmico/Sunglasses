@@ -14,7 +14,7 @@ angular.module('sunglasses')
                     </div>
                     <div ng-switch-when="1">
                         <a ng-href="#/u/{{ notification.user_action.username }}">{{ userService.getUsername(notification.user_action) }}</a> {{ \'has_sent_follow_request\' | translate }}
-                        <div class="block centered">
+                        <div class="block centered clear">
                             <p ng-show="replied && accepted">{{ \'follow_accepted\' | translate }}</p>
                             <p ng-show="replied && !accepted">{{ \'follow_declined\' | translate }}</p>
                             <button class="btn small-btn" ng-show="!replied" ng-click="replyFollowRequest(\'yes\')">{{ \'accept\' | translate }}</button>

@@ -17,6 +17,10 @@
         float: left;
         margin: 10px;
         box-shadow: 0px 0px 5px rgba(black, .1) inset;
+        @media all and (max-width: $mobile-bp) {
+            float: none;
+            margin: 10px auto;
+        }
         
         .ion {
             font-size: 3.5em;
@@ -32,6 +36,10 @@
         border-radius: 50%;
         float: left;
         margin: 10px;
+        @media all and (max-width: $mobile-bp) {
+            float: none;
+            margin: 10px auto;
+        }
         
         img {
             width: 100px;
@@ -43,6 +51,12 @@
     .user-data {
         width: calc(100% - 130px);
         float: right;
+        @media all and (max-width: $mobile-bp) {
+            float: none;
+            width: 100%;
+            padding: 0 10px;
+            text-align: center;
+        }
 
         h2 {
             font-size: 2.8em;
@@ -73,6 +87,36 @@
         padding: 10px;
     }
     
+    .follow-count-box {
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border: 1px solid #EEE;
+            
+            li {
+                display: inline-block;
+                width: 32%;
+                padding: 10px;
+                text-align: center;
+                border: none;
+                border-right: 1px solid #EEE;
+                @media all and (max-width: $mobile-bp) {
+                    display: block;
+                    width: 100%;
+                    border-bottom: 1px solid #EEE;
+                }
+                
+                &:last-child {
+                    border-right: none;
+                    @media all and (max-width: $mobile-bp) {
+                        border-bottom: none;
+                    }
+                }
+            }
+        }
+    }
+    
     .info-box {
         padding: 0 20px;
         
@@ -87,6 +131,7 @@
             border-radius: 0;
             padding: 2px 0px;
             margin-bottom: 15px;
+            margin-top: 10px;
             
             &:hover {
                 border-bottom-color: $base-accent;
@@ -101,6 +146,93 @@
             h4 {
                 display: inline-block;
                 margin-right: 10px;
+            }
+        }
+    }
+}
+
+.follow-list {
+    @include post;
+    width: 90%;
+    max-width: 600px;
+    margin: 15px auto;
+    
+    p {
+        padding: 0 20px;
+        text-align: center;
+        font-weight: 300;
+        font-size: 1.3em;
+    }
+    
+    ul {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+
+        li {
+            display: block;
+            cursor: default;
+            margin: 0;
+            padding: 10px;
+            padding-bottom: 0;
+            border-radius: 0px;
+            border-bottom: 1px solid #DDD;
+            box-shadow: 0px 1px 0px white inset;
+            @media all and (max-width: $mobile-bp) {
+                width: 100%;
+            }
+            
+            &:last-child {
+                border-bottom: none;
+            }
+            
+            &:hover {
+                background-color: transparent;
+            }
+            
+            .user-data {
+                padding: 0;
+                margin: 0;
+                margin-bottom: 6px;
+            }
+            
+            .user-name {
+                padding: 0;
+                margin: 0;
+                font-weight: 400 !important;
+                color: #555 !important;
+                vertical-align: top;
+                @media all and (max-width: $mobile-bp) {
+                    text-align: left;
+                }
+            }
+            
+            h3 span.time {
+                display: inline-block;
+                font-size: 0.7em;
+            }
+            
+            .message {
+                font-size: 0.8em;
+                color: #666 !important;
+                text-align: center;
+                padding: 5px;
+                margin: 5px;
+            }
+            
+            .search-actions {
+                padding: 10px 0;
+                margin: 0;
+                
+                a.btn, .btn {
+                    @include base-button;
+                    display: inline-block;
+                    margin: 0;
+                    width: auto;
+                    padding: 6px 30px;
+                    font-size: 0.7em;
+                    font-weight: 400;
+                }
             }
         }
     }

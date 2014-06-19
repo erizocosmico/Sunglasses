@@ -326,6 +326,7 @@ func UserForDisplay(u User, hasAccess, includeInfo bool) map[string]interface{} 
 			"avatar":                  "",
 			"avatar_thumbnail":        "",
 			"private_name":            "",
+			"protected":               false,
 		}
 
 		if u.Settings.DisplayAvatarBeforeApproval || hasAccess {
@@ -346,6 +347,7 @@ func UserForDisplay(u User, hasAccess, includeInfo bool) map[string]interface{} 
 			"avatar":                  "",
 			"avatar_thumbnail":        "",
 			"private_name":            "",
+			"protected":               true,
 		}
 	}
 

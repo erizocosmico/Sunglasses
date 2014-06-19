@@ -159,6 +159,9 @@ div#app {
         height: auto;
         left: 0;
         background: rgba(#17b57c, .9);
+        @media all and (max-width: $mobile-bp) {
+            top: 98px;
+        }
         
         p {
             text-align: center;

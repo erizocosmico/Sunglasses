@@ -138,7 +138,6 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
         
         if translate?
             $translate(text).then (msg) ->
-                console.log(msg)
                 displayAlert(msg, danger)
         else
             displayAlert(text, danger)

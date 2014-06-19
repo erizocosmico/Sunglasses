@@ -113,6 +113,13 @@
     "delete_post_message": "¿De verdad quieres borrar esta publicación?",
     "delete": "Borrar",
     "cancel": "Cancelar",
+    
+    "followers": "seguidores",
+    "following": "siguiendo",
+    "posts": "publicaciones",
+    "no_followers": "No tienes ningún seguidor",
+    "no_following": "No sigues a ningún usuario",
+    "go_back_tl": "Ver publicaciones",
 
     "logout": "Salir",
     "settings": "Preferencias",
