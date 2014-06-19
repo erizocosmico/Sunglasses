@@ -3,6 +3,7 @@
 angular.module('sunglasses')
 .directive('postForm', () ->
     restrict: 'E',
+    replace: true,
     templateUrl: 'templates/post-form.html',
     controller: ['$scope', 'api', '$rootScope', '$timeout', ($scope, api, $rootScope, $timeout) ->
         $scope.privacyOpened = false

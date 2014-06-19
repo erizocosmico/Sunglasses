@@ -3,6 +3,7 @@
 angular.module('sunglasses')
 .directive('commentForm', () ->
     restrict: 'E',
+    replace: true,
     templateUrl: 'templates/comment-form.html',
     controller: ['$scope', '$rootScope', 'api', ($scope, $rootScope, api) ->
         $scope.commentText = ''

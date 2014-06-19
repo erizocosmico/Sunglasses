@@ -3,6 +3,7 @@
 angular.module('sunglasses')
 .directive('post', () ->
     restrict: 'E',
+    replace: true,
     templateUrl: 'templates/post.html',
     controller: ['$scope', '$rootScope', 'api', ($scope, $rootScope, api) ->
         $scope.post.commentsDirty = 0

@@ -3,6 +3,7 @@
 angular.module('sunglasses')
 .directive('footerBar', () ->
     restrict: 'E',
+    replace: true,
     templateUrl: 'templates/footer-bar.html',
     controller: [
         '$scope',

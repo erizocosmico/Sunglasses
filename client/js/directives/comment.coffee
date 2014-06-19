@@ -3,6 +3,7 @@
 angular.module('sunglasses')
 .directive('comment', () ->
     restrict: 'E',
+    replace: true,
     templateUrl: 'templates/comment.html',
     controller: ['$scope', '$rootScope', 'api', ($scope, $rootScope, api) ->
         $scope.deleteComment = () ->
