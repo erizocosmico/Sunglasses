@@ -716,7 +716,7 @@ func TestListFollowing(t *testing.T) {
 					}
 					So(resp.Code, ShouldEqual, 200)
 					So(errResp["count"].(float64), ShouldEqual, float64(24))
-					So(len(errResp["followings"].([]interface{})), ShouldEqual, 24)
+					So(len(errResp["following"].([]interface{})), ShouldEqual, 24)
 				})
 		})
 
@@ -735,7 +735,7 @@ func TestListFollowing(t *testing.T) {
 					}
 					So(resp.Code, ShouldEqual, 200)
 					So(errResp["count"].(float64), ShouldEqual, float64(10))
-					So(len(errResp["followings"].([]interface{})), ShouldEqual, 10)
+					So(len(errResp["following"].([]interface{})), ShouldEqual, 10)
 				})
 		})
 
@@ -755,7 +755,7 @@ func TestListFollowing(t *testing.T) {
 					}
 					So(resp.Code, ShouldEqual, 200)
 					So(errResp["count"].(float64), ShouldEqual, float64(9))
-					So(len(errResp["followings"].([]interface{})), ShouldEqual, 9)
+					So(len(errResp["following"].([]interface{})), ShouldEqual, 9)
 				})
 		})
 
@@ -774,7 +774,7 @@ func TestListFollowing(t *testing.T) {
 					}
 					So(resp.Code, ShouldEqual, 200)
 					So(errResp["count"].(float64), ShouldEqual, float64(24))
-					So(len(errResp["followings"].([]interface{})), ShouldEqual, 24)
+					So(len(errResp["following"].([]interface{})), ShouldEqual, 24)
 				})
 		})
 	})
