@@ -219,6 +219,8 @@
     "private_name": "Private name",
     "update_data": "Update data",
     "avatars": "Avatars",
+    "private_avatar": "Private avatar",
+    "public_avatar": "Public avatar",
     "set_private_avatar": "Set private avatar",
     "set_public_avatar": "Set public avatar",
     "delete_avatar": "Delete avatar",
@@ -236,5 +238,13 @@
     "private_avatar_changed": "Private avatar changed successfully!",
     "settings_updated": "Settings updated successfully!",
     "info_updated": "Account info updated successfully!",
-    "privacy_updated": "Post privacy updated successfully!"
+    "privacy_updated": "Post privacy updated successfully!",
+    
+    "intro_title": "Welcome to Sunglasses",
+    "intro_p_1": "Now that you are signed up you can post and get in touch with the people you want.",
+    "intro_p_2": "You are currently invisible to all users because, by default, the most restrictive privacy settings are applied to all users. Here are a few presets you can set depending on the privacy you want to have.",
+    "intro_opt_1_explain": "I want to stay invisible. I'll change my privacy settings later.",
+    "intro_opt_2_explain": "I want to be seen by my friends but I want to be asked before anyone can follow me.",
+    "intro_opt_3_explain": "I want to be public. Everyone will be able to follow me without asking me for permission.",
+    "select_preset": "Select preset"
 }

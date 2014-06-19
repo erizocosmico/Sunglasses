@@ -18,7 +18,7 @@
     "signup_section_done": "¡Has sido correctamente registrado en Sunglasses!",
 
     "signup_step_username": "Nombre de usuario",
-    "signup_step_password": "Contraseá",
+    "signup_step_password": "Contraseña",
     "signup_step_recovery": "Método de recuperación",
     "signup_step_done": "¡Hecho!",
 
@@ -215,6 +215,8 @@
     "private_name": "Nombre privado",
     "update_data": "Actualizar datos",
     "avatars": "Avatares",
+    "private_avatar": "Avatar privado",
+    "public_avatar": "Avatar público",
     "set_private_avatar": "Establecer avatar privado",
     "set_public_avatar": "Establecer avatar público",
     "delete_avatar": "Eliminar avatar",
@@ -232,5 +234,13 @@
     "private_avatar_changed": "¡Avatar privado cambiado con éxito!",
     "settings_updated": "¡Preferencias actualizadas con éxito!",
     "info_updated": "¡Información de cuenta actualizada con éxito!",
-    "privacy_updated": "¡Privacidad de la publicación actualizada con éxito!"
+    "privacy_updated": "¡Privacidad de la publicación actualizada con éxito!",
+    
+    "intro_title": "Bienvenido a Sunglasses",
+    "intro_p_1": "Ahora que estás registrado puedes estar en contacto con gente de todo el mundo.",
+    "intro_p_2": "Eres actualmente invisible para todos los usuarios porque, por defecto, se aplican las configuraciones de privacidad más restrictivas. Aquí hay algunas configuraciones predefinidas que puedes seleccionar.",
+    "intro_opt_1_explain": "Quiero seguir siendo invisible. Cambiaré luego mi privacidad.",
+    "intro_opt_2_explain": "Quiero ser visible pero quiero poder aprobar las peticiones de seguimiento que me hagan.",
+    "intro_opt_3_explain": "Quiero ser público, todos los usuarios podrán seguirme sin necesidad de aprobación.",
+    "select_preset": "Seleccionar"
 }

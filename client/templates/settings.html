@@ -30,7 +30,7 @@
                 <h3>{{ 'avatars' | translate }}</h3>
                 
                 <div class="col-50-50 pull-left centered">
-                    <h4>Public avatar</h4>
+                    <h4>{{ 'public_avatar' | translate }}</h4>
                     <img ng-src="{{ userData.public_avatar_thumbnail }}" alt="{{ public_avatar | translate }}" ng-hide="userData.public_avatar_thumbnail.length == 0">
                     <input type="file" id="public-avatar" class="hidden" accept="image/x-png, image/png, image/gif, image/jpeg">
                     <div class="upload-zone">
@@ -39,7 +39,7 @@
                 </div>
                 
                 <div class="col-50-50 pull-right centered">
-                    <h4>Private avatar</h4>
+                    <h4>{{ 'private_avatar' | translate }}</h4>
                     <img ng-src="{{ userData.avatar_thumbnail }}" alt="{{ private_avatar | translate }}" ng-hide="userData.avatar_thumbnail.length == 0">
                     <input type="file" id="private-avatar" class="hidden" accept="image/x-png, image/png, image/gif, image/jpeg">
                     <div class="upload-zone">

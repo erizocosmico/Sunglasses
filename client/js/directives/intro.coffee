@@ -3,7 +3,6 @@
 angular.module('sunglasses')
 .directive('intro', () ->
     restrict: 'E',
-    replace: true,
     templateUrl: 'templates/intro.html',
     controller: ['$scope', '$rootScope', 'api', '$timeout', ($scope, $rootScope, api, $timeout) ->
         dismiss = () ->
