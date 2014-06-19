@@ -22,6 +22,12 @@ footer {
             padding-right: 15px;
             margin-left: 15px;
             border-right: 1px solid rgba(black, .1);
+            @media all and (max-width: $mobile-bp) {
+                border: none;
+                margin: 0;
+                padding: 10px 20px;
+                display: block;
+            }
             
             &:first-child {
                 margin-left: 0;
@@ -44,10 +50,14 @@ footer {
         border-radius: 4px;
         padding: 4px 15px;
         float: right;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
         @media all and (max-width: $mobile-bp) {
             float: none;
             display: block;
             margin: 0px auto;
+            position: static;
         }
     }
 }

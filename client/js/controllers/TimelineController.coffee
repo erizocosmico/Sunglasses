@@ -106,7 +106,8 @@ angular.module('sunglasses.controllers')
         
             app = document.getElementById('app')
             app.addEventListener('scroll', () ->
-                if app.scrollHeight * 0.75 < app.scrollTop
+                
+                if app.scrollHeight * 0.75 < app.scrollTop and app.scrollWidth > 760
                     $scope.$apply(() ->
                         if $scope.canLoadMorePosts then $scope.loadPosts('older')
                     )
