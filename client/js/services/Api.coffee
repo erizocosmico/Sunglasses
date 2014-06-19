@@ -31,5 +31,7 @@ angular.module('sunglasses.services')
                     error(resp)
                 else
                     $rootScope.showAlert('error_code_' + resp.responseJSON.code, true, true)
+                    
+                    if resp.status == 404 then $rootScope.goHome()
         )
 ])

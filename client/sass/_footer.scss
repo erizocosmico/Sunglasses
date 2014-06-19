@@ -54,10 +54,15 @@ footer {
         bottom: 20px;
         right: 20px;
         @media all and (max-width: $mobile-bp) {
-            float: none;
-            display: block;
-            margin: 0px auto;
-            position: static;
+            float: none !important;
+            display: block !important;
+            margin: 0px auto !important;
+            position: static !important;
         }
     }
+}
+
+#landing select.language-selector {
+    float: right;
+    position: static;
 }
