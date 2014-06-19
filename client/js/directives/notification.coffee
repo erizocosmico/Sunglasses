@@ -36,7 +36,7 @@ angular.module('sunglasses')
                     <div ng-switch-when="6">
                         Wall post
                     </div>
-                    <span class="time">{{ notification.timeFormatted }}</div>
+                    <span class="time" translate="time_format" translate-value-unit="{{ notification.timeUnit | translate }}" translate-value-num="{{ notification.timeNumber }}"></div>
                 </div>
     ',
     link: (scope, elem, attrs) ->

@@ -8,7 +8,7 @@
             <span class="ion ion-android-contact"></span>
         </div>
         <a href="#/u/{{ comment.user.username.toLowerCase() }}" class="username">{{ userService.getUsername(comment.user) }}</a>
-        <span class="time">{{ comment.timeFormatted }}</span>
+        <span class="time" translate="time_format" translate-value-unit="{{ post.timeUnit | translate }}" translate-value-num="{{ post.timeNumber }}"></span>
     </div>
     <p class="comment-text">{{ comment.message }}</p>
     <div class="clear"></div>

@@ -8,7 +8,7 @@
             <span class="ion ion-android-contact"></span>
         </div>
         <a href="#/u/{{ post.user.username.toLowerCase() }}" class="username">{{ userService.getUsername(post.user) }}</a>
-        <span class="time" ng-click="goTo('/posts/' + post.id)">{{ post.timeFormatted }}</span>
+        <span class="time" ng-click="goTo('/posts/' + post.id)" translate="time_format" translate-value-unit="{{ post.timeUnit | translate }}" translate-value-num="{{ post.timeNumber }}"></span>
     </div>
     <p class="text">{{ post.text }}</p>
     <div class="post-video" ng-hide="!postService.isKindOf(post, 'video')">

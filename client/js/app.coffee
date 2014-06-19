@@ -144,7 +144,7 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
             displayAlert(text, danger)
         
     # returns the relative time
-    $rootScope.relativeTime = (time, dict, callback) ->
+    $rootScope.relativeTime = (time, obj) ->
         diff = Math.floor(new Date().getTime() / 1000) - Number(time)
         unit = 's'
         num = diff
@@ -161,18 +161,9 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
         else
             num = Math.floor(diff / 86400)
             unit = 'd'
-                
-        $translate(unit)
-        .then((s) ->
-            $translate('time_format')
-            .then((t) ->
-                str = t.replace('%num%', num).replace('%unit%', s)
-                if dict?
-                    dict.timeFormatted = str
-                else
-                    callback(str)
-            )
-        )
+          
+        obj.timeUnit = unit
+        obj.timeNumber = num  
         
     $rootScope.displayIntro = false
     if window.localStorage?

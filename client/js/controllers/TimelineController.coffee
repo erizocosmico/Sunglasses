@@ -66,31 +66,37 @@ angular.module('sunglasses.controllers')
                 'GET',
                 params,
                 (resp) ->
-                    $scope.loading = false
-                    $scope.postCount += resp.count
+                    $scope.$apply(() ->
+                        $scope.loading = false
+                        $scope.postCount += resp.count
+                        
+                        $rootScope.daTime = 5
                     
-                    if loadType == 'older' and resp.posts.length < 25
-                        $scope.canLoadMorePosts = false
-                    else if $scope.posts.length == 0 and resp.posts.length == 25
-                        $scope.canLoadMorePosts = true
+                        if loadType == 'older' and resp.posts.length < 25
+                            $scope.canLoadMorePosts = false
+                        else if $scope.posts.length == 0 and resp.posts.length == 25
+                            $scope.canLoadMorePosts = true
                     
-                    if loadType == 'older'
-                        $scope.posts = $scope.posts.concat(resp.posts)
-                    else
-                        $scope.posts = resp.posts.concat($scope.posts)
+                        if loadType == 'older'
+                            $scope.posts = $scope.posts.concat(resp.posts)
+                        else
+                            $scope.posts = resp.posts.concat($scope.posts)
                     
-                    if not $scope.isHome
-                        $rootScope.userProfile = resp.user
+                        if not $scope.isHome
+                            $rootScope.userProfile = resp.user
                     
-                    for post in $scope.posts
-                        $rootScope.relativeTime(post.created, post)
-                        if post.comments?
-                            for comment in post.comments
-                                $rootScope.relativeTime(comment.created, comment)
-                        if post.photo_url then post.photo_back = 'url(' + post.photo_url + ')'
-                        if post.liked then post.className = 'liked'
+                        for post in $scope.posts
+                            $rootScope.relativeTime(post.created, post)
+                            if post.comments?
+                                for comment in post.comments
+                                    $rootScope.relativeTime(comment.created, comment)
+                            if post.photo_url then post.photo_back = 'url(' + post.photo_url + ')'
+                            if post.liked then post.className = 'liked'
+                    )
                 , (resp) ->
-                    $scope.loading = false
+                    $scope.$apply(() ->
+                        $scope.loading = false
+                    )
                     $rootScope.showAlert('error_code_' + resp.responseJSON.code, true, true)
             )
         

@@ -101,7 +101,7 @@
     "error_code_59": "Invalid user list provided",
     "error_code_60": "Comment text must not be more than 500 characters long or be empty",
 
-    "time_format": "%num%%unit% ago",
+    "time_format": "{{num}}{{unit}} ago",
     "s": "s",
     "m": "m",
     "h": "h",

@@ -99,7 +99,7 @@
     "error_code_59": "Lista de usuarios inválida proporcionada",
     "error_code_60": "El texto de un comentario no puede tener más de 500 caracteres o estar en blanco",
 
-    "time_format": "Hace %num%%unit%",
+    "time_format": "Hace {{num}}{{unit}}",
     "s": "s",
     "m": "m",
     "h": "h",
