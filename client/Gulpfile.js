@@ -119,6 +119,7 @@ gulp.task('watch', function() {
     gulp.watch('app.html', ['index']);
     gulp.watch('lang/*.json', ['lang']);
     gulp.watch('templates/**/*.html', ['tpls']);
+    gulp.watch('../public/css/style.css', ['prod-css']);
 });
 
 // The default task (called when you run `gulp` from cli)
