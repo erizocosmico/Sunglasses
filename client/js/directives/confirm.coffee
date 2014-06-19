@@ -6,7 +6,7 @@ angular.module('sunglasses')
     restrict: 'E',
     replace: true,
     template: '<div class="ui modal small" id="confirm-dialog">
-                  <i class="close icon"></i>
+                  <span class="close ion ion-close-round"></span>
                   <div class="header" ng-bind="confirm.title"></div>
                   <div class="content">
                     <div class="left" ng-bind="confirm.message"></div>
