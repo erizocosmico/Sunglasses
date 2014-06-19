@@ -10,18 +10,24 @@ angular.module('sunglasses')
         '$translate',
         'api',
         ($scope, $rootScope, $translate,  api) ->
-            $scope.preferredLang = $rootScope?.userData?.preferred_lang || 'en'
+            $scope.preferredLang = $rootScope?.userData?.preferred_lang || window.localStorage?.getItem('preferred_lang') || 'en'
             $scope.languages =
                 es: 'Español',
                 en: 'English'
 
             $scope.changeLanguage = () ->
-                api(
-                    '/api/users/change_lang',
-                    'PUT',
-                    lang: $scope.preferredLang,
-                    (resp) ->
-                        $translate.use($scope.preferredLang)
-                )
+                if userData?
+                    api(
+                        '/api/users/change_lang',
+                        'PUT',
+                        lang: $scope.preferredLang,
+                        (resp) ->
+                            $scope.$apply(() ->
+                                $translate.use($scope.preferredLang)
+                            )
+                    )
+                else
+                    $translate.use($scope.preferredLang)
+                    window.localStorage?.setItem('preferred_lang', $scope.preferredLang)
     ]
 )
