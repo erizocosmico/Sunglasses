@@ -98,6 +98,8 @@ angular.module('sunglasses.controllers')
                         $scope.loading = false
                     )
                     $rootScope.showAlert('error_code_' + resp.responseJSON.code, true, true)
+                    
+                    if $scope.profileName and resp.status == 404 then $rootScope.goHome()
             )
         
         if not $scope.isSingle
