@@ -3,6 +3,7 @@
     "headline": "Conecta con gente de todo el mundo, ten el control sobre tus datos.",
     "signup": "Registrarse",
     "search": "Buscar...",
+    "view_post": "Viendo publicación",
     
     "landing_title_1": "Tus datos son tuyos",
     "landing_title_3": "Comparte tus momentos",
@@ -116,9 +117,9 @@
     "logout": "Salir",
     "settings": "Preferencias",
 
-    "account_settings": "Preferencias de cuenta",
-    "account_info": "Información de cuenta",
-    "account_details": "Detalles de cuenta",
+    "account_settings": "Preferencias",
+    "account_info": "Información",
+    "account_details": "Detalles",
 
     "invisible": "Invisible para otros usuarios",
     "can_receive_requests": "Aceptar peticiones de seguimiento de otros usuarios",

@@ -8,6 +8,7 @@ angular.module('sunglasses.controllers')
     'user',
     'api',
     ($routeParams, $rootScope, $scope, userService, api) ->
+        $rootScope.title = 'sunglasses'
         $scope.userService = userService
         $rootScope.userProfile = {}
         $scope.infoVisible = false

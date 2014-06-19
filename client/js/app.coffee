@@ -27,13 +27,19 @@ angular.module('sunglasses', ['ngRoute', 'ngCookies', 'sunglasses.controllers', 
             )
             .when('/posts/show/:postid',
                 templateUrl: 'templates/home.html'
+                controller: ['$rootScope', ($rootScope) ->
+                    $rootScope.title = 'view_post'
+                ]
             )
             .when('/settings',
                 templateUrl: 'templates/settings.html'
                 controller: 'SettingsController'
             )
             .when('/',
-                templateUrl: 'templates/home.html'
+                templateUrl: 'templates/home.html',
+                controller: ['$rootScope', ($rootScope) ->
+                    $rootScope.title = 'sunglasses'
+                ]
             )
             .otherwise(
                 redirectTo: '/'
