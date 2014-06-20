@@ -42,10 +42,8 @@ angular.module('sunglasses.controllers')
             
         $scope.handleUpload = (type) ->
             if ['private', 'public'].indexOf(type) == -1 then return
-            
-            e = document.createEvent('Event')
-            e.initEvent('click', true, true)
-            document.getElementById(type + '-avatar').dispatchEvent(e)
+
+            $('#' + type + '-avatar').click()
             
         $scope.uploadAvatar = (type) ->
             $translate('confirm_avatar_upload')
@@ -85,6 +83,10 @@ angular.module('sunglasses.controllers')
                 'PUT',
                 $scope.profileData,
                 (resp) ->
+                    $scope.$apply(() ->
+                        for k, v of $scope.profileData
+                            $rootScope.userData[k] = v
+                    )
                     $rootScope.showAlert('data_updated', true)
             )
 

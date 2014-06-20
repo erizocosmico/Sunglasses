@@ -6,7 +6,7 @@ angular.module('sunglasses.services')
     # retrieves the user avatar thumbnail (it can be public or private)
     user =
         getAvatarThumb: (user) ->
-            if user.avatar_thumbnail?
+            if user.avatar_thumbnail? and user.avatar_thumbnail != ''
                 return user.avatar_thumbnail
             else
                 return user.public_avatar_thumbnail
