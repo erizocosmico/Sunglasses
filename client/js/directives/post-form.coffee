@@ -77,9 +77,8 @@ angular.module('sunglasses')
                 )
                 
         $scope.handleUpload = () ->
-            e = document.createEvent('Event')
-            e.initEvent('click', true, true)
-            document.getElementById('photo-upload').dispatchEvent(e)
+            $('#photo-upload').click()
+            return
             
         # changes the post type
         $scope.changePostType = (type) ->
