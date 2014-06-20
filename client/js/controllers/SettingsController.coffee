@@ -44,6 +44,7 @@ angular.module('sunglasses.controllers')
             if ['private', 'public'].indexOf(type) == -1 then return
 
             $('#' + type + '-avatar').click()
+            return
             
         $scope.uploadAvatar = (type) ->
             $translate('confirm_avatar_upload')
