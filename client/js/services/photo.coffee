@@ -11,20 +11,30 @@ angular.module('sunglasses.services')
             photo = document.createElement('img')
             photo.id = 'photo-theater-photo'
             photoHolder.appendChild(photo)
-
-            photo.alt = caption
-            photo.src = image
-        
+            
             h = window.innerHeight
             w = window.innerWidth
-        
-            photo.style.marginTop = '0px'
-            if photo.width > w then photo.width = w
-
-            if photo.height > h
-                photo.height = h
-            else
-                photo.style.marginTop = ((h - photo.height) / 2) + 'px'
+            
+            $("<img/>").attr("src", image).load(() ->
+                photo.alt = caption
+                photo.src = image
+                
+                if this.height > h
+                    this.width = (this.width * h) / this.height
+                    this.height = h
+                    
+                if this.width > w
+                    this.height = (this.height * w) / this.width
+                    this.width = w
+                    
+                photo.width = this.width
+                photo.height = this.height
+                    
+                if this.height < h
+                    photo.style.marginTop = ((h - photo.height) / 2) + 'px'
+                else
+                    photo.style.marginTop = '0px'
+            )
 
             $rootScope.animateElem(theater, 'fadeInDown')  
             return
