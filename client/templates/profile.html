@@ -57,7 +57,7 @@
                 </div>
                 <h3 class="user-name">{{ userService.getUsername(f.user) }} <span class="time" translate="time_format" translate-value-unit="{{ f.user.timeUnit | translate }}" translate-value-num="{{ f.user.timeNumber }}"></span></h3>
                 <div class="search-actions" ng-show="userData.id !== f.userid">
-                    <a href="#/u/{{ f.username.toLowerCase() }}" class="btn">{{ 'view_profile' | translate }}</a>
+                    <a href="#/u/{{ f.user.username.toLowerCase() }}" class="btn">{{ 'view_profile' | translate }}</a>
                     <button class="btn" ng-show="!f.user.needs_follow_request && !f.user.followed" ng-click="userService.sendFollowRequest(f.user)">{{ 'follow_user' | translate }}</button>
                     <button class="btn" ng-show="f.user.followed && !f.user.follow_requested" ng-click="userService.unfollow(f.user)">{{ 'unfollow_user' | translate }}</button>
                     <button class="btn" ng-show="f.user.needs_follow_request && !f.user.followed && !f.user.follow_requested" ng-click="userService.sendFollowRequest(f, true)">{{ 'send_follow_request' | translate }}</button>
