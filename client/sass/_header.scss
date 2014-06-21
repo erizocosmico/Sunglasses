@@ -231,13 +231,14 @@ header {
                     .search-actions {
                         padding: 10px 0;
                         margin: 0;
+                        text-align: left;
                         
                         a.btn, .btn {
                             @include base-button;
                             display: inline-block;
                             margin: 0;
                             width: auto;
-                            padding: 6px 30px;
+                            padding: 6px 10px;
                             font-size: 0.7em;
                             font-weight: 400;
                         }

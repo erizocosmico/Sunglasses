@@ -70,6 +70,9 @@
         h1 {
             font-weight: 300;
             font-size: 2.5em;
+            @media all and (max-width: $mobile-bp) {
+                padding-top: 30px;
+            }
         }
         
         article {
