@@ -145,16 +145,6 @@ func GetAccountInfo(c middleware.Context) {
 func UpdateAccountInfo(c middleware.Context) {
 	info := c.User.Info
 
-	// If any field is more than 500 characters long directly return an error
-	for _, v := range c.Request.PostForm {
-		for _, f := range v {
-			if util.Strlen(f) > 500 {
-				c.Error(400, CodeInvalidInfoLength, MsgInvalidInfoLength)
-				return
-			}
-		}
-	}
-
 	// Check user websites
 	if v, ok := c.Request.PostForm["websites"]; ok {
 		sites := make([]string, 0, len(v))
@@ -164,7 +154,7 @@ func UpdateAccountInfo(c middleware.Context) {
 				site = "http://" + site
 			}
 
-			if !util.IsValidURL(site) {
+			if !util.IsValidURL(site) || util.Strlen(site) > 500 {
 				c.Error(400, CodeInvalidWebsites, MsgInvalidWebsites)
 				return
 			}
@@ -204,6 +194,13 @@ func UpdateAccountInfo(c middleware.Context) {
 
 		if err != nil {
 			c.Error(400, CodeInvalidStatus, MsgInvalidStatus)
+			return
+		}
+	}
+
+	for _, field := range []string{"work", "education", "hobbies", "books", "movies", "tv", "about"} {
+		if util.Strlen(c.Form(field)) > 500 {
+			c.Error(400, CodeInvalidInfoLength, MsgInvalidInfoLength)
 			return
 		}
 	}
