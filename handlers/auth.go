@@ -95,7 +95,7 @@ func Logout(c middleware.Context) {
 		}
 	}
 
-	http.Redirect(c.ResponseWriter, c.Request, "/", 301)
+	http.Redirect(c.ResponseWriter, c.Request, "/", 302)
 }
 
 // DestroyUserToken destroys the current user token

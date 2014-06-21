@@ -33,3 +33,5 @@ up
 store/*
 store/thumbnails/*
 *.pem
+
+*.back
