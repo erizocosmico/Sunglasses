@@ -38,15 +38,17 @@ angular.module('sunglasses.controllers')
                 'GET',
                 {},
                 (resp) ->
-                    $scope.loading = false
-                    $scope.posts.push(resp.post)
-                    for post in $scope.posts
-                        $rootScope.relativeTime(post.created, post)
-                        if post.comments?
-                            for comment in post.comments
-                                $rootScope.relativeTime(comment.created, comment)
-                        if post.photo_url then post.photo_back = 'url(' + post.photo_url + ')'
-                        if post.liked then post.className = 'liked'
+                    $scope.$apply(() ->
+                        $scope.loading = false
+                        $scope.posts.push(resp.post)
+                        for post in $scope.posts
+                            $rootScope.relativeTime(post.created, post)
+                            if post.comments?
+                                for comment in post.comments
+                                    $rootScope.relativeTime(comment.created, comment)
+                            if post.photo_url then post.photo_back = 'url(' + post.photo_url + ')'
+                            if post.liked then post.className = 'liked'
+                    )
             )
         
         # load more posts, uses $scope.postCount to automatically manage pagination
@@ -69,7 +71,6 @@ angular.module('sunglasses.controllers')
                     $scope.$apply(() ->
                         $scope.loading = false
                         $scope.postCount += resp.count
-                        
                         $rootScope.daTime = 5
                     
                         if loadType == 'older' and resp.posts.length < 25
