@@ -69,7 +69,7 @@ angular.module('sunglasses')
                     when 4, 5, 6
                         $location.path('/posts/show/' + $scope.notification.post_id)
 
-            if not $scope.notification.read
+            if not $scope.notification.read and $scope.notification.notification_type > 1
                 api(
                     '/api/notifications/seen',
                     'PUT',
